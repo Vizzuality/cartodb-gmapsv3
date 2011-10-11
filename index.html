@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+  <title>Using CartoDB with Google Maps v3</title>
+  <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+  <script type="text/javascript" src="/wax.g.js"></script>
+  <script type="text/javascript" src="/cartodb-gmapsv3.js"></script>
+
+  <script type="text/javascript">
+
+  function initialize() {
+
+    map = new google.maps.Map(document.getElementById('map_canvas'), {
+      center: new google.maps.LatLng(20,0),
+      zoom: 3,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+
+    var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
+    	map: map,
+      user_name:'xavijam',
+      table_name: 'cartodb_gmapsv3',
+      query: "SELECT * FROM " + cartodb_gmapsv3 + " WHERE cartodb_id>3",
+      map_style: true,
+      infowindow: true,
+      auto_bound: true
+    });
+
+  }
+  </script>
+</head>
+<body onload="initialize()">
+  <div id="map_canvas"></div>
+</body>
+</html>
