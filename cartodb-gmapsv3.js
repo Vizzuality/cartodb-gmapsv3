@@ -39,7 +39,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
    
   google.maps.CartoDBLayer = function (params) {
 	  
-		addCartoDBTiles();																		// Always add cartodb tiles.
+		addCartoDBTiles(params);															// Always add cartodb tiles.
 		if (params.map_style) 	setCartoDBMapStyle(params);		// Map style? ok, let's style.
 		if (params.auto_bound) 	autoBound(params);						// Bounds? CartoDB does it.
 		
