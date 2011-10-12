@@ -28,6 +28,7 @@
 if (typeof(google.maps.CartoDBLayer) === "undefined") {
   /**
    * @params {}
+   *    map_canvas    -     Gmapsv3 canvas id (necesary for showing the infowindow)
    *		map						-			Your gmapsv3 map
    *   	user_name 		-		 	CartoDB user name
    *   	table_name 		-			CartoDB table name
@@ -38,12 +39,15 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
    */
    
   google.maps.CartoDBLayer = function (params) {
-	  
-		addCartoDBTiles(params);															// Always add cartodb tiles.
+
+    if (params.infowindow) {
+		  addWaxCartoDBTiles(params)
+		} else {
+		  addSimpoleCartoDBTiles(params);											// Always add cartodb tiles, simple or with wax.
+		}
 		if (params.map_style) 	setCartoDBMapStyle(params);		// Map style? ok, let's style.
 		if (params.auto_bound) 	autoBound(params);						// Bounds? CartoDB does it.
-		
-	  
+
 	  
 	  // Add cartodb tiles to the map
 	  function addCartoDBTiles(params) {
@@ -62,10 +66,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	  // Zoom to cartodb geometries
 	  function autoBound(params) {
 			// Zoom to your geometries
-		  reqwest({
+		  $.ajax({
 			  method:'get',
-		    url: 'https://'+params.user_name+'.cartodb.com/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ params.table_name)+'&callback=?',
-		    type: 'jsonp',
+		    url: 'http://'+params.user_name+'.cartodb.com/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ params.table_name)+'&callback=?',
+		    dataType: 'jsonp',
 		    success: function(result) {
 		      if (result.rows[0].st_extent!=null) {
 		        var coordinates = result.rows[0].st_extent.replace('BOX(','').replace(')','').split(',');
@@ -95,10 +99,11 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	  }
 	  
 	  
+	  // Set the map styles of your cartodb table/map
 	  function setCartoDBMapStyle(params) {
-		  reqwest({
-		    url:'https://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/map_metadata?callback=?',
-		    type: 'jsonp',
+		  $.ajax({
+		    url:'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/map_metadata?callback=?',
+		    dataType: 'jsonp',
 		    success:function(result){
 		      var map_style = JSON.parse(result.map_metadata);
 		      
@@ -121,388 +126,290 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 		    error: function(e){}
 		  });
 	  }
+	  
+	  
+	  // Add cartodb tiles to the map
+	  function addSimpleCartoDBTiles(params) {
+		  // Add the cartodb tiles
+	    var cartodb_layer = {
+	      getTileUrl: function(coord, zoom) {
+	        return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query;
+	      },
+	      tileSize: new google.maps.Size(256, 256)
+	    };
+	    var cartodb_imagemaptype = new google.maps.ImageMapType(cartodb_layer);
+	    params.map.overlayMapTypes.insertAt(0, cartodb_imagemaptype);
+	  }
+	  
+	  
+	  // Add cartodb tiles to the map
+	  function addWaxCartoDBTiles(params) {
+	    
+	    function generateTileJson() {
+        var core_url = 'http://' + params.user_name + '.cartodb.com';  
+        var base_url = core_url + '/tiles/' + params.table_name + '/{z}/{x}/{y}';
+        var tile_url = base_url + '.png?cache_buster=0';
+        var grid_url = base_url + '.grid.json';
+    
+        // SQL?
+        if (params.query) {
+          var query = 'sql=' + params.query;
+          tile_url = wax.util.addUrlData(tile_url, query);
+          grid_url = wax.util.addUrlData(grid_url, query);
+        }
+    
+        // Build up the tileJSON
+        // TODO: make a blankImage a real 'empty tile' image
+        return {
+          blankImage: 'blank_tile.png', 
+          tilejson: '1.0.0',
+          scheme: 'xyz',
+          tiles: [tile_url],
+          grids: [grid_url],
+          tiles_base: tile_url,
+          grids_base: grid_url,
+          formatter: function(options, data) {
+              currentCartoDbId = data.cartodb_id;
+              return data.cartodb_id;
+          },
+          cache_buster: function(){
+              return 1;
+          }
+        };
+	    }
+
+      // interaction placeholder
+      var currentCartoDbId,
+          tilejson = generateTileJson(),
+          infowindow = new CartoDBInfowindow(params);
+            
+      var waxOptions = {
+        callbacks: {
+          out: function(){
+            params.map.setOptions({draggableCursor: 'default'});
+          },
+          over: function(feature, div, opt3, evt){
+            params.map.setOptions({draggableCursor: 'pointer'});
+          },
+          click: function(feature, div, opt3, evt){
+            infowindow.open(feature);
+          }
+        },
+        clickAction: 'full'
+      };
+      
+      var wax_tile = new wax.g.connector(tilejson);
+      params.map.overlayMapTypes.insertAt(0,wax_tile);
+      var interaction = wax.g.interaction(params.map, tilejson, waxOptions);
+	  }
   };
 }
 
 
 
-
-
-
-
-
-
 /**
- * Ender reqwest.js
- * Ajax request
+ * CartoDB Infowindow
+ * @xavijam
  **/
 
 
-!function (name, definition) {
-  if (typeof define == 'function') define(definition)
-  else if (typeof module != 'undefined') module.exports = definition()
-  else this[name] = definition()
-	}('reqwest', function () {
+	function CartoDBInfowindow(params) {
+	  this.latlng_ = new google.maps.LatLng(0,0);
+		this.feature_;
+		this.map_ = params.map;
+		this.columns_;
+	  this.offsetHorizontal_ = -107;
+	  this.width_ = 214;
+	  this.setMap(params.map);
+	  this.params_ = params;
+	  this.getActiveColumns(params);
+	}
 
-  var context = this
-    , win = window
-    , doc = document
-    , old = context.reqwest
-    , twoHundo = /^20\d$/
-    , byTag = 'getElementsByTagName'
-    , readyState = 'readyState'
-    , contentType = 'Content-Type'
-    , head = doc[byTag]('head')[0]
-    , uniqid = 0
-    , lastValue // data stored by the most recent JSONP callback
-    , xhr = ('XMLHttpRequest' in win) ?
-        function () {
-          return new XMLHttpRequest()
-        } :
-        function () {
-          return new ActiveXObject('Microsoft.XMLHTTP')
-        }
 
-  function handleReadyState(o, success, error) {
-    return function () {
-      if (o && o[readyState] == 4) {
-        if (twoHundo.test(o.status)) {
-          success(o)
-        } else {
-          error(o)
-        }
-      }
+	CartoDBInfowindow.prototype = new google.maps.OverlayView();
+
+
+	CartoDBInfowindow.prototype.getActiveColumns = function(params) {
+	  var that = this;
+	  $.ajax({
+	    url:'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/infowindow?callback=?',
+	    dataType: 'jsonp',
+	    success:function(result){
+	      var columns = JSON.parse(result.infowindow);
+	      var str = '';
+	      for (p in columns) {
+	        if (columns[p]) {
+	          str+=p+',';
+	        }
+	      }
+	      that.columns_ = str.substr(0,str.length-1);
+	    },
+	    error: function(e){}
+	  });
+	}
+
+
+	CartoDBInfowindow.prototype.draw = function() {
+	  var me = this;
+		
+	  var div = this.div_;
+	  if (!div) {
+	    div = this.div_ = document.createElement('div');
+	    div.setAttribute('class','cartodb_infowindow');
+	
+      div.innerHTML = '<a href="#close" class="close">x</a>'+
+  			              '<div class="outer_top">'+
+  			                '<div class="top">'+
+  			                '</div>'+
+  			              '</div>'+
+  			              '<div class="bottom">'+
+  											'<label>cartodb_id:1</label>'+
+  		                '</div>';
+      
+ 	    $(div).find('a.close').click(function(ev){
+ 	      ev.preventDefault();
+        me.hide();
+      });
+
+      google.maps.event.addDomListener(div,'click',function(ev){});
+      google.maps.event.addDomListener(div,'dblclick',function(ev){});
+			
+	    var panes = this.getPanes();
+	    panes.floatPane.appendChild(div);
+
+	    div.style.opacity = 0;
+	  }
+	
+	  var pixPosition = this.getProjection().fromLatLngToDivPixel(this.latlng_);
+	  if (pixPosition) {
+		  div.style.width = this.width_ + 'px';
+		  div.style.left = (pixPosition.x - 49) + 'px';
+		  var actual_height = - $(div).height();
+		  div.style.top = (pixPosition.y + actual_height + 5) + 'px';
+	  }
+	};
+	
+	
+	CartoDBInfowindow.prototype.setPosition = function() {
+	  if (this.div_) { 
+ 	    var div = this.div_;
+ 	    var pixPosition = this.getProjection().fromLatLngToDivPixel(this.latlng_);
+ 	    if (pixPosition) {
+ 		    div.style.width = this.width_ + 'px';
+ 		    div.style.left = (pixPosition.x - 49) + 'px';
+ 		    var actual_height = - $(div).height();
+ 		    div.style.top = (pixPosition.y + actual_height + 5) + 'px';
+ 	    }
+ 	    this.show();
     }
-  }
+	}
+	
+	
+	CartoDBInfowindow.prototype.open = function(feature){
+	  var that = this;
+	  that.feature_ = feature;
 
-  function setHeaders(http, o) {
-    var headers = o.headers || {},
-     mimetypes= {
-      			xml: "application/xml, text/xml",
-      			html: "text/html",
-      			text: "text/plain",
-      			json: "application/json, text/javascript",
-      			js: 'application/javascript, text/javascript'
-      		}
-      headers.Accept = headers.Accept || mimetypes[o.type] || 'text/javascript, text/html, application/xml, text/xml, */*'
 
-    // breaks cross-origin requests with legacy browsers
-    if (!o.crossOrigin) {
-      headers['X-Requested-With'] = headers['X-Requested-With'] || 'XMLHttpRequest'
-    }
-    headers[contentType] = headers[contentType] || 'application/x-www-form-urlencoded'
-    for (var h in headers) {
-      headers.hasOwnProperty(h) && http.setRequestHeader(h, headers[h])
-    }
-  }
+    $.ajax({
+		  method:'get',
+	    url: 'http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+escape('select '+that.columns_+',ST_AsGeoJSON(ST_PointOnSurface(the_geom),6) as cdb_centre from '+ this.params_.table_name + ' where cartodb_id=' + feature)+'&callback=?',
+	    dataType: 'jsonp',
+	    success: function(result) {
+	      positionateInfowindow(result.rows[0]);
+	    },
+	    error: function(e) {}
+	  });
+   
+   
+    function positionateInfowindow(variables) {
+      if (that.div_) {
+        var div = that.div_;
+        // Get latlng position
+        that.latlng_ = that.transformGeoJSON(variables.cdb_centre);
+                
+        // Remove the list items
+        $('div.cartodb_infowindow div.outer_top div.top').html('');
 
-  function getCallbackName(o, reqId) {
-    var callbackVar = o.jsonpCallback || "callback"
-    if (o.url.slice(-(callbackVar.length + 2)) == (callbackVar + "=?")) {
-      // Generate a guaranteed unique callback name
-      var callbackName = "reqwest_" + reqId
-
-      // Replace the ? in the URL with the generated name
-      o.url = o.url.substr(0, o.url.length - 1) + callbackName
-      return callbackName
-    } else {
-      // Find the supplied callback name
-      var regex = new RegExp(callbackVar + "=([\\w]+)")
-      return o.url.match(regex)[1]
-    }
-  }
-
-  // Store the data returned by the most recent callback
-  function generalCallback(data) {
-    lastValue = data
-  }
-
-  function getRequest(o, fn, err) {
-    if (o.type == 'jsonp') {
-      var script = doc.createElement('script')
-        , loaded = 0
-        , reqId = uniqid++
-
-      // Add the global callback
-      win[getCallbackName(o, reqId)] = generalCallback
-
-      // Setup our script element
-      script.type = 'text/javascript'
-      script.src = o.url
-      script.async = true
-      if (typeof script.onreadystatechange !== 'undefined') {
-          // need this for IE due to out-of-order onreadystatechange(), binding script
-          // execution to an event listener gives us control over when the script
-          // is executed. See http://jaubourg.net/2010/07/loading-script-as-onclick-handler-of.html
-          script.event = 'onclick'
-          script.htmlFor = script.id = '_reqwest_' + reqId
-      }
-
-      script.onload = script.onreadystatechange = function () {
-        if ((script[readyState] && script[readyState] !== "complete" && script[readyState] !== "loaded") || loaded) {
-          return false
-        }
-        script.onload = script.onreadystatechange = null
-        script.onclick && script.onclick()
-        // Call the user callback with the last value stored
-        // and clean up values and scripts.
-        o.success && o.success(lastValue)
-        lastValue = undefined
-        head.removeChild(script)
-        loaded = 1
-      }
-
-      // Add the script to the DOM head
-      head.appendChild(script)
-    } else {
-      var http = xhr()
-        , method = (o.method || 'GET').toUpperCase()
-        , url = (typeof o === 'string' ? o : o.url)
-        // convert non-string objects to query-string form unless o.processData is false 
-        , data = o.processData !== false && o.data && typeof o.data !== 'string'
-          ? reqwest.toQueryString(o.data)
-          : o.data || null
-
-      // if we're working on a GET request and we have data then we should append
-      // query string to end of URL and not post data
-      method == 'GET' && data && data !== '' && (url += (/\?/.test(url) ? '&' : '?') + data) && (data = null)
-      http.open(method, url, true)
-      setHeaders(http, o)
-      http.onreadystatechange = handleReadyState(http, fn, err)
-      o.before && o.before(http)
-      http.send(data)
-      return http
-    }
-  }
-
-  function Reqwest(o, fn) {
-    this.o = o
-    this.fn = fn
-    init.apply(this, arguments)
-  }
-
-  function setType(url) {
-    if (/\.json$/.test(url)) {
-      return 'json'
-    }
-    if (/\.jsonp$/.test(url)) {
-      return 'jsonp'
-    }
-    if (/\.js$/.test(url)) {
-      return 'js'
-    }
-    if (/\.html?$/.test(url)) {
-      return 'html'
-    }
-    if (/\.xml$/.test(url)) {
-      return 'xml'
-    }
-    return 'js'
-  }
-
-  function init(o, fn) {
-    this.url = typeof o == 'string' ? o : o.url
-    this.timeout = null
-    var type = o.type || setType(this.url)
-      , self = this
-    fn = fn || function () {}
-
-    if (o.timeout) {
-      this.timeout = setTimeout(function () {
-        self.abort()
-      }, o.timeout)
-    }
-
-    function complete(resp) {
-      o.timeout && clearTimeout(self.timeout)
-      self.timeout = null
-      o.complete && o.complete(resp)
-    }
-
-    function success(resp) {
-      var r = resp.responseText
-      if (r) {
-        switch (type) {
-        case 'json':
-          try {
-            resp = win.JSON ? win.JSON.parse(r) : eval('(' + r + ')')          
-          } catch(err) {
-            return error(resp, 'Could not parse JSON in response', err)
+        for (p in variables) {
+          if (p!='cartodb_id' && p!='cdb_centre') {
+            $('div.cartodb_infowindow div.outer_top div.top').append('<label>'+p+'</label><p class="'+((variables[p]!=null)?'':'empty')+'">'+(variables[p] || 'empty')+'</p>');
           }
-          break;
-        case 'js':
-          resp = eval(r)
-          break;
-        case 'html':
-          resp = r
-          break;
         }
-      }
-
-      fn(resp)
-      o.success && o.success(resp)
-
-      complete(resp)
-    }
-
-    function error(resp, msg, t) {
-      o.error && o.error(resp, msg, t)
-      complete(resp)
-    }
-
-    this.request = getRequest(o, success, error)
-  }
-
-  Reqwest.prototype = {
-    abort: function () {
-      this.request.abort()
-    }
-
-  , retry: function () {
-      init.call(this, this.o, this.fn)
-    }
-  }
-
-  function reqwest(o, fn) {
-    return new Reqwest(o, fn)
-  }
-
-  // normalize newline variants according to spec -> CRLF
-  function normalize(s) {
-    return s ? s.replace(/\r?\n/g, '\r\n') : ''
-  }
-
-  var isArray = typeof Array.isArray == 'function' ? Array.isArray : function(a) {
-    return Object.prototype.toString.call(a) == '[object Array]'
-  }
-
-  function serial(el, cb) {
-    var n = el.name
-      , t = el.tagName.toLowerCase()
-      , optCb = function(o) {
-          // IE gives value="" even where there is no value attribute
-          // 'specified' ref: http://www.w3.org/TR/DOM-Level-3-Core/core.html#ID-862529273
-          if (o && !o.disabled)
-            cb(n, normalize(o.attributes.value && o.attributes.value.specified ? o.value : o.text))
-        }
-
-
-    // don't serialize elements that are disabled or without a name
-    if (el.disabled || !n) return;
-
-    switch (t) {
-    case 'input':
-      if (!/reset|button|image|file/i.test(el.type)) {
-        var ch = /checkbox/i.test(el.type)
-          , ra = /radio/i.test(el.type)
-          , val = el.value;
-        // WebKit gives us "" instead of "on if a checkbox has no value, so correct it here
-        (!(ch || ra) || el.checked) && cb(n, normalize(ch && val === '' ? 'on' : val))
-      }
-      break;
-    case 'textarea':
-      cb(n, normalize(el.value))
-      break;
-    case 'select':
-      if (el.type.toLowerCase() === 'select-one') {
-        optCb(el.selectedIndex >= 0 ? el.options[el.selectedIndex] : null)
-      } else {
-        for (var i = 0; el.length && i < el.length; i++) {
-          el.options[i].selected && optCb(el.options[i])
-        }
-      }
-      break;
-    }
-  }
-
-  // collect up all form elements found from the passed argument elements all
-  // the way down to child elements; pass a '<form>' or form fields.
-  // called with 'this'=callback to use for serial() on each element
-  function eachFormElement() {
-    var cb = this
-      , serializeSubtags = function(e, tags) {
-        for (var i = 0; i < tags.length; i++) {
-          var fa = e[byTag](tags[i])
-          for (var j = 0; j < fa.length; j++) serial(fa[j], cb)
-        }
-      }
-
-    for (var i = 0; i < arguments.length; i++) {
-      var e = arguments[i]
-      if (/input|select|textarea/i.test(e.tagName)) serial(e, cb);
-      serializeSubtags(e, [ 'input', 'select', 'textarea' ])
-    }
-  }
-
-  // standard query string style serialization
-  function serializeQueryString() {
-    return reqwest.toQueryString(reqwest.serializeArray.apply(null, arguments))
-  }
-
-  // { 'name': 'value', ... } style serialization
-  function serializeHash() {
-    var hash = {}
-    eachFormElement.apply(function(name, value) {
-      if (name in hash) {
-        hash[name] && !isArray(hash[name]) && (hash[name] = [hash[name]])
-        hash[name].push(value)
-      } else hash[name] = value
-    }, arguments)
-    return hash
-  }
-
-  // [ { name: 'name', value: 'value' }, ... ] style serialization
-  reqwest.serializeArray = function () {
-    var arr = []
-    eachFormElement.apply(function(name, value) {
-      arr.push({name: name, value: value})
-    }, arguments)
-    return arr 
-  }
-
-  reqwest.serialize = function () {
-    if (arguments.length === 0) return "";
-    var opt, fn
-      , args = Array.prototype.slice.call(arguments, 0)
-
-    opt = args.pop()
-    opt && opt.nodeType && args.push(opt) && (opt = null)
-    opt && (opt = opt.type)
-
-    if (opt == 'map') fn = serializeHash
-    else if (opt == 'array') fn = reqwest.serializeArray
-    else fn = serializeQueryString
-
-    return fn.apply(null, args)
-  }
-
-  reqwest.toQueryString = function(o) {
-    var qs = '', i
-      , enc = encodeURIComponent
-      , push = function(k, v) {
-          qs += enc(k) + '=' + enc(v) + '&'
-        }
-
-    if (isArray(o)) {
-      for (i = 0; o && i < o.length; i++) push(o[i].name, o[i].value)
-    } else {
-      for (var k in o) {
-        if (!Object.hasOwnProperty.call(o, k)) continue;
-        var v = o[k]
-        if (isArray(v)) {
-          for (i = 0; i < v.length; i++) push(k, v[i])
-        } else push(k, o[k])
+        
+        $('div.cartodb_infowindow div.bottom label').html('cartodb_id: <strong>'+feature+'</strong>');
+        that.moveMaptoOpen();
+        that.setPosition();     
       }
     }
+	}	
+	
 
-    // spaces should be + according to spec
-    return qs.replace(/&$/, '').replace(/%20/g,'+')
+	CartoDBInfowindow.prototype.hide = function() {
+	  if (this.div_) {
+	    var div = this.div_;
+	    $(div).animate({
+	      top: '+=' + 10 + 'px',
+	      opacity: 0},
+	      100, 'swing',
+        function () {
+          div.style.visibility = "hidden";
+        }
+			);
+	  }
+	}
+
+
+	CartoDBInfowindow.prototype.show = function() {
+	  if (this.div_) {
+	    var div = this.div_;
+			div.style.opacity = 0;
+			div.style.visibility = "visible";
+			$(div).animate({
+	      top: '-=' + 10 + 'px',
+	      opacity: 1},
+	      250
+			);
+		}
+	}
+
+
+	CartoDBInfowindow.prototype.isVisible = function(marker_id) {
+	  if (this.div_) {
+	    var div = this.div_;
+			if (div.style.visibility == 'visible' && this.feature_!=null) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+	
+	
+	CartoDBInfowindow.prototype.transformGeoJSON = function(str) {
+    var json = JSON.parse(str);
+    return new google.maps.LatLng(json.coordinates[1],json.coordinates[0]);
   }
+	
+	
+	CartoDBInfowindow.prototype.moveMaptoOpen = function() {
+		var left = 0;
+		var top = 0;
+		var div = this.div_;
+	  var pixPosition = this.getProjection().fromLatLngToContainerPixel(this.latlng_);
 
-  reqwest.noConflict = function () {
-    context.reqwest = old
-    return this
-  }
-
-  return reqwest
-})
+		if ((pixPosition.x + this.offsetHorizontal_) < 0) {
+			left = (pixPosition.x + this.offsetHorizontal_ - 20);
+		}
+		
+		if ((pixPosition.x + 180) >= ($('#'+this.params_.map_canvas).width())) {
+			left = (pixPosition.x + 180 - $('#'+this.params_.map_canvas).width());
+		}
+		
+		if ((pixPosition.y - $(div).height()) < 0) {
+			top = (pixPosition.y - $(div).height() - 30);
+		}
+				
+		this.map_.panBy(left,top);
+	}
