@@ -39,7 +39,9 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
    */
    
   google.maps.CartoDBLayer = function (params) {
-
+    
+    var defaults = params;
+    
     if (params.infowindow) {
 		  addWaxCartoDBTiles(params)
 		} else {
@@ -144,46 +146,13 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	  
 	  // Add cartodb tiles to the map
 	  function addWaxCartoDBTiles(params) {
-	    
-	    function generateTileJson() {
-        var core_url = 'http://' + params.user_name + '.cartodb.com';  
-        var base_url = core_url + '/tiles/' + params.table_name + '/{z}/{x}/{y}';
-        var tile_url = base_url + '.png?cache_buster=0';
-        var grid_url = base_url + '.grid.json';
-    
-        // SQL?
-        if (params.query) {
-          var query = 'sql=' + params.query;
-          tile_url = wax.util.addUrlData(tile_url, query);
-          grid_url = wax.util.addUrlData(grid_url, query);
-        }
-    
-        // Build up the tileJSON
-        // TODO: make a blankImage a real 'empty tile' image
-        return {
-          blankImage: 'blank_tile.png', 
-          tilejson: '1.0.0',
-          scheme: 'xyz',
-          tiles: [tile_url],
-          grids: [grid_url],
-          tiles_base: tile_url,
-          grids_base: grid_url,
-          formatter: function(options, data) {
-              currentCartoDbId = data.cartodb_id;
-              return data.cartodb_id;
-          },
-          cache_buster: function(){
-              return 1;
-          }
-        };
-	    }
-
       // interaction placeholder
-      var currentCartoDbId,
-          tilejson = generateTileJson(),
-          infowindow = new CartoDBInfowindow(params);
-            
-      var waxOptions = {
+      var currentCartoDbId;
+          params.tilejson = generateTileJson();
+          params.infowindow = new CartoDBInfowindow(params);
+          params.cache_buster = 0;
+          
+      params.waxOptions = {
         callbacks: {
           out: function(){
             params.map.setOptions({draggableCursor: 'default'});
@@ -192,16 +161,81 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
             params.map.setOptions({draggableCursor: 'pointer'});
           },
           click: function(feature, div, opt3, evt){
-            infowindow.open(feature);
+            params.infowindow.open(feature);
           }
         },
         clickAction: 'full'
       };
       
-      var wax_tile = new wax.g.connector(tilejson);
+      var wax_tile = new wax.g.connector(params.tilejson);
       params.map.overlayMapTypes.insertAt(0,wax_tile);
-      var interaction = wax.g.interaction(params.map, tilejson, waxOptions);
+      params.interaction = wax.g.interaction(params.map, params.tilejson, params.waxOptions);
 	  }
+  
+ 
+    // Refresh wax interaction
+    function refreshWax(sql) {
+      params.cache_buster++;
+      params.query = sql;
+      params.tilejson = generateTileJson();
+      
+      // Remove old wax
+      params.map.overlayMapTypes.clear();
+      
+      // Setup new wax
+      params.tilejson.grids = wax.util.addUrlData(params.tilejson.grids_base,  'cache_buster=' + params.cache_buster);
+
+      // Add map tiles
+      var wax_tile = new wax.g.connector(params.tilejson);
+      params.map.overlayMapTypes.insertAt(0,wax_tile);
+
+      // Add interaction
+      params.interaction.remove();
+      params.interaction = wax.g.interaction(params.map, params.tilejson, params.waxOptions);
+    }
+    
+    
+    function generateTileJson() {
+      var core_url = 'http://' + params.user_name + '.cartodb.com';  
+      var base_url = core_url + '/tiles/' + params.table_name + '/{z}/{x}/{y}';
+      var tile_url = base_url + '.png?cache_buster=0';
+      var grid_url = base_url + '.grid.json';
+  
+      // SQL?
+      if (params.query) {
+        var query = 'sql=' + params.query;
+        tile_url = wax.util.addUrlData(tile_url, query);
+        grid_url = wax.util.addUrlData(grid_url, query);
+      }
+  
+      // Build up the tileJSON
+      // TODO: make a blankImage a real 'empty tile' image
+      return {
+        blankImage: 'blank_tile.png', 
+        tilejson: '1.0.0',
+        scheme: 'xyz',
+        tiles: [tile_url],
+        grids: [grid_url],
+        tiles_base: tile_url,
+        grids_base: grid_url,
+        formatter: function(options, data) {
+            currentCartoDbId = data.cartodb_id;
+            return data.cartodb_id;
+        },
+        cache_buster: function(){
+            return params.cache_buster;
+        }
+      };
+    }
+    
+  
+    // Change the query?
+    google.maps.CartoDBLayer.prototype.changeQuery = function(sql) {
+      // Hide the infowindow
+      params.infowindow.hide();
+      // Refresh wax
+      refreshWax(sql);
+    };
   };
 }
 
