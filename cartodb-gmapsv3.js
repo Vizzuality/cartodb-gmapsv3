@@ -236,16 +236,33 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	    dataType: 'jsonp',
 	    success:function(result){
 	      var columns = JSON.parse(result.infowindow);
-	      var str = '';
-	      for (p in columns) {
-	        if (columns[p]) {
-	          str+=p+',';
-	        }
+	      if (columns) {
+	        that.columns_ = parseColumns(columns.rows[0]);
+	      } else {
+	        $.ajax({
+      		  method:'get',
+      	    url: 'http://'+ that.params_.user_name +'.cartodb.com/api/v1/sql/?q='+escape('select * from '+ that.params_.table_name + ' LIMIT 1'),
+      	    dataType: 'jsonp',
+      	    success: function(columns) {
+      	      that.columns_ = parseColumns(columns.rows[0]);
+      	    },
+      	    error: function(e) {}
+      	  });
 	      }
-	      that.columns_ = str.substr(0,str.length-1);
+
 	    },
 	    error: function(e){}
 	  });
+	  
+	  function parseColumns(columns) {
+	    var str = '';
+      for (p in columns) {
+        if (columns[p] && p!='the_geom_webmercator') {
+          str+=p+',';
+        }
+      }
+      return str.substr(0,str.length-1);
+	  }
 	}
 
 
@@ -271,8 +288,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         me.hide();
       });
 
-      google.maps.event.addDomListener(div,'click',function(ev){});
-      google.maps.event.addDomListener(div,'dblclick',function(ev){});
+      google.maps.event.addDomListener(div,'click',function(ev){ev.preventDefault()});
+      google.maps.event.addDomListener(div,'dblclick',function(ev){ev.preventDefault()});
+      google.maps.event.addDomListener(div,'mousedown',function(ev){ev.preventDefault()});
+      google.maps.event.addDomListener(div,'mouseup',function(ev){ev.preventDefault()});
+      google.maps.event.addDomListener(div,'mousewheel',function(ev){ev.stopPropagation()});
+      google.maps.event.addDomListener(div,'DOMMouseScroll',function(ev){ev.stopPropagation()});
 			
 	    var panes = this.getPanes();
 	    panes.floatPane.appendChild(div);
@@ -309,7 +330,6 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	  var that = this;
 	  that.feature_ = feature;
 
-
     $.ajax({
 		  method:'get',
 	    url: 'http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+escape('select '+that.columns_+',ST_AsGeoJSON(ST_PointOnSurface(the_geom),6) as cdb_centre from '+ this.params_.table_name + ' where cartodb_id=' + feature)+'&callback=?',
@@ -319,7 +339,6 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	    },
 	    error: function(e) {}
 	  });
-   
    
     function positionateInfowindow(variables) {
       if (that.div_) {
