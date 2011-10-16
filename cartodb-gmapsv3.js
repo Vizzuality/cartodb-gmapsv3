@@ -270,7 +270,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	    dataType: 'jsonp',
 	    success:function(result){
 	      var columns = JSON.parse(result.infowindow);
-	      if (columns) {
+	      if (columns!=undefined && columns!=null) {
 	        that.columns_ = parseColumns(columns.rows[0]);
 	      } else {
 	        $.ajax({
