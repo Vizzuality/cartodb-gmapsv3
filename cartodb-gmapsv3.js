@@ -45,7 +45,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     if (params.infowindow) {
 		  addWaxCartoDBTiles(params)
 		} else {
-		  addSimpoleCartoDBTiles(params);											// Always add cartodb tiles, simple or with wax.
+		  addSimpleCartoDBTiles(params);											// Always add cartodb tiles, simple or with wax.
 		}
 		if (params.map_style) 	setCartoDBMapStyle(params);		// Map style? ok, let's style.
 		if (params.auto_bound) 	autoBound(params);						// Bounds? CartoDB does it.
