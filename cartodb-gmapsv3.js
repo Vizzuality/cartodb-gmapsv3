@@ -319,6 +319,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       
  	    $(div).find('a.close').click(function(ev){
  	      ev.preventDefault();
+ 	      ev.stopPropagation();
         me.hide();
       });
 
