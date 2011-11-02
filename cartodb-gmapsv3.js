@@ -314,7 +314,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
   			                '</div>'+
   			              '</div>'+
   			              '<div class="bottom">'+
-  											'<label>cartodb_id:1</label>'+
+  											'<label>id:1</label>'+
   		                '</div>';
       
  	    $(div).find('a.close').click(function(ev){
@@ -390,7 +390,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
           }
         }
         
-        $('div.cartodb_infowindow div.bottom label').html('cartodb_id: <strong>'+feature+'</strong>');
+        $('div.cartodb_infowindow div.bottom label').html('id: <strong>'+feature+'</strong>');
         that.moveMaptoOpen();
         that.setPosition();     
       }
