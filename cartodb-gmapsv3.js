@@ -43,12 +43,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     var defaults = params;
     
     if (params.infowindow) {
-		  addWaxCartoDBTiles(params)
+		  addWaxCartoDBTiles(params);
 		} else {
 		  addSimpleCartoDBTiles(params);											// Always add cartodb tiles, simple or with wax.
 		}
-		if (params.map_style) 	setCartoDBMapStyle(params);		// Map style? ok, let's style.
-		if (params.auto_bound) 	autoBound(params);						// Bounds? CartoDB does it.
+	if (params.map_style) 	setCartoDBMapStyle(params);		// Map style? ok, let's style.
+	if (params.auto_bound) 	autoBound(params);				// Bounds? CartoDB does it.
 
 	  
 	  // Add cartodb tiles to the map
@@ -193,6 +193,20 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       params.interaction.remove();
       params.interaction = wax.g.interaction(params.map, params.tilejson, params.waxOptions);
     }
+
+    // Refresh tiles
+    function refreshTiles(sql) {
+ 	 // Add the cartodb tiles
+ 	 	params.query = sql;
+		var cartodb_layer = {
+			getTileUrl: function(coord, zoom) {
+			return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query;
+		},
+			tileSize: new google.maps.Size(256, 256)
+	    };
+	    var cartodb_imagemaptype = new google.maps.ImageMapType(cartodb_layer);
+	    params.map.overlayMapTypes.insertAt(0, cartodb_imagemaptype);
+    }
     
     
     function generateTileJson() {
@@ -229,12 +243,14 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     }
     
   
-    // Change the query?
-    google.maps.CartoDBLayer.prototype.changeQuery = function(sql) {
+    // Update tiles & interactivity layer;
+    google.maps.CartoDBLayer.prototype.update = function(sql) {
       // Hide the infowindow
       params.infowindow.hide();
       // Refresh wax
       refreshWax(sql);
+      // Refresh tiles
+      refreshTiles(sql);
     };
   };
 }
