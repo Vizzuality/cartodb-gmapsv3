@@ -5,7 +5,7 @@ Use your own CartoDB tables in a google map (version 3).
 
 Adding the library
 ------------------
-Use the library is really easy, and you only will need:
+Use the library is really easy, and you will only need:
 
 * Your CartoDB user name
 * Choose a table to play with
@@ -35,8 +35,7 @@ First of all create your map:
     center: new google.maps.LatLng(20,0),
     zoom: 3,
     mapTypeId: google.maps.MapTypeId.ROADMAP,
-    mapTypeControl: false
-  });
+    mapTypeControl: false});
   
 And then add the cartodb layer:
 
@@ -48,16 +47,14 @@ And then add the cartodb layer:
     query: "SELECT * FROM test",
     map_style: true,
     infowindow: true,
-    auto_bound: true
-  });
+    auto_bound: true});
 
 
-[example](http://vizzuality.github.com/cartodb-gmapsv3/)
+[live example](http://vizzuality.github.com/cartodb-gmapsv3/)
 
 
 Functions
 ---------
+New funcionalities are coming, but for now, you can use:
 
-* update: It needs a new query to work. Example:
-
-	cartodb_gmapsv3.update('SELECT * FROM test WHERE cartodb_id>2');
+* update: It needs a new query to work. Example: cartodb_gmapsv3.update('SELECT * FROM test WHERE cartodb_id>2');
