@@ -7,21 +7,26 @@ Using the library
 Using the library is really easy, you'll only need:
 
 * Your CartoDB user name.
-* A *public* table.
+* A **public** table.
 * A query.
 
 Params
 ------
 The library accepts certain params to manage the cartodb layer:
 
-* map_canvas (required): 	The DOM element id where the map is
-* map (required): 		The google map object create before
-* username (required): 		Your CartoDB user name
-* table_name (required): 	Your CartoDB table name
-* query (required): 		A query to experiment with
-* map_style:			Show the same style as you defined in CartoDB
-* infowindow:			If you want to add interactivity to the layer, showing the infowindow
-* autobound:			If you want to zoom in the area where the layer is positioned
+#### Required
+
+* **map_canvas**: 	the DOM element id where the map is
+* **map**: 		the Google map object create before
+* **username**: 	your CartoDB user name
+* **table_name**: 	your CartoDB table name
+* **query**: 		a query to experiment with
+
+#### Optional:
+
+* **map_style**:	show the same style as you defined in CartoDB
+* **infowindow**:	if you want to add interactivity to the layer, showing the infowindow
+* **autobound**:	if you want to zoom in the area where the layer is positioned
 
 
 Example
