@@ -38,7 +38,7 @@
     $('form').submit(function(ev){
       ev.stopPropagation(); ev.preventDefault();
       var value = $(this).find('input').val();
-      cartodb_gmapsv3.changeQuery(value);
+      cartodb_gmapsv3.update(value);
     });
 
   }
