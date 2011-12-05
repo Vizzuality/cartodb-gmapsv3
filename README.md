@@ -17,17 +17,19 @@ The library accepts certain params to manage the cartodb layer:
 #### Required
 
 * **map_canvas**: 	the DOM element id where the map is
-* **map**: 		the Google map object create before
-* **username**: 	your CartoDB user name
+* **map**: 					the Google map object create before
+* **username**: 		your CartoDB user name
 * **table_name**: 	your CartoDB table name
-* **query**: 		a query to experiment with
+* **query**: 				a query to experiment with
 
 #### Optional:
 
+* **map_key**:		if your table is private, you'll need the map_key parameter
 * **map_style**:	show the same style as you defined in CartoDB
 * **infowindow**:	if you want to add interactivity to the layer, showing the infowindow
 * **autobound**:	if you want to zoom in the area where the layer is positioned
 
+Note: If you choose a CartoDB private table you'll need to authenticate for using API methods.
 
 Example
 -------
@@ -44,9 +46,10 @@ And then add the cartodb layer:
 	var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
     map_canvas: 'map_canvas',
     map: map,
-    user_name:'xavijam',
+    user_name:"xavijam",
     table_name: 'test',
     query: "SELECT * FROM test",
+    map_key: "6087bc5111352713a81a48491078f182a0541f6c",
     map_style: true,
     infowindow: true,
     auto_bound: true});
