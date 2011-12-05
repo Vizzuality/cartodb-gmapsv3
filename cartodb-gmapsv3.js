@@ -69,7 +69,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	  function autoBound(params) {
 			// Zoom to your geometries
 			// If the table is private you can't auto zoom without being authenticated
-			if (params.map_key) {
+			if (!params.map_key) {
 			  $.ajax({
 				  method:'get',
 			    url: 'http://'+params.user_name+'.cartodb.com/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ params.table_name)+'&callback=?',
