@@ -16,14 +16,14 @@
 
   function initialize() {
 
-    map = new google.maps.Map(document.getElementById('map_canvas'), {
+    var map = new google.maps.Map(document.getElementById('map_canvas'), {
       center: new google.maps.LatLng(20,0),
       zoom: 3,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       mapTypeControl: false
     });
 
-    cartodb_gmapsv3 = new google.maps.CartoDBLayer({
+    var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
       map_canvas: 'map_canvas',
       map: map,
       user_name:'xavijam',
