@@ -112,7 +112,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 		    url:'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/map_metadata?'+ 'map_key=' + (params.map_key || '') + '&callback=?',
 		    dataType: 'jsonp',
 		    success:function(result){
-		      var map_style = JSON.parse(result.map_metadata);
+		      var map_style = $.parseJSON(result.map_metadata);
 		      
 		      if (!map_style || map_style.google_maps_base_type=="roadmap") {
 		        params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
@@ -345,7 +345,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	    url:'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/infowindow?'+ 'map_key=' + (params.map_key || '')+'&callback=?',
 	    dataType: 'jsonp',
 	    success:function(result){
-	      var columns = JSON.parse(result.infowindow);
+	      var columns = $.parseJSON(result.infowindow);
 	      if (columns) {
 	        that.columns_ = parseColumns(columns);
 	      } else {
@@ -520,7 +520,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	
 	
 	CartoDBInfowindow.prototype.transformGeoJSON = function(str) {
-    var json = JSON.parse(str);
+    var json = $.parseJSON(str);
     return new google.maps.LatLng(json.coordinates[1],json.coordinates[0]);
   }
 	
