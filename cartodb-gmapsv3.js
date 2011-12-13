@@ -50,6 +50,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	  if (params.map_style) 	setCartoDBMapStyle(params);		// Map style? ok, let's style.
 	  if (params.auto_bound) 	autoBound(params);				    // Bounds? CartoDB does it.
 
+	  params.visible = true;
+	  params.active = true;
 	  
 	  // Add cartodb tiles to the map
 	  function addCartoDBTiles(params) {
@@ -272,6 +274,9 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       refreshWax(sql);
       // Refresh tiles
       refreshTiles(sql);
+
+      params.active = true;
+      params.visible = true;
     };
 
     // Remove layers from the map
@@ -283,12 +288,15 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         // Remove wax interaction
         params.interaction.remove();
     	}
+
+    	params.active = false;
     };
 
 		
 		// Hide layers from the map
     google.maps.CartoDBLayer.prototype.hide = function() {
     	this.delete();
+    	params.visible = false;
     };
 		    
 
@@ -297,6 +305,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     	if (params.map.overlayMapTypes.getArray().length==0) {
     		this.update(params.query);
     	}
+    	params.visible = true;
+    };
+
+    // CartoDB layer visible?
+    google.maps.CartoDBLayer.prototype.isVisible = function() {
+    	return params.visible;
     };
   };
 }

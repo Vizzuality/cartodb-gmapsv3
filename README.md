@@ -66,3 +66,4 @@ New funcionalities are coming, in the meantime you can use:
 * destroy: Removes the cartodb layer from the map.
 * hide: Hide the cartodb layer from the map (For now, hide and destroy are the same, but will be replace in the future).
 * show: Show again the cartodb layer in the map.
+* isVisible: Returns if cartodb layer is visible or not.
