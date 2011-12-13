@@ -400,10 +400,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         me.hide();
       });
 
-      google.maps.event.addDomListener(div,'click',function(ev){ev.preventDefault()});
-      google.maps.event.addDomListener(div,'dblclick',function(ev){ev.preventDefault()});
-      google.maps.event.addDomListener(div,'mousedown',function(ev){ev.preventDefault()});
-      google.maps.event.addDomListener(div,'mouseup',function(ev){ev.preventDefault()});
+      google.maps.event.addDomListener(div,'click',function(ev){ev.preventDefault ? ev.preventDefault() : ev.returnValue = false;});
+      google.maps.event.addDomListener(div,'dblclick',function(ev){ev.preventDefault ? ev.preventDefault() : ev.returnValue = false;});
+      google.maps.event.addDomListener(div,'mousedown',function(ev){ev.preventDefault ? ev.preventDefault() : ev.returnValue = false;});
+      google.maps.event.addDomListener(div,'mouseup',function(ev){ev.preventDefault ? ev.preventDefault() : ev.returnValue = false;});
       google.maps.event.addDomListener(div,'mousewheel',function(ev){ev.stopPropagation()});
       google.maps.event.addDomListener(div,'DOMMouseScroll',function(ev){ev.stopPropagation()});
 			
