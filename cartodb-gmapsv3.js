@@ -295,7 +295,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 		
 		// Hide layers from the map
     google.maps.CartoDBLayer.prototype.hide = function() {
-    	this.delete();
+    	this.destroy();
     	params.visible = false;
     };
 		    
