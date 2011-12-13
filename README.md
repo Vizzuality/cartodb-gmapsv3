@@ -63,3 +63,6 @@ Functions
 New funcionalities are coming, in the meantime you can use:
 
 * update: It needs a new query to work. Example: cartodb_gmapsv3.update('SELECT * FROM test WHERE cartodb_id>2');
+* destroy: Removes the cartodb layer from the map.
+* hide: Hide the cartodb layer from the map (For now, hide and destroy are the same, but will be replace in the future).
+* show: Show again the cartodb layer in the map.

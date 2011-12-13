@@ -23,13 +23,13 @@
       mapTypeControl: false
     });
 
-    var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
+    cartodb_gmapsv3 = new google.maps.CartoDBLayer({
       map_canvas: 'map_canvas',
       map: map,
       user_name:'xavijam',
       table_name: 'test',
       query: "SELECT * FROM test",
-      //map_key: '6087bc5111352713a81a48491078f182a0541f6c',
+      //map_key: '49826e269f1a85bce655ffadd25a1e82593020ea',
       map_style: true,
       infowindow: true,
       auto_bound: true

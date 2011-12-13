@@ -273,6 +273,31 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       // Refresh tiles
       refreshTiles(sql);
     };
+
+    // Remove layers from the map
+    google.maps.CartoDBLayer.prototype.delete = function() {
+    	// Remove cartodb layer
+      params.map.overlayMapTypes.clear();
+
+    	if (params.infowindow) {
+        // Remove wax interaction
+        params.interaction.remove();
+    	}
+    };
+
+		
+		// Hide layers from the map
+    google.maps.CartoDBLayer.prototype.hide = function() {
+    	this.delete();
+    };
+		    
+
+    // Show layers from the map
+    google.maps.CartoDBLayer.prototype.show = function() {
+    	if (params.map.overlayMapTypes.getArray().length==0) {
+    		this.update(params.query);
+    	}
+    };
   };
 }
 
