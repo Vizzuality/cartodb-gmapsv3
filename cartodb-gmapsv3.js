@@ -279,8 +279,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       params.visible = true;
     };
 
-    // Remove layers from the map
-    google.maps.CartoDBLayer.prototype.delete = function() {
+    // Destroy layers from the map
+    google.maps.CartoDBLayer.prototype.destroy = function() {
     	// Remove cartodb layer
       params.map.overlayMapTypes.clear();
 
