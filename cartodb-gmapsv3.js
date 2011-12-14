@@ -39,31 +39,31 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
    */
    
   google.maps.CartoDBLayer = function (params) {
-    
-    var defaults = params;
-    
-    if (params.infowindow) {
-		  addWaxCartoDBTiles(params);
-		} else {
-		  addSimpleCartoDBTiles(params);											// Always add cartodb tiles, simple or with wax.
-		}
-	  if (params.map_style) 	setCartoDBMapStyle(params);		// Map style? ok, let's style.
-	  if (params.auto_bound) 	autoBound(params);				    // Bounds? CartoDB does it.
 
-	  params.visible = true;
-	  params.active = true;
+    this.params = params;
+    
+    if (this.params.infowindow) {
+		  addWaxCartoDBTiles(this.params);
+		} else {
+		  addSimpleCartoDBTiles(this.params);											      // Always add cartodb tiles, simple or with wax.
+		}
+	  if (this.params.map_style) 	setCartoDBMapStyle(this.params);		// Map style? ok, let's style.
+	  if (this.params.auto_bound) 	autoBound(this.params);				    // Bounds? CartoDB does it.
+
+	  this.params.visible = true;
+	  this.params.active = true;
 	  
 	  // Add cartodb tiles to the map
 	  function addCartoDBTiles(params) {
 		  // Add the cartodb tiles
 	    var cartodb_layer = {
 	      getTileUrl: function(coord, zoom) {
-	        return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+ (params.query|| '') + '&map_key=' + (params.map_key || '');
+	        return 'http://' + this.params.user_name + '.cartodb.com/tiles/' + this.params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+ (this.params.query|| '') + '&map_key=' + (this.params.map_key || '');
 	      },
 	      tileSize: new google.maps.Size(256, 256)
 	    };
 	    var cartodb_imagemaptype = new google.maps.ImageMapType(cartodb_layer);
-	    params.map.overlayMapTypes.insertAt(0, cartodb_imagemaptype);
+	    this.params.map.overlayMapTypes.push(cartodb_imagemaptype);
 	  }
 	  
 	  
@@ -142,10 +142,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	      getTileUrl: function(coord, zoom) {
 	        return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query + '&map_key=' + (params.map_key || '');
 	      },
-	      tileSize: new google.maps.Size(256, 256)
+	      tileSize: new google.maps.Size(256, 256),
+        name: params.query,
+        description: false
 	    };
-	    var cartodb_imagemaptype = new google.maps.ImageMapType(cartodb_layer);
-	    params.map.overlayMapTypes.insertAt(0, cartodb_imagemaptype);
+	    params.layer = new google.maps.ImageMapType(cartodb_layer);
+	    params.map.overlayMapTypes.push(params.layer);
 	  }
 	  
 	  
@@ -153,7 +155,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	  function addWaxCartoDBTiles(params) {
       // interaction placeholder
       var currentCartoDbId;
-          params.tilejson = generateTileJson();
+          params.tilejson = generateTileJson(params);
           params.infowindow = new CartoDBInfowindow(params);
           params.cache_buster = 0;
           
@@ -172,28 +174,29 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         clickAction: 'full'
       };
       
-      var wax_tile = new wax.g.connector(params.tilejson);
-      params.map.overlayMapTypes.insertAt(0,wax_tile);
+      params.layer = new wax.g.connector(params.tilejson);
+
+      params.map.overlayMapTypes.push(params.layer);
       params.interaction = wax.g.interaction(params.map, params.tilejson, params.waxOptions);
 	  }
   
  
     // Refresh wax interaction
-    function refreshWax(sql) {
+    function refreshWax(params,sql) {
       if (params.infowindow) {
         params.cache_buster++;
         params.query = sql;
-        params.tilejson = generateTileJson();
+        params.tilejson = generateTileJson(params);
 
         // Remove old wax
-        params.map.overlayMapTypes.clear();
+        removeOldLayer(params.map,params.layer);
 
         // Setup new wax
         params.tilejson.grids = wax.util.addUrlData(params.tilejson.grids_base,  'cache_buster=' + params.cache_buster);
 
         // Add map tiles
-        var wax_tile = new wax.g.connector(params.tilejson);
-        params.map.overlayMapTypes.insertAt(0,wax_tile);
+        params.layer = new wax.g.connector(params.tilejson);
+        params.map.overlayMapTypes.push(params.layer);
 
         // Add interaction
         params.interaction.remove();
@@ -202,11 +205,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     }
 
     // Refresh tiles
-    function refreshTiles(sql) {
+    function refreshTiles(params,sql) {
       // If you are not using interaction on the tiles... let's update your tiles
       if (!params.infowindow) {
+
         // First remove previous cartodb - tiles.
-        params.map.overlayMapTypes.clear();
+        removeOldLayer(params.map,params.layer);
 
      	  // Then add the cartodb tiles
      	 	params.query = sql;
@@ -214,16 +218,18 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     			  getTileUrl: function(coord, zoom) {
     			  return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query + '&map_key=' + (params.map_key || '');
     		  },
-  			  tileSize: new google.maps.Size(256, 256)
+  			  tileSize: new google.maps.Size(256, 256),
+          name: params.query,
+          description: false
   	    };
   	    
-  	    var cartodb_imagemaptype = new google.maps.ImageMapType(cartodb_layer);
-  	    params.map.overlayMapTypes.insertAt(0, cartodb_imagemaptype);
+  	    params.layer = new google.maps.ImageMapType(cartodb_layer);
+  	    params.map.overlayMapTypes.push(params.layer);
       }
     }
     
     
-    function generateTileJson() {
+    function generateTileJson(params) {
       var core_url = 'http://' + params.user_name + '.cartodb.com';  
       var base_url = core_url + '/tiles/' + params.table_name + '/{z}/{x}/{y}';
       var tile_url = base_url + '.png?cache_buster=0';
@@ -254,6 +260,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         grids: [grid_url],
         tiles_base: tile_url,
         grids_base: grid_url,
+        name: params.query,
+        description: true,
         formatter: function(options, data) {
             currentCartoDbId = data.cartodb_id;
             return data.cartodb_id;
@@ -263,55 +271,73 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         }
       };
     }
+
+
+    // Remove old cartodb layer added (wax or imagemaptype)
+    function removeOldLayer(map,layer) {
+      if (layer) {
+        var pos = -1;
+        map.overlayMapTypes.forEach(function(map_type,i){
+          if (layer == map_type && map_type.name == layer.name && map_type.description == layer.description) {
+            pos = i;
+          }
+        });
+        if (pos!=-1) 
+          map.overlayMapTypes.removeAt(pos);
+        layer = null;
+      }
+    }
     
   
     // Update tiles & interactivity layer;
     google.maps.CartoDBLayer.prototype.update = function(sql) {
       // Hide the infowindow
-      if (params.infowindow) 
-        params.infowindow.hide();
+      if (this.params.infowindow) 
+        this.params.infowindow.hide();
       // Refresh wax
-      refreshWax(sql);
+      refreshWax(this.params,sql);
       // Refresh tiles
-      refreshTiles(sql);
+      refreshTiles(this.params,sql);
 
-      params.active = true;
-      params.visible = true;
+      this.params.active = true;
+      this.params.visible = true;
     };
 
     // Destroy layers from the map
     google.maps.CartoDBLayer.prototype.destroy = function() {
-    	// Remove cartodb layer
-      params.map.overlayMapTypes.clear();
+      // First remove previous cartodb - tiles.
+      removeOldLayer(this.params.map,this.params.layer);
 
-    	if (params.infowindow) {
+    	if (this.params.infowindow) {
         // Remove wax interaction
-        params.interaction.remove();
+        this.params.interaction.remove();
+        this.params.infowindow.hide();
     	}
 
-    	params.active = false;
+    	this.params.active = false;
     };
 
 		
 		// Hide layers from the map
     google.maps.CartoDBLayer.prototype.hide = function() {
     	this.destroy();
-    	params.visible = false;
+    	this.params.visible = false;
     };
 		    
 
     // Show layers from the map
     google.maps.CartoDBLayer.prototype.show = function() {
-    	if (params.map.overlayMapTypes.getArray().length==0) {
-    		this.update(params.query);
-    	}
-    	params.visible = true;
+      if (!this.params.visible || !this.params.active) {
+        this.update(this.params.query);
+        this.params.visible = true;
+      }
     };
 
     // CartoDB layer visible?
     google.maps.CartoDBLayer.prototype.isVisible = function() {
-    	return params.visible;
+    	return this.params.visible;
     };
+
   };
 }
 

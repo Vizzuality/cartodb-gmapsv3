@@ -13,9 +13,10 @@
 
   <script type="text/javascript">
 
+  var cartodb1_gmapsv3
+    , cartodb2_gmapsv3;
 
   function initialize() {
-
     var map = new google.maps.Map(document.getElementById('map_canvas'), {
       center: new google.maps.LatLng(20,0),
       zoom: 3,
@@ -23,26 +24,35 @@
       mapTypeControl: false
     });
 
-    var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
+    var cartodb1_gmapsv3 = new google.maps.CartoDBLayer({
       map_canvas: 'map_canvas',
       map: map,
       user_name:'xavijam',
       table_name: 'test',
       query: "SELECT * FROM test",
-      //map_key: '49826e269f1a85bce655ffadd25a1e82593020ea',
       map_style: true,
       infowindow: true,
       auto_bound: true
     });
-    
+
+    var cartodb2_gmapsv3 = new google.maps.CartoDBLayer({
+      map_canvas: 'map_canvas',
+      map: map,
+      user_name:'xavijam',
+      table_name: 'schools',
+      query: "SELECT * FROM schools",
+      map_style: false,
+      infowindow: true,
+      auto_bound: false
+    });    
     
     $('form').submit(function(ev){
       ev.stopPropagation(); ev.preventDefault();
       var value = $(this).find('input').val();
-      cartodb_gmapsv3.update(value);
+      cartodb1_gmapsv3.update(value);
     });
-
   }
+
   </script>
 </head>
 <body onload="initialize()">
