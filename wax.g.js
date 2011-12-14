@@ -2606,7 +2606,7 @@ wax.g.interaction = function(map, tilejson, options) {
             if (!this._onClick) this._onClick = wax.util.bind(function(evt) {
                 // Feature previously found? Don't continue with the event...
                 // @vizzuality change!
-                if (window.event.cancelBubble) {
+                if (window.event && window.event.cancelBubble) {
                   return false;
                 }
 
@@ -2623,7 +2623,17 @@ wax.g.interaction = function(map, tilejson, options) {
                         if (feature) {
                             // Stop propagation of the click event to avoid fire more wax clicks!!!
                             // @vizzuality change!
+                            
+                            // For Firefox browser that doesn't recognize window.event
+                            if (!window.event) {
+                              window.event = {};
+                              setTimeout(function(){
+                                window.event = null;
+                              },150);
+                            }
+                            
                             window.event.cancelBubble = true;
+
                             switch (this.clickAction) {
                                 case 'full':
                                     this.callbacks.click(feature, map.getDiv(), 0, evt);
