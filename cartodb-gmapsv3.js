@@ -63,7 +63,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	      tileSize: new google.maps.Size(256, 256)
 	    };
 	    var cartodb_imagemaptype = new google.maps.ImageMapType(cartodb_layer);
-	    this.params.map.overlayMapTypes.push(cartodb_imagemaptype);
+	    this.params.map.overlayMapTypes.insertAt(0,cartodb_imagemaptype);
 	  }
 	  
 	  
@@ -147,7 +147,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         description: false
 	    };
 	    params.layer = new google.maps.ImageMapType(cartodb_layer);
-	    params.map.overlayMapTypes.push(params.layer);
+	    params.map.overlayMapTypes.insertAt(0,params.layer);
 	  }
 	  
 	  
@@ -168,7 +168,9 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
             params.map.setOptions({draggableCursor: 'pointer'});
           },
           click: function(feature, div, opt3, evt){
-            params.infowindow.open(feature);
+            // If there are more than one cartodb layer, close all possible infowindows
+            params.infowindow.hideAll();
+            params.infowindow.open(feature,evt.latLng);
           }
         },
         clickAction: 'full'
@@ -176,7 +178,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       
       params.layer = new wax.g.connector(params.tilejson);
 
-      params.map.overlayMapTypes.push(params.layer);
+      params.map.overlayMapTypes.insertAt(0,params.layer);
       params.interaction = wax.g.interaction(params.map, params.tilejson, params.waxOptions);
 	  }
   
@@ -196,7 +198,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
         // Add map tiles
         params.layer = new wax.g.connector(params.tilejson);
-        params.map.overlayMapTypes.push(params.layer);
+        params.map.overlayMapTypes.insertAt(0,params.layer);
 
         // Add interaction
         params.interaction.remove();
@@ -224,7 +226,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
   	    };
   	    
   	    params.layer = new google.maps.ImageMapType(cartodb_layer);
-  	    params.map.overlayMapTypes.push(params.layer);
+  	    params.map.overlayMapTypes.insertAt(0,params.layer);
       }
     }
     
@@ -457,33 +459,33 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
  		    div.style.width = this.width_ + 'px';
  		    div.style.left = (pixPosition.x - 49) + 'px';
  		    var actual_height = - $(div).height();
- 		    div.style.top = (pixPosition.y + actual_height + 5) + 'px';
+ 		    div.style.top = (pixPosition.y + actual_height + 10) + 'px';
  	    }
  	    this.show();
     }
 	}
 	
 	
-	CartoDBInfowindow.prototype.open = function(feature){
+	CartoDBInfowindow.prototype.open = function(feature,latlng){
 	  var that = this;
 	  that.feature_ = feature;
 		
 		// If the table is private, you can't run any api methods without being
     $.ajax({
 		  method:'get',
-	    url: 'http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+escape('select '+that.columns_+',ST_AsGeoJSON(ST_PointOnSurface(the_geom),6) as cdb_centre from '+ this.params_.table_name + ' where cartodb_id=' + feature)+'&callback=?',
+	    url: 'http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+escape('select '+that.columns_+' from '+ this.params_.table_name + ' where cartodb_id=' + feature)+'&callback=?',
 	    dataType: 'jsonp',
 	    success: function(result) {
-	      positionateInfowindow(result.rows[0]);
+	      positionateInfowindow(result.rows[0],latlng);
 	    },
 	    error: function(e) {}
 	  });
    
-    function positionateInfowindow(variables) {
+    function positionateInfowindow(variables,center) {
       if (that.div_) {
         var div = that.div_;
         // Get latlng position
-        that.latlng_ = that.transformGeoJSON(variables.cdb_centre);
+        that.latlng_ = latlng;
                 
         // Remove the list items
         $('div.cartodb_infowindow div.outer_top div.top').html('');
@@ -529,6 +531,11 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 			);
 		}
 	}
+
+
+  CartoDBInfowindow.prototype.hideAll = function() {
+    $('div.cartodb_infowindow').css('visibility','hidden');
+  }
 
 
 	CartoDBInfowindow.prototype.isVisible = function(marker_id) {

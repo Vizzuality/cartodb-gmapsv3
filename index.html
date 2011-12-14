@@ -6,7 +6,7 @@
   <title>Using CartoDB with Google Maps v3</title>
   <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
   <link rel="stylesheet" href="cartodb.css">
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
   <script type="text/javascript" src="wax.g.js"></script>
   <script type="text/javascript" src="cartodb-gmapsv3.js"></script>
@@ -24,7 +24,7 @@
       mapTypeControl: false
     });
 
-    var cartodb1_gmapsv3 = new google.maps.CartoDBLayer({
+    cartodb1_gmapsv3 = new google.maps.CartoDBLayer({
       map_canvas: 'map_canvas',
       map: map,
       user_name:'xavijam',
@@ -35,7 +35,7 @@
       auto_bound: true
     });
 
-    var cartodb2_gmapsv3 = new google.maps.CartoDBLayer({
+    cartodb2_gmapsv3 = new google.maps.CartoDBLayer({
       map_canvas: 'map_canvas',
       map: map,
       user_name:'xavijam',
