@@ -376,7 +376,7 @@ wax.GridInstance = function(grid_tile, formatter, options) {
         // the grid's array is large enough to make this work.
         var key = this.getKey(x, y);
 
-        if (grid_tile.keys[key] && grid_tile.data[grid_tile.keys[key]]) {
+        if (grid_tile && grid_tile.keys[key] && grid_tile.data[grid_tile.keys[key]]) {
             return grid_tile.data[grid_tile.keys[key]];
         }
     };
