@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.1 [October 10, 2011]
+ * @version 0.2 [December 14, 2011]
  * @author: xavijam@gmail.com
  * @fileoverview <b>Author:</b> xavijam@gmail.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -329,7 +329,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
     // Show layers from the map
     google.maps.CartoDBLayer.prototype.show = function() {
-      if (!this.params.visible || !this.params.active) {
+      if (!this.params.visible || !this.params.active) {
         this.update(this.params.query);
         this.params.visible = true;
       }
