@@ -58,7 +58,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	      getTileUrl: function(coord, zoom) {
 	        return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query;
 	      },
-	      tileSize: new google.maps.Size(256, 256)
+	      tileSize: new google.maps.Size(256, 256),
+         name: params.tile_name
 	    };
 	    var cartodb_imagemaptype = new google.maps.ImageMapType(cartodb_layer);
 	    params.map.overlayMapTypes.insertAt(0, cartodb_imagemaptype);
@@ -137,7 +138,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	      getTileUrl: function(coord, zoom) {
 	        return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query;
 	      },
-	      tileSize: new google.maps.Size(256, 256)
+	      tileSize: new google.maps.Size(256, 256),
+         name: params.tile_name
 	    };
 	    var cartodb_imagemaptype = new google.maps.ImageMapType(cartodb_layer);
 	    params.map.overlayMapTypes.insertAt(0, cartodb_imagemaptype);
@@ -209,7 +211,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     			  getTileUrl: function(coord, zoom) {
     			  return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query;
     		  },
-  			  tileSize: new google.maps.Size(256, 256)
+  			  tileSize: new google.maps.Size(256, 256),
+           name: params.tile_name
   	    };
   	    
   	    var cartodb_imagemaptype = new google.maps.ImageMapType(cartodb_layer);
@@ -241,6 +244,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         grids: [grid_url],
         tiles_base: tile_url,
         grids_base: grid_url,
+        name: params.tile_name,
         formatter: function(options, data) {
             currentCartoDbId = data.cartodb_id;
             return data.cartodb_id;
