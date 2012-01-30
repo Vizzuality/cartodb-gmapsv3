@@ -410,8 +410,9 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 		
 	  var div = this.div_;
 	  if (!div) {
-	    div = this.div_ = document.createElement('div');
-	    div.setAttribute('class','cartodb_infowindow');
+	    div = this.div_ = document.createElement('DIV');
+	    div.className = "cartodb_infowindow";
+	 
 	
       div.innerHTML = '<a href="#close" class="close">x</a>'+
   			              '<div class="outer_top">'+
