@@ -53,19 +53,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	  this.params.visible = true;
 	  this.params.active = true;
 	  
-	  // Add cartodb tiles to the map
-	  function addCartoDBTiles(params) {
-		  // Add the cartodb tiles
-	    var cartodb_layer = {
-	      getTileUrl: function(coord, zoom) {
-	        return 'http://' + this.params.user_name + '.cartodb.com/tiles/' + this.params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+ (this.params.query|| '') + '&map_key=' + (this.params.map_key || '');
-	      },
-	      tileSize: new google.maps.Size(256, 256)
-	    };
-	    var cartodb_imagemaptype = new google.maps.ImageMapType(cartodb_layer);
-	    this.params.map.overlayMapTypes.insertAt(0,cartodb_imagemaptype);
-	  }
-	  
+
+	 
 	  
 	  // Zoom to cartodb geometries
 	  function autoBound(params) {
@@ -137,10 +126,11 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	  
 	  // Add cartodb tiles to the map
 	  function addSimpleCartoDBTiles(params) {
+     console.log(params.tile_style);
 		  // Add the cartodb tiles
 	    var cartodb_layer = {
 	      getTileUrl: function(coord, zoom) {
-	        return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query + '&map_key=' + (params.map_key || '');
+	        return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query + '&map_key=' + (params.map_key || '') + '&style=' + (encodeURIComponent(params.tile_style) || '')
 	      },
 	      tileSize: new google.maps.Size(256, 256),
         name: params.query,
@@ -218,7 +208,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      	 	params.query = sql;
     		var cartodb_layer = {
     			  getTileUrl: function(coord, zoom) {
-    			  return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query + '&map_key=' + (params.map_key || '');
+            return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query + '&map_key=' + (params.map_key || '') + '&style=' + (encodeURIComponent(params.tile_style) || '')
     		  },
   			  tileSize: new google.maps.Size(256, 256),
           name: params.query,
@@ -244,11 +234,18 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         grid_url = wax.util.addUrlData(grid_url, query);
       }
       
-      // Map key
+      // Map key ?
       if (params.map_key) {
 	    	var map_key = 'map_key=' + params.map_key;
       	tile_url = wax.util.addUrlData(tile_url,map_key);
       	grid_url = wax.util.addUrlData(grid_url,map_key);
+      }
+
+      // Tiles style ?
+      if (params.tile_style) {
+        var style = 'style=' + encodeURIComponent(params.tile_style);
+        tile_url = wax.util.addUrlData(tile_url,style);
+        grid_url = wax.util.addUrlData(grid_url,style);
       }
 
   
@@ -456,12 +453,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         // List all the new variables
         for (p in variables) {
           if (p!='cartodb_id' && p!='cdb_centre' && p!='the_geom_webmercator') {
-            $('div.cartodb_infowindow div.outer_top div.top').append('<label>'+p+'</label><p class="'+((variables[p]!=null)?'':'empty')+'">'+(variables[p] || 'empty')+'</p>');
+            $('div.cartodb_infowindow div.outer_top div.top').append('<label>'+p+'</label><p class="'+((variables[p]!=null && variables[p]!='')?'':'empty')+'">'+(variables[p] || 'empty')+'</p>');
           }
         }
         
-        // 
-        if (variables['cartodb_id'] || variables['id']) {
+        // Show cartodb_id?
+        if (variables['cartodb_id']) {
           $('div.cartodb_infowindow div.bottom label').html('id: <strong>'+feature+'</strong>');
         }
         
