@@ -32,7 +32,8 @@
       query: "SELECT * FROM test",
       map_style: true,
       infowindow: true,
-      auto_bound: true
+      auto_bound: true,
+      debug: true
     });
 
     cartodb2_gmapsv3 = new google.maps.CartoDBLayer({
@@ -40,10 +41,11 @@
       map: map,
       user_name:'xavijam',
       table_name: 'schools',
-      query: "SELECT * FROM schools",
+      query: "SELECT cartodb_id, the_geom_webmercator, address_line_1 AS Address FROM schools",
       map_style: false,
       infowindow: true,
-      auto_bound: false
+      auto_bound: false,
+      debug: true
     });    
     
     $('form').submit(function(ev){

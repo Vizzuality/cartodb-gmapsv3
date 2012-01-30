@@ -100,7 +100,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 			      }
 			  
 			    },
-			    error: function(e) {}
+			    error: function(e) {params.debug && console.debug(e)}
 			  });
 			}
 	  }
@@ -130,7 +130,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 		      if (!map_style) {map_style = {google_maps_customization_style: []}}
 		      params.map.setOptions({styles: map_style.google_maps_customization_style})
 		    },
-		    error: function(e){}
+		    error: function(e){params.debug && console.debug(e)}
 		  });
 	  }
 	  
@@ -360,49 +360,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	  this.width_ = 214;
 	  this.setMap(params.map);
 	  this.params_ = params;
-	  this.getActiveColumns(params);
 	}
 
 
 	CartoDBInfowindow.prototype = new google.maps.OverlayView();
-
-
-	CartoDBInfowindow.prototype.getActiveColumns = function(params) {
-	  var that = this;
-	  $.ajax({
-	    url:'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/infowindow?'+ 'map_key=' + (params.map_key || '')+'&callback=?',
-	    dataType: 'jsonp',
-	    success:function(result){
-	      var columns = $.parseJSON(result.infowindow);
-	      if (columns) {
-	        that.columns_ = parseColumns(columns);
-	      } else {
-	        $.ajax({
-		        // If the table is private, you can't run any api methods without being
-      		  method:'get',
-      	    url: 'http://'+ that.params_.user_name +'.cartodb.com/api/v1/sql/?q='+escape('select * from '+ that.params_.table_name + ' LIMIT 1'),
-      	    dataType: 'jsonp',
-      	    success: function(columns) {
-      	      that.columns_ = parseColumns(columns.rows[0]);
-      	    },
-      	    error: function(e) {}
-      	  });
-	      }
-
-	    },
-	    error: function(e){}
-	  });
-	  
-	  function parseColumns(columns) {
-	    var str = '';
-      for (p in columns) {
-        if (columns[p] && p!='the_geom_webmercator') {
-          str+=p+',';
-        }
-      }
-      return str.substr(0,str.length-1);
-	  }
-	}
 
 
 	CartoDBInfowindow.prototype.draw = function() {
@@ -474,12 +435,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 		// If the table is private, you can't run any api methods without being
     $.ajax({
 		  method:'get',
-	    url: 'http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+escape('select '+that.columns_+' from '+ this.params_.table_name + ' where cartodb_id=' + feature)+'&callback=?',
+	    url: 'http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+encodeURIComponent(this.params_.query + ' where cartodb_id=' + feature)+'&callback=?',
 	    dataType: 'jsonp',
 	    success: function(result) {
 	      positionateInfowindow(result.rows[0],latlng);
 	    },
-	    error: function(e) {}
+	    error: function(e) {params.debug && console.debug(e)}
 	  });
    
     function positionateInfowindow(variables,center) {
@@ -488,16 +449,22 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         // Get latlng position
         that.latlng_ = latlng;
                 
-        // Remove the list items
+        // Remove the unnecessary html
         $('div.cartodb_infowindow div.outer_top div.top').html('');
+        $('div.cartodb_infowindow div.outer_top div.bottom label').html('');
 
+        // List all the new variables
         for (p in variables) {
-          if (p!='cartodb_id' && p!='cdb_centre') {
+          if (p!='cartodb_id' && p!='cdb_centre' && p!='the_geom_webmercator') {
             $('div.cartodb_infowindow div.outer_top div.top').append('<label>'+p+'</label><p class="'+((variables[p]!=null)?'':'empty')+'">'+(variables[p] || 'empty')+'</p>');
           }
         }
         
-        $('div.cartodb_infowindow div.bottom label').html('id: <strong>'+feature+'</strong>');
+        // 
+        if (variables['cartodb_id'] || variables['id']) {
+          $('div.cartodb_infowindow div.bottom label').html('id: <strong>'+feature+'</strong>');
+        }
+        
         that.moveMaptoOpen();
         that.setPosition();     
       }

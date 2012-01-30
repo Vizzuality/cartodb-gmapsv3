@@ -28,6 +28,7 @@ The library accepts certain params to manage the cartodb layer:
 * **map_style**:	show the same style as you defined in CartoDB
 * **infowindow**:	if you want to add interactivity to the layer, showing the infowindow
 * **autobound**:	if you want to zoom in the area where the layer is positioned
+* **debug**:        if you want to debug the library, set to true
 
 Note: If you choose a CartoDB private table you'll need to authenticate for using API methods.
 
@@ -48,11 +49,12 @@ And then add the cartodb layer:
     map: map,
     user_name:"xavijam",
     table_name: 'test',
-    query: "SELECT * FROM test",
+    query: "SELECT cartodb_id,the_geom_webmercator,description FROM test",
     map_key: "6087bc5111352713a81a48491078f182a0541f6c",
     map_style: true,
     infowindow: true,
-    auto_bound: true});
+    auto_bound: true,
+    debug: false});
 
 
 [live example](http://vizzuality.github.com/cartodb-gmapsv3/)
