@@ -33,9 +33,11 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
    *   	user_name 		-		 	CartoDB user name
    *   	table_name 		-			CartoDB table name
    *    query					-			If you want to apply any sql sentence to the table...
+   *    tile_style    -     If you want to add other style to the layer
    *		map_style			-			If you want to see the map styles created on cartodb (opcional - default = false)
    *		infowindow		-			If you want to see infowindows when click in a geometry (opcional - default = false)
    *		auto_bound		-			Let cartodb auto-bound-zoom in the map (opcional - default = false)
+   *    debug         -     Do you want to debug the library? Set to true
    */
    
   google.maps.CartoDBLayer = function (params) {
