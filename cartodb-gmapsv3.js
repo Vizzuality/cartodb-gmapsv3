@@ -126,7 +126,6 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	  
 	  // Add cartodb tiles to the map
 	  function addSimpleCartoDBTiles(params) {
-     console.log(params.tile_style);
 		  // Add the cartodb tiles
 	    var cartodb_layer = {
 	      getTileUrl: function(coord, zoom) {
