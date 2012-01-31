@@ -1836,7 +1836,7 @@ wax.movetip = function(options) {
     function getTooltip(feature, context) {
         var tooltip = document.createElement('div');
         tooltip.className = 'wax-movetip';
-        tooltip.style.cssText = 'position:absolute;'
+        tooltip.style.cssText = 'position:absolute;';
         tooltip.innerHTML = feature;
         context.appendChild(tooltip);
         _context = context;
