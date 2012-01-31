@@ -24,16 +24,18 @@
       mapTypeControl: false
     });
 
-    cartodb1_gmapsv3 = new google.maps.CartoDBLayer({
+    var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
       map_canvas: 'map_canvas',
       map: map,
-      user_name:'thedatarepublic-pro',
-      table_name: 'seccionescensalesbarcelona',
-      query: "SELECT s.cartodb_id,(SELECT count(distinct f.user_id) FROM flickrbcn11 as f WHERE ST_Within(f.the_geom,s.the_geom) AND f.user_country<>'BCN' AND f.user_country<>'NULL' AND f.latitude<>'41.385719' AND f.longitude<>'2.170049') AS n,s.km2, s.poblacion, s.districtname,s.the_geom_webmercator FROM seccionescensalesbarcelona AS s order by n desc",
+      user_name:"xavijam",
+      table_name: 'test',
+      query: "SELECT cartodb_id,the_geom_webmercator,description FROM test",
+      style: "#test{line-color:#719700;line-width:1;line-opacity:0.6;polygon-opacity:0.6;}",
+      map_key: "6087bc5111352713a81a48491078f182a0541f6c",
       map_style: true,
-      infowindow: "SELECT s.cartodb_id,(SELECT count(distinct f.user_id) FROM flickrbcn11 as f WHERE ST_Within(f.the_geom,s.the_geom) AND f.user_country<>'BCN' AND f.user_country<>'NULL' AND f.latitude<>'41.385719' AND f.longitude<>'2.170049') AS n,s.km2, s.poblacion, s.districtname AS District_name,s.the_geom_webmercator FROM seccionescensalesbarcelona AS s WHERE cartodb_id={{feature}} order by n desc",
+      infowindow: "SELECT cartodb_id,the_geom_webmercator,description FROM test WHERE cartodb_id={{feature}}",
       auto_bound: true,
-      debug: true
+      debug: false
     });
 
     cartodb2_gmapsv3 = new google.maps.CartoDBLayer({
