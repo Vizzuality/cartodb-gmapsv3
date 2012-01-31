@@ -44,20 +44,20 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
     this.params = params;
     this.params.feature = params.infowindow;
+
+    if (this.params.map_style)  setCartoDBMapStyle(this.params);    // Map style? ok, let's style.
+    if (this.params.auto_bound)   autoBound(this.params);           // Bounds? CartoDB does it.
     
     if (this.params.infowindow) {
 		  addWaxCartoDBTiles(this.params);
 		} else {
 		  addSimpleCartoDBTiles(this.params);											      // Always add cartodb tiles, simple or with wax.
 		}
-	  if (this.params.map_style) 	setCartoDBMapStyle(this.params);		// Map style? ok, let's style.
-	  if (this.params.auto_bound) 	autoBound(this.params);				    // Bounds? CartoDB does it.
 
 	  this.params.visible = true;
 	  this.params.active = true;
 
 	 
-	  
 	  // Zoom to cartodb geometries
 	  function autoBound(params) {
 			// Zoom to your geometries
@@ -419,11 +419,17 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 	
 	
 	CartoDBInfowindow.prototype.open = function(feature,latlng){
-	  var that = this;
+	  var that = this
+      , infowindow_sql = 'SELECT * FROM ' + this.params_.table_name + ' WHERE cartodb_id=' + feature;
 	  that.feature_ = feature;
 		
-		// If the table is private, you can't run any api methods without being
-    $.getJSON('http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+encodeURIComponent(this.params_.feature.replace('{{feature}}',feature)) + '&callback=', function(result) {
+		// If the table is private, you can't run any api methods
+    if (this.params_.feature!=true) {
+      infowindow_sql = encodeURIComponent(this.params_.feature.replace('{{feature}}',feature));
+    }
+      
+
+    $.getJSON('http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+infowindow_sql + '&callback=', function(result) {
       positionateInfowindow(result.rows[0],latlng);
     }).error(function(e, msg) {
       that.params_.debug && console.debug('Error retrieving infowindow variables: ' + msg)
