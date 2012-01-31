@@ -51,7 +51,7 @@ And then add the cartodb layer:
     user_name:"xavijam",
     table_name: 'test',
     query: "SELECT cartodb_id,the_geom_webmercator,description FROM test",
-    style: "#test{line-color:#719700;line-width:1;line-opacity:0.6;polygon-opacity:0.6;}",
+    tile_style: "#test{line-color:#719700;line-width:1;line-opacity:0.6;polygon-opacity:0.6;}",
     map_key: "6087bc5111352713a81a48491078f182a0541f6c",
     map_style: true,
     infowindow: "SELECT cartodb_id,the_geom_webmercator,description FROM test WHERE cartodb_id={{feature}}",
