@@ -25,7 +25,7 @@ The library accepts certain params to manage the cartodb layer:
 #### Optional:
 
 * **map_key**:		If your table is private, you'll need the map_key parameter
-* **map_style**:	show the same style as you defined in CartoDB
+* **map_style**:	Show the same style as you defined in CartoDB
 * **infowindow**:   If you want to add interactivity to the layer, showing the infowindow (If you want to show specific columns, it must be a query, adding it 'WHERE cartodb_id={{feature}}', later it will be replace by the clicked cartodb_id. **cartodb_id** and **the_geom_webmercator** are REQUIRED parameters)
 * **tile_style**:   If you want to add other style to the layer
 * **autobound**:	If you want to zoom in the area where the layer is positioned
