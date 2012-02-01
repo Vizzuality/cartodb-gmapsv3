@@ -16,20 +16,20 @@ The library accepts certain params to manage the cartodb layer:
 
 #### Required
 
-* **map_canvas**: 	the DOM element id where the map is
-* **map**: 					the Google map object create before
-* **username**: 		your CartoDB user name
-* **table_name**: 	your CartoDB table name
-* **query**: 				a query to experiment with
+* **map_canvas**: 	The DOM element id where the map is
+* **map**: 			The Google map object create before
+* **username**:     Your CartoDB user name
+* **table_name**: 	Your CartoDB table name
+* **query**: 		A query to experiment with
 
 #### Optional:
 
-* **map_key**:		if your table is private, you'll need the map_key parameter
+* **map_key**:		If your table is private, you'll need the map_key parameter
 * **map_style**:	show the same style as you defined in CartoDB
-* **infowindow**:	if you want to add interactivity to the layer, showing the infowindow (It must be a query, adding WHERE cartodb_id={{feature}}', later it will be replace by the clicked cartodb_id. **cartodb_id** and **the_geom_webmercator** are REQUIRED parameters)
-* **tile_style**:   if you want to add other style to the layer
-* **autobound**:	if you want to zoom in the area where the layer is positioned
-* **debug**:        if you want to debug the library, set to true
+* **infowindow**:   If you want to add interactivity to the layer, showing the infowindow (If you want to show specific columns, it must be a query, adding it 'WHERE cartodb_id={{feature}}', later it will be replace by the clicked cartodb_id. **cartodb_id** and **the_geom_webmercator** are REQUIRED parameters)
+* **tile_style**:   If you want to add other style to the layer
+* **autobound**:	If you want to zoom in the area where the layer is positioned
+* **debug**:        If you want to debug the library, set to true
 
 Note: If you choose a CartoDB private table you'll need to authenticate for using API methods.
 
