@@ -64,58 +64,72 @@ var CartoDB = CartoDB || {};
         // Zoom to your geometries
         // If the table is private you can't auto zoom without being authenticated
         if (!params.map_key) {
-          $.getJSON('http://'+params.user_name+'.cartodb.com/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ params.table_name)+'&callback=?', function(result) {
-            if (result.rows[0].st_extent!=null) {
-              var coordinates = result.rows[0].st_extent.replace('BOX(','').replace(')','').split(',');
+          $.ajax({
+            url:'http://'+params.user_name+'.cartodb.com/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ params.table_name),
+            dataType: 'jsonp',
+            timeout: 2000,
+            callbackParameter: 'callback',
+            success: function(result) {
+              if (result.rows[0].st_extent!=null) {
+                var coordinates = result.rows[0].st_extent.replace('BOX(','').replace(')','').split(',');
 
-              var coor1 = coordinates[0].split(' ');
-              var coor2 = coordinates[1].split(' ');
-              var bounds = new google.maps.LatLngBounds();
+                var coor1 = coordinates[0].split(' ');
+                var coor2 = coordinates[1].split(' ');
+                var bounds = new google.maps.LatLngBounds();
 
-              // Check bounds
-              if (coor1[0] >  180 || coor1[0] < -180 || coor1[1] >  90 || coor1[1] < -90 
-                || coor2[0] >  180 || coor2[0] < -180 || coor2[1] >  90  || coor2[1] < -90) {
-                coor1[0] = '-30';
-                coor1[1] = '-50'; 
-                coor2[0] = '110'; 
-                coor2[1] =  '80'; 
+                // Check bounds
+                if (coor1[0] >  180 || coor1[0] < -180 || coor1[1] >  90 || coor1[1] < -90 
+                  || coor2[0] >  180 || coor2[0] < -180 || coor2[1] >  90  || coor2[1] < -90) {
+                  coor1[0] = '-30';
+                  coor1[1] = '-50'; 
+                  coor2[0] = '110'; 
+                  coor2[1] =  '80'; 
+                }
+
+                bounds.extend(new google.maps.LatLng(coor1[1],coor1[0]));
+                bounds.extend(new google.maps.LatLng(coor2[1],coor2[0]));
+
+                params.map.fitBounds(bounds);
               }
-
-              bounds.extend(new google.maps.LatLng(coor1[1],coor1[0]));
-              bounds.extend(new google.maps.LatLng(coor2[1],coor2[0]));
-
-              params.map.fitBounds(bounds);
+            },
+            error: function(e,msg) {
+              params.debug && console.debug('Error setting table bounds: ' + msg);
             }
-          }).error(function(e, msg) {
-            params.debug && console.debug('Error setting table bounds: ' + msg);
           });
         }
       }
 
       // Set the map styles of your cartodb table/map
       function setCartoDBMapStyle(params) {
-        $.getJSON('http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/map_metadata?'+ 'map_key=' + (params.map_key || '') + '&callback=?', function(result) {
-          var map_style = $.parseJSON(result.map_metadata);
+        $.ajax({
+          url: 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/map_metadata?'+ 'map_key=' + (params.map_key || ''),
+          dataType: 'jsonp',
+          timeout: 2000,
+          callbackParameter: 'callback',
+          success: function(result) {
+            var map_style = $.parseJSON(result.map_metadata);
 
-          if (!map_style || map_style.google_maps_base_type=="roadmap") {
-            params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
-          } else if (map_style.google_maps_base_type=="satellite") {
-            params.map.setOptions({mapTypeId: google.maps.MapTypeId.SATELLITE});
-          } else if (map_style.google_maps_base_type=="terrain") {
-            params.map.setOptions({mapTypeId: google.maps.MapTypeId.TERRAIN});
-          } else {
-            var mapStyles = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] },{ featureType: "administrative", stylers: [ { saturation: -95 }, { gamma: 2.26 } ] },{ featureType: "water", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", stylers: [ { visibility: "off" } ] },{ featureType: "road", stylers: [ { visibility: "simplified" }, { saturation: -99 }, { gamma: 2.22 } ] },{ featureType: "poi", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "transit", stylers: [ { visibility: "off" } ] },{ featureType: "road", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "poi", stylers: [ { saturation: -55 } ] } ];
-            map_style.google_maps_customization_style = mapStyles;
-            params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
-          }
+            if (!map_style || map_style.google_maps_base_type=="roadmap") {
+              params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
+            } else if (map_style.google_maps_base_type=="satellite") {
+              params.map.setOptions({mapTypeId: google.maps.MapTypeId.SATELLITE});
+            } else if (map_style.google_maps_base_type=="terrain") {
+              params.map.setOptions({mapTypeId: google.maps.MapTypeId.TERRAIN});
+            } else {
+              var mapStyles = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] },{ featureType: "administrative", stylers: [ { saturation: -95 }, { gamma: 2.26 } ] },{ featureType: "water", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", stylers: [ { visibility: "off" } ] },{ featureType: "road", stylers: [ { visibility: "simplified" }, { saturation: -99 }, { gamma: 2.22 } ] },{ featureType: "poi", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "transit", stylers: [ { visibility: "off" } ] },{ featureType: "road", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "poi", stylers: [ { saturation: -55 } ] } ];
+              map_style.google_maps_customization_style = mapStyles;
+              params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
+            }
 
-          // Custom tiles
-          if (!map_style) {
-            map_style = {google_maps_customization_style: []};
+            // Custom tiles
+            if (!map_style) {
+              map_style = {google_maps_customization_style: []};
+            }
+            params.map.setOptions({styles: map_style.google_maps_customization_style});
+          },
+          error: function(e, msg) {
+            params.debug && console.debug('Error setting map style: ' + msg);
           }
-          params.map.setOptions({styles: map_style.google_maps_customization_style});
-        }).error(function(e, msg) {
-          params.debug && console.debug('Error setting map style: ' + msg);
         });
       }
 
@@ -413,10 +427,18 @@ var CartoDB = CartoDB || {};
       infowindow_sql = encodeURIComponent(this.params_.feature.replace('{{feature}}',feature));
     }
 
-    $.getJSON('http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+infowindow_sql + '&callback=', function(result) {
-      positionateInfowindow(result.rows[0],latlng);
-    }).error(function(e, msg) {
-      that.params_.debug && console.debug('Error retrieving infowindow variables: ' + msg);
+
+    $.ajax({
+      url:'http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+infowindow_sql,
+      dataType: 'jsonp',
+      timeout: 2000,
+      callbackParameter: 'callback',
+      success: function(result) {
+        positionateInfowindow(result.rows[0],latlng);
+      },
+      error: function(e,msg) {
+        that.params_.debug && console.debug('Error retrieving infowindow variables: ' + msg);  
+      }
     });
 
     function positionateInfowindow(variables,center) {
