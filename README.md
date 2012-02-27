@@ -46,31 +46,31 @@ Using the library is really easy. It accepts the following parameters to manage 
 <tr>
 <td>map_style</td>
 <td>Show the same style as you defined in CartoDB.</td>
-<td></td>
+<td>No</td>
 </tr>
 
 <tr>
 <td>infowindow</td>
 <td>If you want to add interactivity to the layer, showing the info window.</td>
-<td></td>
+<td>No</td>
 </tr>
 
 <tr>
 <td>tile_style</td>
 <td>If you want to add other style to the layer.</td>
-<td></td>
+<td>No</td>
 </tr>
 
 <tr>
 <td>auto_bound</td>
 <td>If you want to zoom in the area where the layer is positioned.</td>
-<td></td>
+<td>No</td>
 </tr>
 
 <tr>
 <td>debug</td>
 <td>If you want to debug the library, set to true.</td>
-<td></td>
+<td>No</td>
 </tr>
 
 </table>
@@ -100,12 +100,12 @@ And then add the CartoDB layer:
 var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
     map_canvas: 'map_canvas',
     map: map,
-    user_name: "xavijam",
-    table_name: 'test',
-    query: "SELECT cartodb_id,the_geom_webmercator,description FROM test",
-    tile_style: "#test{line-color:#719700;line-width:1;line-opacity:0.6;polygon-opacity:0.6;}",
+    user_name: "examples",
+    table_name: 'earthquakes',
+    query: "SELECT cartodb_id,the_geom_webmercator,magnitude FROM {{table_name}}",
+    tile_style: "#{{table_name}}{line-color:#719700;line-width:1;line-opacity:0.6;polygon-opacity:0.6;}",
     map_style: true,
-    infowindow: "SELECT cartodb_id,the_geom_webmercator,description FROM test WHERE cartodb_id={{feature}}",
+    infowindow: "SELECT cartodb_id,the_geom_webmercator,magnitude FROM {{table_name}} WHERE cartodb_id={{feature}}",
     auto_bound: true,
     debug: false
 });
