@@ -281,11 +281,11 @@ var CartoDB = CartoDB || {};
 
       // Update tiles & interactivity layer;
       google.maps.CartoDBLayer.prototype.update = function(param,value) {
-        // Hide the infowindow
-        if (this.params.infowindow) 
-          this.params.infowindow.hide();
-        
 
+        // Destroy the infowindow if existed
+        if (this.params.infowindow) 
+          this.params.infowindow.destroy();
+        
         // What do we support change? - tile_style | query | infowindow
         if (param != "tile_style" && param != "query" && param != "infowindow") {
         	if (this.params.debug) {
@@ -300,15 +300,16 @@ var CartoDB = CartoDB || {};
         // Removes previous tiles
         removeOldLayer(this.params);
 
-        // Refresh wax
-        refreshWax(this.params);
-        
-        // Refresh tiles
-        refreshTiles(this.params);
+        // Add new one updated
+	      if (this.params.infowindow)
+				  refreshWax(this.params);
+				else
+				  refreshTiles(this.params);
 
         this.params.active = true;
         this.params.visible = true;
       };
+  
   
       // Destroy layers from the map
       google.maps.CartoDBLayer.prototype.destroy = function() {
@@ -499,6 +500,14 @@ var CartoDB = CartoDB || {};
         opacity: 1},
         250
       );
+    }
+  };
+
+  CartoDB.Infowindow.prototype.destroy = function() {
+    // Check if the overlay was on the map and needs to be removed.
+    if (this.div_) {
+      this.div_.parentNode.removeChild(this.div_);
+      this.div_ = null;
     }
   };
 
