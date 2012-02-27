@@ -39,7 +39,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 
 <tr>
 <td>query</td>
-<td>An SQL query.</td>
+<td>A SQL query.</td>
 <td>Yes</td>
 </tr>
 
@@ -115,7 +115,7 @@ var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
 
 New funcionalities are coming, in the meantime you can use:
 
-* update: It needs a parameter and a new value to work. Example: cartodb_gmapsv3.update('query','SELECT * FROM test WHERE cartodb_id>2');
+* update: It needs a parameter and a new value to work. Example: cartodb_gmapsv3.update('query','SELECT * FROM earthquakes WHERE cartodb_id>2');
 * destroy: Removes the cartodb layer from the map. Example: cartodb_gmapsv3.destroy();
 * hide: Hide the cartodb layer from the map (For now, hide and destroy are the same, but will be replace in the future).
 * show: Show again the cartodb layer in the map. Example: cartodb_gmapsv3.show();
