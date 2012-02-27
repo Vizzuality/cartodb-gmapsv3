@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.2 [December 14, 2011]
+ * @version 0.3 [February 27, 2012]
  * @author: xavijam@gmail.com
  * @fileoverview <b>Author:</b> xavijam@gmail.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -33,13 +33,13 @@ var CartoDB = CartoDB || {};
      *    map_canvas    -     Gmapsv3 canvas id (necesary for showing the infowindow)
      *    map           -     Your gmapsv3 map
      *    user_name     -     CartoDB user name
-     *    table_name          CartoDB table name
-     *    query               If you want to apply any sql sentence to the table...
+     *    table_name    -     CartoDB table name
+     *    query         -     If you want to apply any sql sentence to the table...
      *    tile_style    -     If you want to add other style to the layer
      *    map_style     -     If you want to see the map styles created on cartodb (opcional - default = false)
      *    infowindow    -     If you want to see infowindows when click in a geometry (opcional - default = false)
      *    auto_bound    -     Let cartodb auto-bound-zoom in the map (opcional - default = false)
-     *    debug         -     Do you want to debug the library? Set to true
+     *    debug         -     Do you want to debug the library? Set it to true
      */
 
     google.maps.CartoDBLayer = function (params) {
@@ -62,39 +62,36 @@ var CartoDB = CartoDB || {};
       // Zoom to cartodb geometries
       function autoBound(params) {
         // Zoom to your geometries
-        // If the table is private you can't auto zoom without being authenticated
-        if (!params.map_key) {
-          $.getJSON('http://'+params.user_name+'.cartodb.com/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ params.table_name)+'&callback=?', function(result) {
-            if (result.rows[0].st_extent!=null) {
-              var coordinates = result.rows[0].st_extent.replace('BOX(','').replace(')','').split(',');
+        $.getJSON('http://'+params.user_name+'.cartodb.com/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ params.table_name)+'&callback=?', function(result) {
+          if (result.rows[0].st_extent!=null) {
+            var coordinates = result.rows[0].st_extent.replace('BOX(','').replace(')','').split(',');
 
-              var coor1 = coordinates[0].split(' ');
-              var coor2 = coordinates[1].split(' ');
-              var bounds = new google.maps.LatLngBounds();
+            var coor1 = coordinates[0].split(' ');
+            var coor2 = coordinates[1].split(' ');
+            var bounds = new google.maps.LatLngBounds();
 
-              // Check bounds
-              if (coor1[0] >  180 || coor1[0] < -180 || coor1[1] >  90 || coor1[1] < -90 
-                || coor2[0] >  180 || coor2[0] < -180 || coor2[1] >  90  || coor2[1] < -90) {
-                coor1[0] = '-30';
-                coor1[1] = '-50'; 
-                coor2[0] = '110'; 
-                coor2[1] =  '80'; 
-              }
-
-              bounds.extend(new google.maps.LatLng(coor1[1],coor1[0]));
-              bounds.extend(new google.maps.LatLng(coor2[1],coor2[0]));
-
-              params.map.fitBounds(bounds);
+            // Check bounds
+            if (coor1[0] >  180 || coor1[0] < -180 || coor1[1] >  90 || coor1[1] < -90 
+              || coor2[0] >  180 || coor2[0] < -180 || coor2[1] >  90  || coor2[1] < -90) {
+              coor1[0] = '-30';
+              coor1[1] = '-50'; 
+              coor2[0] = '110'; 
+              coor2[1] =  '80'; 
             }
-          }).error(function(e, msg) {
-            params.debug && console.debug('Error setting table bounds: ' + msg);
-          });
-        }
+
+            bounds.extend(new google.maps.LatLng(coor1[1],coor1[0]));
+            bounds.extend(new google.maps.LatLng(coor2[1],coor2[0]));
+
+            params.map.fitBounds(bounds);
+          }
+        }).error(function(e, msg) {
+          if (params.debug) throw('Error getting table bounds: ' + msg);
+        });
       }
 
       // Set the map styles of your cartodb table/map
       function setCartoDBMapStyle(params) {
-        $.getJSON('http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/map_metadata?'+ 'map_key=' + (params.map_key || '') + '&callback=?', function(result) {
+        $.getJSON('http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/map_metadata?callback=?', function(result) {
           var map_style = $.parseJSON(result.map_metadata);
 
           if (!map_style || map_style.google_maps_base_type=="roadmap") {
@@ -115,7 +112,7 @@ var CartoDB = CartoDB || {};
           }
           params.map.setOptions({styles: map_style.google_maps_customization_style});
         }).error(function(e, msg) {
-          params.debug && console.debug('Error setting map style: ' + msg);
+          if (params.debug) throw('Error getting map style: ' + msg);
         });
       }
 
@@ -124,7 +121,7 @@ var CartoDB = CartoDB || {};
         // Add the cartodb tiles
         var cartodb_layer = {
           getTileUrl: function(coord, zoom) {
-            return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query + '&map_key=' + (params.map_key || '') + '&style=' + ((params.tile_style)?encodeURIComponent(params.tile_style):'');
+            return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query.replace(/\{\{table_name\}\}/g,params.table_name) + '&style=' + ((params.tile_style)?encodeURIComponent(params.tile_style):'');
           },
           tileSize: new google.maps.Size(256, 256),
           name: params.query,
@@ -201,7 +198,7 @@ var CartoDB = CartoDB || {};
             params.query = sql;
           var cartodb_layer = {
               getTileUrl: function(coord, zoom) {
-              return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query + '&map_key=' + (params.map_key || '') + '&style=' + (encodeURIComponent(params.tile_style) || '');
+              return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query + '&style=' + (encodeURIComponent(params.tile_style) || '');
             },
             tileSize: new google.maps.Size(256, 256),
             name: params.query,
@@ -221,16 +218,9 @@ var CartoDB = CartoDB || {};
 
         // SQL?
         if (params.query) {
-          var query = 'sql=' + params.query;
+          var query = 'sql=' + params.query.replace(/\{\{table_name\}\}/g,params.table_name);
           tile_url = wax.util.addUrlData(tile_url, query);
           grid_url = wax.util.addUrlData(grid_url, query);
-        }
-
-        // Map key ?
-        if (params.map_key) {
-          var map_key = 'map_key=' + params.map_key;
-          tile_url = wax.util.addUrlData(tile_url,map_key);
-          grid_url = wax.util.addUrlData(grid_url,map_key);
         }
 
         // Tiles style ?
@@ -279,12 +269,24 @@ var CartoDB = CartoDB || {};
       
 
       // Update tiles & interactivity layer;
-      google.maps.CartoDBLayer.prototype.update = function(sql) {
+      google.maps.CartoDBLayer.prototype.update = function(param,value) {
         // Hide the infowindow
         if (this.params.infowindow) 
           this.params.infowindow.hide();
+        
+
+        // What do we support change? - tile_style | query | infowindow
+        if (param != "tile_style" || param != "query" || param != "infowindow") {
+        	if (this.params.debug) {
+        		throw("Sorry, you can't update this parameter");
+        	} else {
+        		return false;
+        	}
+        }
+
         // Refresh wax
         refreshWax(this.params,sql);
+        
         // Refresh tiles
         refreshTiles(this.params,sql);
 
@@ -409,14 +411,17 @@ var CartoDB = CartoDB || {};
     that.feature_ = feature;
 
     // If the table is private, you can't run any api methods
-    if (this.params_.feature!=true) {
-      infowindow_sql = encodeURIComponent(this.params_.feature.replace('{{feature}}',feature));
+    if (this.params_.feature!=false) {
+      infowindow_sql = this.params_.feature.replace('{{feature}}',feature);
     }
+
+    // Replace {{table_name}} for table name
+    infowindow_sql = encodeURIComponent(infowindow_sql.replace(/\{\{table_name\}\}/g,this.params_.table_name));
 
     $.getJSON('http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+infowindow_sql + '&callback=', function(result) {
       positionateInfowindow(result.rows[0],latlng);
     }).error(function(e, msg) {
-      that.params_.debug && console.debug('Error retrieving infowindow variables: ' + msg);
+    	if (that.params_.debug) throw('Error retrieving infowindow variables: ' + msg);
     });
 
     function positionateInfowindow(variables,center) {
