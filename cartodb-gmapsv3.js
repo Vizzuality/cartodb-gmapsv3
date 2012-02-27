@@ -62,57 +62,71 @@ var CartoDB = CartoDB || {};
       // Zoom to cartodb geometries
       function autoBound(params) {
         // Zoom to your geometries
-        $.getJSON('http://'+params.user_name+'.cartodb.com/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ params.table_name)+'&callback=?', function(result) {
-          if (result.rows[0].st_extent!=null) {
-            var coordinates = result.rows[0].st_extent.replace('BOX(','').replace(')','').split(',');
+        $.ajax({
+          url:'http://'+params.user_name+'.cartodb.com/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ params.table_name),
+          dataType: 'jsonp',
+          timeout: 2000,
+          callbackParameter: 'callback',
+          success: function(result) {
+            if (result.rows[0].st_extent!=null) {
+              var coordinates = result.rows[0].st_extent.replace('BOX(','').replace(')','').split(',');
 
-            var coor1 = coordinates[0].split(' ');
-            var coor2 = coordinates[1].split(' ');
-            var bounds = new google.maps.LatLngBounds();
+              var coor1 = coordinates[0].split(' ');
+              var coor2 = coordinates[1].split(' ');
+              var bounds = new google.maps.LatLngBounds();
 
-            // Check bounds
-            if (coor1[0] >  180 || coor1[0] < -180 || coor1[1] >  90 || coor1[1] < -90 
-              || coor2[0] >  180 || coor2[0] < -180 || coor2[1] >  90  || coor2[1] < -90) {
-              coor1[0] = '-30';
-              coor1[1] = '-50'; 
-              coor2[0] = '110'; 
-              coor2[1] =  '80'; 
+              // Check bounds
+              if (coor1[0] >  180 || coor1[0] < -180 || coor1[1] >  90 || coor1[1] < -90 
+                || coor2[0] >  180 || coor2[0] < -180 || coor2[1] >  90  || coor2[1] < -90) {
+                coor1[0] = '-30';
+                coor1[1] = '-50'; 
+                coor2[0] = '110'; 
+                coor2[1] =  '80'; 
+              }
+
+              bounds.extend(new google.maps.LatLng(coor1[1],coor1[0]));
+              bounds.extend(new google.maps.LatLng(coor2[1],coor2[0]));
+
+              params.map.fitBounds(bounds);
             }
-
-            bounds.extend(new google.maps.LatLng(coor1[1],coor1[0]));
-            bounds.extend(new google.maps.LatLng(coor2[1],coor2[0]));
-
-            params.map.fitBounds(bounds);
+          },
+          error: function(e,msg) {
+            if (params.debug) throw('Error getting table bounds: ' + msg);
           }
-        }).error(function(e, msg) {
-          if (params.debug) throw('Error getting table bounds: ' + msg);
         });
       }
 
       // Set the map styles of your cartodb table/map
       function setCartoDBMapStyle(params) {
-        $.getJSON('http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/map_metadata?callback=?', function(result) {
-          var map_style = $.parseJSON(result.map_metadata);
+        $.ajax({
+          url: 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/map_metadata?callback=?',
+          dataType: 'jsonp',
+          timeout: 2000,
+          callbackParameter: 'callback',
+          success: function(result) {
+            var map_style = $.parseJSON(result.map_metadata);
 
-          if (!map_style || map_style.google_maps_base_type=="roadmap") {
-            params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
-          } else if (map_style.google_maps_base_type=="satellite") {
-            params.map.setOptions({mapTypeId: google.maps.MapTypeId.SATELLITE});
-          } else if (map_style.google_maps_base_type=="terrain") {
-            params.map.setOptions({mapTypeId: google.maps.MapTypeId.TERRAIN});
-          } else {
-            var mapStyles = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] },{ featureType: "administrative", stylers: [ { saturation: -95 }, { gamma: 2.26 } ] },{ featureType: "water", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", stylers: [ { visibility: "off" } ] },{ featureType: "road", stylers: [ { visibility: "simplified" }, { saturation: -99 }, { gamma: 2.22 } ] },{ featureType: "poi", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "transit", stylers: [ { visibility: "off" } ] },{ featureType: "road", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "poi", stylers: [ { saturation: -55 } ] } ];
-            map_style.google_maps_customization_style = mapStyles;
-            params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
-          }
+            if (!map_style || map_style.google_maps_base_type=="roadmap") {
+              params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
+            } else if (map_style.google_maps_base_type=="satellite") {
+              params.map.setOptions({mapTypeId: google.maps.MapTypeId.SATELLITE});
+            } else if (map_style.google_maps_base_type=="terrain") {
+              params.map.setOptions({mapTypeId: google.maps.MapTypeId.TERRAIN});
+            } else {
+              var mapStyles = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] },{ featureType: "administrative", stylers: [ { saturation: -95 }, { gamma: 2.26 } ] },{ featureType: "water", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", stylers: [ { visibility: "off" } ] },{ featureType: "road", stylers: [ { visibility: "simplified" }, { saturation: -99 }, { gamma: 2.22 } ] },{ featureType: "poi", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "transit", stylers: [ { visibility: "off" } ] },{ featureType: "road", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "poi", stylers: [ { saturation: -55 } ] } ];
+              map_style.google_maps_customization_style = mapStyles;
+              params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
+            }
 
-          // Custom tiles
-          if (!map_style) {
-            map_style = {google_maps_customization_style: []};
+            // Custom tiles
+            if (!map_style) {
+              map_style = {google_maps_customization_style: []};
+            }
+            params.map.setOptions({styles: map_style.google_maps_customization_style});
+          },
+          error: function(e, msg) {
+            if (params.debug) throw('Error getting map style: ' + msg);
           }
-          params.map.setOptions({styles: map_style.google_maps_customization_style});
-        }).error(function(e, msg) {
-          if (params.debug) throw('Error getting map style: ' + msg);
         });
       }
 
@@ -164,14 +178,11 @@ var CartoDB = CartoDB || {};
       }
 
       // Refresh wax interaction
-      function refreshWax(params,sql) {
+      function refreshWax(params) {
         if (params.infowindow) {
           params.cache_buster++;
-          params.query = sql;
+          params.query = params.query;
           params.tilejson = generateTileJson(params);
-  
-          // Remove old wax
-          removeOldLayer(params.map,params.layer);
   
           // Setup new wax
           params.tilejson.grids = wax.util.addUrlData(params.tilejson.grids_base,  'cache_buster=' + params.cache_buster);
@@ -187,18 +198,18 @@ var CartoDB = CartoDB || {};
       }
 
       // Refresh tiles
-      function refreshTiles(params,sql) {
+      function refreshTiles(params) {
         // If you are not using interaction on the tiles... let's update your tiles
         if (!params.infowindow) {
 
-          // First remove previous cartodb - tiles.
-          removeOldLayer(params.map,params.layer);
+          // Then add the cartodb tiles
+          var tile_style = (params.tile_style)? encodeURIComponent(params.tile_style.replace(/\{\{table_name\}\}/g,params.table_name)) : ''
+          	, query = encodeURIComponent(params.query.replace(/\{\{table_name\}\}/g,params.table_name));
 
-           // Then add the cartodb tiles
-            params.query = sql;
+
           var cartodb_layer = {
               getTileUrl: function(coord, zoom) {
-              return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query + '&style=' + (encodeURIComponent(params.tile_style) || '');
+              return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql=' + query + '&style=' + tile_style;
             },
             tileSize: new google.maps.Size(256, 256),
             name: params.query,
@@ -218,14 +229,14 @@ var CartoDB = CartoDB || {};
 
         // SQL?
         if (params.query) {
-          var query = 'sql=' + params.query.replace(/\{\{table_name\}\}/g,params.table_name);
+          var query = 'sql=' + encodeURIComponent(params.query.replace(/\{\{table_name\}\}/g,params.table_name));
           tile_url = wax.util.addUrlData(tile_url, query);
           grid_url = wax.util.addUrlData(grid_url, query);
         }
 
         // Tiles style ?
         if (params.tile_style) {
-          var style = 'style=' + encodeURIComponent(params.tile_style);
+          var style = 'style=' + encodeURIComponent(params.tile_style.replace(/\{\{table_name\}\}/g,params.table_name));
           tile_url = wax.util.addUrlData(tile_url,style);
           grid_url = wax.util.addUrlData(grid_url,style);
         }
@@ -253,17 +264,17 @@ var CartoDB = CartoDB || {};
       }
 
       // Remove old cartodb layer added (wax or imagemaptype)
-      function removeOldLayer(map,layer) {
-        if (layer) {
+      function removeOldLayer(params) {
+        if (params.layer) {
           var pos = -1;
-          map.overlayMapTypes.forEach(function(map_type,i){
-            if (layer == map_type && map_type.name == layer.name && map_type.description == layer.description) {
+          params.map.overlayMapTypes.forEach(function(map_type,i){
+            if (params.layer == map_type && map_type.name == params.layer.name && map_type.description == params.layer.description) {
               pos = i;
             }
           });
           if (pos!=-1) 
-            map.overlayMapTypes.removeAt(pos);
-          layer = null;
+            params.map.overlayMapTypes.removeAt(pos);
+          params.layer = null;
         }
       }
       
@@ -276,19 +287,24 @@ var CartoDB = CartoDB || {};
         
 
         // What do we support change? - tile_style | query | infowindow
-        if (param != "tile_style" || param != "query" || param != "infowindow") {
+        if (param != "tile_style" && param != "query" && param != "infowindow") {
         	if (this.params.debug) {
         		throw("Sorry, you can't update this parameter");
         	} else {
         		return false;
         	}
+        } else {
+        	this.params[param] = value;
         }
 
+        // Removes previous tiles
+        removeOldLayer(this.params);
+
         // Refresh wax
-        refreshWax(this.params,sql);
+        refreshWax(this.params);
         
         // Refresh tiles
-        refreshTiles(this.params,sql);
+        refreshTiles(this.params);
 
         this.params.active = true;
         this.params.visible = true;
@@ -418,10 +434,17 @@ var CartoDB = CartoDB || {};
     // Replace {{table_name}} for table name
     infowindow_sql = encodeURIComponent(infowindow_sql.replace(/\{\{table_name\}\}/g,this.params_.table_name));
 
-    $.getJSON('http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+infowindow_sql + '&callback=', function(result) {
-      positionateInfowindow(result.rows[0],latlng);
-    }).error(function(e, msg) {
-    	if (that.params_.debug) throw('Error retrieving infowindow variables: ' + msg);
+    $.ajax({
+      url:'http://'+ this.params_.user_name +'.cartodb.com/api/v1/sql/?q='+infowindow_sql,
+      dataType: 'jsonp',
+      timeout: 2000,
+      callbackParameter: 'callback',
+      success: function(result) {
+        positionateInfowindow(result.rows[0],latlng);
+      },
+      error: function(e,msg) {
+        if (that.params_.debug) throw('Error retrieving infowindow variables: ' + msg);
+      }
     });
 
     function positionateInfowindow(variables,center) {
