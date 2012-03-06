@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.3 [February 27, 2012]
+ * @version 0.31 [March 6, 2012]
  * @author: xavijam@gmail.com
  * @fileoverview <b>Author:</b> xavijam@gmail.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -135,7 +135,7 @@ var CartoDB = CartoDB || {};
         // Add the cartodb tiles
         var cartodb_layer = {
           getTileUrl: function(coord, zoom) {
-            return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query.replace(/\{\{table_name\}\}/g,params.table_name) + '&style=' + ((params.tile_style)?encodeURIComponent(params.tile_style):'');
+            return 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/'+zoom+'/'+coord.x+'/'+coord.y+'.png?sql='+params.query.replace(/\{\{table_name\}\}/g,params.table_name) + '&style=' + ((params.tile_style)?encodeURIComponent(params.tile_style.replace(/\{\{table_name\}\}/g,params.table_name)):'');
           },
           tileSize: new google.maps.Size(256, 256),
           name: params.query,
@@ -256,22 +256,34 @@ var CartoDB = CartoDB || {};
       
 
       // Update tiles & interactivity layer;
-      google.maps.CartoDBLayer.prototype.update = function(param,value) {
+      google.maps.CartoDBLayer.prototype.update = function(changes) {
 
         // Destroy the infowindow if existed
         if (this.params.infowindow) 
           this.params.infowindow.destroy();
         
-        // What do we support change? - tile_style | query | infowindow
-        if (param != "tile_style" && param != "query" && param != "infowindow") {
-        	if (this.params.debug) {
-        		throw("Sorry, you can't update this parameter");
-        	} else {
-        		return false;
-        	}
-        } else {
-        	this.params[param] = value;
-        }
+				// What do we support change? - tile_style | query | infowindow
+				if (typeof changes == 'object') {
+					for (var param in changes) {
+						console.log(param);
+		      	if (param != "tile_style" && param != "query" && param != "infowindow") {
+			      	if (this.params.debug) {
+			      		throw("Sorry, you can't update " + param);
+			      	} else {
+			      		return;
+			      	}
+			      } else {
+			      	this.params[param] = changes[param];
+			      }					
+					}
+
+				} else {
+					if (this.params.debug) {
+	      		throw("This method only accepts a javascript object");
+	      	} else {
+	      		return;
+	      	}
+				}
 
         // Removes previous tiles
         removeOldLayer(this.params);
@@ -515,11 +527,6 @@ var CartoDB = CartoDB || {};
     } else {
       return false;
     }
-  };
-
-  CartoDB.Infowindow.prototype.transformGeoJSON = function(str) {
-    var json = $.parseJSON(str);
-    return new google.maps.LatLng(json.coordinates[1],json.coordinates[0]);
   };
 
   CartoDB.Infowindow.prototype.moveMaptoOpen = function() {
