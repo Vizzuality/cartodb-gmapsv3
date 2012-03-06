@@ -15,7 +15,8 @@
   <script type="text/javascript">
 
   var cartodb1_gmapsv3
-    , cartodb2_gmapsv3;
+    , cartodb2_gmapsv3
+    , cartodb3_gmapsv3;
 
   function initialize() {
     var map = new google.maps.Map(document.getElementById('map_canvas'), {
@@ -25,30 +26,43 @@
       mapTypeControl: false
     });
 
-    cartodb2_gmapsv3 = new google.maps.CartoDBLayer({
+
+    cartodb3_gmapsv3 = new google.maps.CartoDBLayer({
       map_canvas: 'map_canvas',
       map: map,
-      user_name:"examples",
-      table_name: 'earthquakes',
-      query: "SELECT cartodb_id,the_geom_webmercator,magnitude FROM {{table_name}}",
-      tile_style: "#{{table_name}}{marker-fill:#E25B5B}",
+      user_name:"carbon-tool",
+      table_name: 'ials',
+      query: "SELECT  ials.the_geom_webmercator, ials.cartodb_id FROM ials INNER JOIN species_ials ON ials.ial_id = species_ials.site INNER JOIN countries_ials ON species_ials.site = countries_ials.ial_id  WHERE (countries_ials.country_id IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22)) GROUP BY ials.the_geom_webmercator, ials.cartodb_id",
       map_style: true,
-      infowindow: "SELECT cartodb_id,the_geom_webmercator,magnitude FROM {{table_name}} WHERE cartodb_id={{feature}}",
+      infowindow: "SELECT cartodb_id,the_geom_webmercator,name FROM {{table_name}} WHERE cartodb_id={{feature}}",
       auto_bound: false,
       debug: false
-    });  
-
-    cartodb1_gmapsv3 = new google.maps.CartoDBLayer({
-      map_canvas: 'map_canvas',
-      map: map,
-      user_name:'examples',
-      table_name: 'country_colors',
-      query: "SELECT * FROM {{table_name}}",
-      map_style: false,
-      infowindow: false,
-      auto_bound: false,
-      debug: true
     });
+
+    // cartodb2_gmapsv3 = new google.maps.CartoDBLayer({
+    //   map_canvas: 'map_canvas',
+    //   map: map,
+    //   user_name:"examples",
+    //   table_name: 'earthquakes',
+    //   query: "SELECT cartodb_id,the_geom_webmercator,magnitude FROM {{table_name}}",
+    //   tile_style: "#{{table_name}}{marker-fill:#E25B5B}",
+    //   map_style: true,
+    //   infowindow: "SELECT cartodb_id,the_geom_webmercator,magnitude FROM {{table_name}} WHERE cartodb_id={{feature}}",
+    //   auto_bound: false,
+    //   debug: false
+    // });  
+
+    // cartodb1_gmapsv3 = new google.maps.CartoDBLayer({
+    //   map_canvas: 'map_canvas',
+    //   map: map,
+    //   user_name:'examples',
+    //   table_name: 'country_colors',
+    //   query: "SELECT * FROM {{table_name}}",
+    //   map_style: false,
+    //   infowindow: false,
+    //   auto_bound: false,
+    //   debug: true
+    // });
     
     $('form').submit(function(ev){
       ev.stopPropagation(); ev.preventDefault();
