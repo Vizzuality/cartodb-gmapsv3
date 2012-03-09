@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.31 [March 6, 2012]
+ * @version 0.5 [March 11, 2012]
  * @author: xavijam@gmail.com
  * @fileoverview <b>Author:</b> xavijam@gmail.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -35,11 +35,13 @@ var CartoDB = CartoDB || {};
      *    user_name     -     CartoDB user name
      *    table_name    -     CartoDB table name
      *    query         -     If you want to apply any sql sentence to the table...
-     *    tile_style    -     If you want to add other style to the layer
+     *    tile_style    -     If you want to add other style to the layer {carto string} (opcional - default got from CartoDB)
+     *    position      -     Position of the layer {top || bottom}  (opcional - default = top)
+     *    opacity       -     Set the opacity of the layer {from 0 to 1} (opcional - default = 1)
      *    map_style     -     If you want to see the map styles created on cartodb (opcional - default = false)
      *    infowindow    -     If you want to see infowindows when click in a geometry (opcional - default = false)
      *    auto_bound    -     Let cartodb auto-bound-zoom in the map (opcional - default = false)
-     *    debug         -     Do you want to debug the library? Set it to true
+     *    debug         -     Do you want to debug the library? Set it to true (opcional - default = false)
      */
 
     google.maps.CartoDBLayer = function (params) {
@@ -139,7 +141,8 @@ var CartoDB = CartoDB || {};
           },
           tileSize: new google.maps.Size(256, 256),
           name: params.query,
-          description: false
+          description: false,
+          opacity: params.tile_opacity || 1
         };
         params.layer = new google.maps.ImageMapType(cartodb_layer);
         params.map.overlayMapTypes.insertAt(0,params.layer);
@@ -229,6 +232,7 @@ var CartoDB = CartoDB || {};
           grids_base: grid_url,
           name: params.query,
           description: true,
+          opacity: params.tile_opacity || 1,
           formatter: function(options, data) {
             currentCartoDbId = data.cartodb_id;
             return data.cartodb_id;
@@ -255,82 +259,82 @@ var CartoDB = CartoDB || {};
       }
       
 
-      // Update tiles & interactivity layer;
-      google.maps.CartoDBLayer.prototype.update = function(changes) {
+    //   // Update tiles & interactivity layer;
+    //   google.maps.CartoDBLayer.prototype.update = function(changes) {
 
-        // Destroy the infowindow if existed
-        if (this.params.infowindow) 
-          this.params.infowindow.destroy();
+    //     // Destroy the infowindow if existed
+    //     if (this.params.infowindow) 
+    //       this.params.infowindow.destroy();
         
-				// What do we support change? - tile_style | query | infowindow
-				if (typeof changes == 'object') {
-					for (var param in changes) {
-						console.log(param);
-		      	if (param != "tile_style" && param != "query" && param != "infowindow") {
-			      	if (this.params.debug) {
-			      		throw("Sorry, you can't update " + param);
-			      	} else {
-			      		return;
-			      	}
-			      } else {
-			      	this.params[param] = changes[param];
-			      }					
-					}
+				// // What do we support change? - tile_style | query | infowindow
+				// if (typeof changes == 'object') {
+				// 	for (var param in changes) {
+				// 		console.log(param);
+		  //     	if (param != "tile_style" && param != "query" && param != "infowindow") {
+			 //      	if (this.params.debug) {
+			 //      		throw("Sorry, you can't update " + param);
+			 //      	} else {
+			 //      		return;
+			 //      	}
+			 //      } else {
+			 //      	this.params[param] = changes[param];
+			 //      }					
+				// 	}
 
-				} else {
-					if (this.params.debug) {
-	      		throw("This method only accepts a javascript object");
-	      	} else {
-	      		return;
-	      	}
-				}
+				// } else {
+				// 	if (this.params.debug) {
+	   //    		throw("This method only accepts a javascript object");
+	   //    	} else {
+	   //    		return;
+	   //    	}
+				// }
 
-        // Removes previous tiles
-        removeOldLayer(this.params);
+    //     // Removes previous tiles
+    //     removeOldLayer(this.params);
 
-        // Add new one updated
-	      if (this.params.infowindow)
-				  refreshWax(this.params);
-				else
-				  addSimpleCartoDBTiles(this.params);
+    //     // Add new one updated
+	   //    if (this.params.infowindow)
+				//   refreshWax(this.params);
+				// else
+				//   addSimpleCartoDBTiles(this.params);
 
-        this.params.active = true;
-        this.params.visible = true;
-      };
+    //     this.params.active = true;
+    //     this.params.visible = true;
+    //   };
   
 
-      // Destroy layers from the map
-      google.maps.CartoDBLayer.prototype.destroy = function() {
-        // First remove previous cartodb - tiles.
-        removeOldLayer(this.params.map,this.params.layer);
+    //   // Destroy layers from the map
+    //   google.maps.CartoDBLayer.prototype.destroy = function() {
+    //     // First remove previous cartodb - tiles.
+    //     removeOldLayer(this.params.map,this.params.layer);
 
-        if (this.params.infowindow) {
-          // Remove wax interaction
-          this.params.interaction.remove();
-          this.params.infowindow.hide();
-        }
+    //     if (this.params.infowindow) {
+    //       // Remove wax interaction
+    //       this.params.interaction.remove();
+    //       this.params.infowindow.hide();
+    //     }
 
-        this.params.active = false;
-      };
+    //     this.params.active = false;
+    //   };
   
-      // Hide layers from the map
-      google.maps.CartoDBLayer.prototype.hide = function() {
-        this.destroy();
-        this.params.visible = false;
-      };
+    //   // Hide layers from the map
+    //   google.maps.CartoDBLayer.prototype.hide = function() {
+    //     this.destroy();
+    //     this.params.visible = false;
+    //   };
 
-      // Show layers from the map
-      google.maps.CartoDBLayer.prototype.show = function() {
-        if (!this.params.visible || !this.params.active) {
-          this.update(this.params.query);
-          this.params.visible = true;
-        }
-      };
+    //   // Show layers from the map
+    //   google.maps.CartoDBLayer.prototype.show = function() {
+    //     if (!this.params.visible || !this.params.active) {
+    //       this.update(this.params.query);
+    //       this.params.visible = true;
+    //     }
+    //   };
 
-      // CartoDB layer visible?
-      google.maps.CartoDBLayer.prototype.isVisible = function() {
-        return this.params.visible;
-      };
+    //   // CartoDB layer visible?
+    //   google.maps.CartoDBLayer.prototype.isVisible = function() {
+    //     return this.params.visible;
+    //   };
     };
   }
 

@@ -56,8 +56,20 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>tile_style</td>
+<td>layer_style</td>
 <td>If you want to add other style to the layer.</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>layer_opacity</td>
+<td>Choose the opacity of the layer in the map.</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>layer_position</td>
+<td>Set the position of the layer in the map, at top or bottom.</td>
 <td>No</td>
 </tr>
 

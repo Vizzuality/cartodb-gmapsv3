@@ -2430,7 +2430,7 @@ wax.g.bwdetect = function(map, options) {
             blankImage: mb.options.blankImage,
             minzoom: mb.minZoom,
             maxzoom: mb.maxZoom,
-            name: mb.name,
+            name: mb.name,            
             description: mb.description
         };
         for (var i = 0; i < mb.options.tiles.length; i++) {
@@ -2706,7 +2706,8 @@ wax.g.connector = function(options) {
     this.options = {
         tiles: options.tiles,
         scheme: options.scheme || 'xyz',
-        blankImage: options.blankImage
+        blankImage: options.blankImage,
+        opacity: options.opacity || 1
     };
 
     this.minZoom = options.minzoom || 0;
@@ -2729,6 +2730,7 @@ wax.g.connector.prototype.getTile = function(coord, zoom, ownerDocument) {
     if (!this.cache[key]) {
         var img = this.cache[key] = new Image(256, 256);
         this.cache[key].src = this.getTileUrl(coord, zoom);
+        this.cache[key].setAttribute('style','filter: alpha(opacity=' + (this.options.opacity * 10) + '); -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=' + (this.options.opacity * 10) + ')"; opacity:' + (this.options.opacity));
         this.cache[key].setAttribute('gTileKey', key);
         this.cache[key].onerror = function() { img.style.display = 'none'; };
     }
