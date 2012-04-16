@@ -1,8 +1,8 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.31 [March 6, 2012]
- * @author: xavijam@gmail.com
- * @fileoverview <b>Author:</b> xavijam@gmail.com<br/> <b>Licence:</b>
+ * @version 0.32 [April 16, 2012]
+ * @author: jmedina@vizzuality.com
+ * @fileoverview <b>Author:</b> jmedina@vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
  *               href="http://opensource.org/licenses/mit-license.php">MIT</a>
  *               license.<br/> This library lets you use CartoDB with google
@@ -69,23 +69,35 @@ var CartoDB = CartoDB || {};
           callbackParameter: 'callback',
           success: function(result) {
             if (result.rows[0].st_extent!=null) {
-              var coordinates = result.rows[0].st_extent.replace('BOX(','').replace(')','').split(',');
+              var coordinates = data.rows[0].st_extent.replace('BOX(','').replace(')','').split(',')
+                , coor1 = coordinates[0].split(' ')
+                , coor2 = coordinates[1].split(' ');
 
-              var coor1 = coordinates[0].split(' ');
-              var coor2 = coordinates[1].split(' ');
-              var bounds = new google.maps.LatLngBounds();
+              var lon0 = coor1[0]
+                , lat0 = coor1[1]
+                , lon1 = coor2[0]
+                , lat1 = coor2[1];
 
               // Check bounds
-              if (coor1[0] >  180 || coor1[0] < -180 || coor1[1] >  90 || coor1[1] < -90 
-                || coor2[0] >  180 || coor2[0] < -180 || coor2[1] >  90  || coor2[1] < -90) {
-                coor1[0] = '-30';
-                coor1[1] = '-50'; 
-                coor2[0] = '110'; 
-                coor2[1] =  '80'; 
+
+              var minlat = -85.0511
+                , maxlat =  85.0511
+                , minlon = -179
+                , maxlon =  179;
+
+              /* Clamp X to be between min and max (inclusive) */
+              var clampNum = function(x, min, max) {
+                return x < min ? min : x > max ? max : x;
               }
 
-              bounds.extend(new google.maps.LatLng(coor1[1],coor1[0]));
-              bounds.extend(new google.maps.LatLng(coor2[1],coor2[0]));
+              lon0 = clampNum(lon0, minlon, maxlon);
+              lon1 = clampNum(lon1, minlon, maxlon);
+              lat0 = clampNum(lat0, minlat, maxlat);
+              lat1 = clampNum(lat1, minlat, maxlat);
+
+              var sw = new google.maps.LatLng(lat0, lon0)
+                , ne = new google.maps.LatLng(lat1, lon1)
+                , bounds = new google.maps.LatLngBounds(sw,ne);
 
               params.map.fitBounds(bounds);
             }
