@@ -1,24 +1,133 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-  <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-  <title>Using CartoDB with Google Maps v3</title>
-  <link rel="shortcut icon" href="http://cartodb.com/assets/favicon.ico" />
-  <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
-  <link rel="stylesheet" href="cartodb.css">
-  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-  <script type="text/javascript" src="wax.g.min-6.0.0-beta6.js"></script>
-  <script type="text/javascript" src="cartodb-gmapsv3.js"></script>
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]> <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]> <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!-- Consider adding a manifest.appcache: h5bp.com/d/Offline -->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <title>CartoDB | Google Maps v3 library</title>
+    <link href="http://developers.cartodb.com/stylesheets/all.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="css/style.css" media="screen" rel="stylesheet" type="text/css" />
+    <script src="http://developers.cartodb.com/javascripts/all.js" type="text/javascript"></script>    
+    <link rel="shortcut icon" href="http://developers.cartodb.com/images/favicon.ico" />
+    <script type="text/javascript">
+      var _gaq = _gaq || []; _gaq.push(['_setAccount', 'UA-20934186-3']); _gaq.push(['_setDomainName', 'cartodb.com']); _gaq.push(['_trackPageview']); (function() { var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true; ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'; var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s); })();
+    </script>
+    <noscript><meta http-equiv="refresh" content="0;url=/no_javascript.html"></noscript>
+  </head>
+  <body class="developers examples" onload="initialize()">
+    <div class="background blue grid fixed">
+      <header>
+        <h1 class="left">
+          <a href="http://cartodb.com">CartoDB</a>
+        </h1>
+        <nav class="right">
+          <a href="http://cartodb.com/tour">Tour</a>
+          <a href="http://cartodb.com/tutorial/step/1">Getting Started</a>
+          <a class="selected">Developers</a>
+          <a href="http://blog.cartodb.com">Blog</a>
+          <a href="http://cartodb.com/pricing">Pricing</a>
+          <a href="http://cartodb.com/login">Sign in</a>
+        </nav>
+      </header>
+    </div>
 
-  <script type="text/javascript">
+    <div class="background floating">
+      <section class="shadow top">
+        <div class="content">
+          <hgroup><h2 class="dark">CartoDB Google Maps v3 library</h2><em class="medium">0.40</em></hgroup>
+          <p class="light margin10">Use your CartoDB tables with a Google Maps v3 map.</p>
+          <p class="light margin10">The code is available on <a href="https://github.com/vizzuality/cartodb-gmapsv3" target="_blank">Github</a>. If you have any question there is a complete <a href="#documentation">documentation</a> or you can ask in the <a target="_blank" href="https://groups.google.com/forum/#!forum/cartodb">CartoDB Google group</a>.</p>
+        </div>
+        <div class="content no_padding border code">
 
-  var cartodb2_gmapsv3;
+          <link href="css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css">
+          <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />          
+          <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+          <script type="text/javascript" src="js/wax.g.min-6.0.3.js"></script>
+          <script type="text/javascript" src="dist/cartodb-gmapsv3.js"></script>
 
+          <script type="text/javascript">
+
+            function initialize() {
+              var map = new google.maps.Map(document.getElementById('map'), {
+                center: new google.maps.LatLng(22.95,6.67),
+                zoom: 2,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                mapTypeControl: false
+              });
+
+              var infowindow = new google.maps.InfoWindow();
+
+              var cartodb1_gmapsv3 = new CartoDBLayer({
+                map: map,
+                user_name:'examples',
+                table_name: 'country_colors',
+                query: "SELECT * FROM {{table_name}}",
+                auto_bound: false,
+                debug: false
+              });
+
+
+              var cartodb2_gmapsv3 = new CartoDBLayer({
+                map: map,
+                user_name:"examples",
+                table_name: 'earthquakes',
+                query: "SELECT cartodb_id,the_geom_webmercator,magnitude FROM {{table_name}}",
+                tile_style: "#{{table_name}}{marker-fill:#E25B5B}",
+                interactivity: "cartodb_id, magnitude",
+                layer_order: "top",
+                featureMouseOver: function(data) {
+                  map.setOptions({draggableCursor: 'pointer'});
+                },
+                featureMouseOut: function() {
+                  map.setOptions({draggableCursor: 'default'});
+                },
+                featureMouseClick: function(latlng, data) {
+
+                  // Set popup content
+                  var html = '';
+                  for(var column in data) {
+                    html += '<label>' + column + '</label>';
+                    html += '<p>' + data[column] + '</p>';
+                  }
+                  infowindow.setContent(html);
+
+                  // Set latlng
+                  infowindow.setPosition(latlng);
+
+                  // Show it!
+                  infowindow.open(map);
+                },
+                auto_bound: false,
+                debug: false
+              });
+            }
+          </script>
+          <div id="map"></div>
+          <span class="separator"></span>
+        </div>
+        <a class="back" href="http://developers.cartodb.com/">Back</a>
+      </section>
+
+      <section class="shadow leftwards bottom nav">
+        <div class="content overflow">
+          <div class="left">
+            <h3 class="big">Source code</h3>
+            <pre class="margin25" data-language="javascript">
+&#60;link href="css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css" /&#62;
+&#60;link  href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" /&#62;
+&#60;script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"&#62;&#60;/script&#62;
+&#60;script type="text/javascript" src="js/wax.g.min-6.0.3.js"&#62;&#60;/script&#62;
+&#60;script type="text/javascript" src="dist/cartodb-gmapsv3.js"&#62;&#60;/script&#62;
+
+&#60;script type="text/javascript"&#62;
   function initialize() {
-    var map = new google.maps.Map(document.getElementById('map_canvas'), {
-      center: new google.maps.LatLng(20,0),
-      zoom: 4,
+    var map = new google.maps.Map(document.getElementById('map'), {
+      center: new google.maps.LatLng(22.95,6.67),
+      zoom: 2,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       mapTypeControl: false
     });
@@ -31,18 +140,16 @@
       table_name: 'country_colors',
       query: "SELECT * FROM {{table_name}}",
       auto_bound: false,
-      opacity: 0.5,
       debug: false
     });
 
 
-    cartodb2_gmapsv3 = new CartoDBLayer({
+    var cartodb2_gmapsv3 = new CartoDBLayer({
       map: map,
       user_name:"examples",
       table_name: 'earthquakes',
       query: "SELECT cartodb_id,the_geom_webmercator,magnitude FROM {{table_name}}",
       tile_style: "#{{table_name}}{marker-fill:#E25B5B}",
-      opacity: 0.4,
       interactivity: "cartodb_id, magnitude",
       featureMouseOver: function(data) {
         map.setOptions({draggableCursor: 'pointer'});
@@ -66,15 +173,333 @@
         // Show it!
         infowindow.open(map);
       },
-      auto_bound: true,
+      auto_bound: false,
       debug: false
     });
-
   }
+&#60;/script&#62;
+            </pre>
+          </div>
+          <div class="right">
+            <a class="button blue download" href="https://github.com/Vizzuality/cartodb-gmapsv3/zipball/gh-pages">Download this library</a>
+            <h3 class="big margin40">Related resources</h3>
+            <ul class="vt related">  
+              <li><a href="http://developers.cartodb.com/documentation/cartodb-apis.html#maps_api">CartoDB Maps API</a></li>
+              <li><a href="http://vizzuality.github.com/cartodb-leaflet">CartoDB Leaflet library</a></li>
+              <li><a href="#custom-infowindow">CartoDB Google Maps v3 library with custom infowindow</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
 
-  </script>
-</head>
-<body onload="initialize()">
-  <div id="map_canvas"></div>
-</body>
+      <section class="shadow margin40">
+        <div class="content overflow">
+          <h3 class="big" id="documentation">Documentation</h3>
+          <p class="margin15 light">Using the library is really easy. It accepts the following parameters to manage the behavior of your CartoDB layers:</p>
+
+          <table class="margin30">
+            <tr>
+             <td><b>Parameter name</b></td>
+              <td><b>Description</b></td>
+              <td><b>Type</b></td>
+              <td><b>Callback variables</b></td>
+              <td><b>Required</b></td>
+            </tr>
+
+            <tr>
+              <td>map</td>
+              <td>The Google Map object.</td>
+              <td>Object</td>
+              <td></td>
+              <td>Yes</td>
+            </tr>
+
+            <tr>
+              <td>username</td>
+              <td>Your CartoDB user name.</td>
+              <td>String</td>
+              <td></td>
+              <td>Yes</td>
+            </tr>
+
+            <tr>
+              <td>table_name</td>
+              <td>Your CartoDB table name.</td>
+              <td>String</td>
+              <td></td>
+              <td>Yes</td>
+            </tr>
+
+            <tr>
+              <td>query</td>
+              <td>A SQL query.</td>
+              <td>String</td>
+              <td></td>
+              <td>Yes</td>
+            </tr>
+
+            <tr>
+              <td><i>layer_order</i></td>
+              <td>If you want to set the order of the CartoDB layer.</td>
+              <td>Number or String ("top" or "bottom")</td>
+              <td></td>
+              <td>No</td>
+            </tr>
+
+            <tr>
+              <td>map_style</td>
+              <td>Show the same style as you defined in CartoDB.</td>
+              <td>Boolean</td>
+              <td></td>
+              <td>No</td>
+            </tr>
+
+            <tr>
+              <td>interactivity</td>
+              <td>If you want to add interactivity to the layer without making requests.</td>
+              <td>String (columns separated by commas)</td>
+              <td></td>
+              <td>No</td>
+            </tr>
+
+            <tr>
+              <td>featureMouseOver</td>
+              <td>A callback when hovers in a feature</td>
+              <td>Function</td>
+              <td><b>data:</b> The feature data requested in `interactivity`</td>
+              <td>No (But only will work with `interactivity` specified)</td>
+            </tr>
+
+            <tr>
+              <td>featureMouseOut</td>
+              <td>A callback when hovers out a feature</td>
+              <td>Function</td>
+              <td></td>
+              <td>No (But only will work with `interactivity` specified)</td>
+            </tr>
+
+            <tr>
+              <td>featureMouseClick</td>
+              <td>A callback when clicks in a feature</td>
+              <td>Function</td>
+              <td>
+                <b>latlng:</b> The LatLng Google Maps object where was clicked<br/>
+                <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
+              </td>
+              <td>No (But only will work with `interactivity` specified)</td>
+            </tr>
+
+            <tr>
+              <td>tile_style</td>
+              <td>If you want to add other style to the layer.</td>
+              <td>String</td>
+              <td></td>
+              <td>No</td>
+            </tr>
+
+            <tr>
+              <td>auto_bound</td>
+              <td>If you want to zoom in the area where the layer is positioned.</td>
+              <td>Boolean</td>
+              <td></td>
+              <td>No</td>
+            </tr>
+
+            <tr>
+              <td>debug</td>
+              <td>If you want to debug the library, set to true.</td>
+              <td>Boolean</td>
+              <td></td>
+              <td>No</td>
+            </tr>
+          </table>
+
+
+          <h5 class="margin30">Usage notes</h5>
+          <p class="margin15 light">If you want to get a feature clicked || hover data (via the <i>interactivity</i> parameter), the columns must be in a string separated by commas. If you don't want to write the name of the table several times, you can use {{table_name}} in the <i>query</i> or <i>tile_style</i> parameters. We strongly recommend the use of the files available in this repository. These are tested, and if you decide use updated ones, the library could not work.</p>
+
+          <h5 class="margin30">Example</h5>
+
+          <p class="margin15 light">First of all add the necessary script and css files:</p>
+
+          <pre class="margin10" data-language="javascript">
+&#60;link href="css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css" /&#62;
+&#60;link  href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" /&#62;
+&#60;script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"&#62;&#60;/script&#62;
+&#60;script type="text/javascript" src="js/wax.g.min-6.0.3.js"&#62;&#60;/script&#62;
+&#60;script type="text/javascript" src="dist/cartodb-gmapsv3.js"&#62;&#60;/script&#62;
+          </pre>
+
+
+          <p class="margin15 light">When the document is loaded, start creating the map:</p>
+
+          <pre data-language="javascript">
+var map = new google.maps.Map(document.getElementById('map'), {
+  center: new google.maps.LatLng(20, 0),
+  zoom: 3,
+  mapTypeId: google.maps.MapTypeId.ROADMAP,
+  mapTypeControl: false
+});
+          </pre>
+            
+          <p class="margin20 light">Then create the CartoDB layer:</p>
+
+          <pre class="margin10" data-language="javascript">
+var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
+  map: map,
+  user_name:'example',
+  table_name: 'earthquakes',
+  query: "SELECT * FROM {{table_name}}",
+  layer_order: "top",
+  tile_style: "#{{table_name}}{marker-fill:red}",
+  interactivity: "cartodb_id, magnitude",
+  featureMouseClick: function(feature, latlng, data) {alert(feature)}
+  auto_bound: true
+});
+          </pre>
+
+
+          <h5 class="margin30">Functions</h5>
+          <p class="margin15 light">New funcionalities are coming, in the meantime you can use:</p>
+
+          <ul class="margin20">
+            <li style="display:block">
+              <p class="light"><b>removeLayer</b>: Removes the cartodb layer from the map.</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.removeLayer();</pre>
+            </li>
+            <li class="margin15" style="display:block">
+              <p class="light"><b>hide</b>: Hide the cartodb layer from the map.</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.hide();</pre>
+            </li>
+            <li class="margin15" style="display:block">
+              <p class="light"><b>show</b>: Show again the cartodb layer in the map.</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.show();</pre>
+            </li>
+            <li class="margin15" style="display:block">
+              <p class="light"><b>setInteraction</b>: Set the interaction of your layer to true or false.</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setInteraction(false);</pre>
+            </li>
+            <li class="margin15" style="display:block">
+              <p class="light"><b>setLayerOrder</b>: Change the opacity of the CartoDB layer.</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setLayerOrder("top");</pre>
+            </li>
+            <li class="margin15" style="display:block">
+              <p class="light"><b>setQuery</b>: Change the query parameter for the layer.</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setQuery("SELECT * FROM {{table_name}} WHERE cartodb_id > 10");</pre>
+            </li>
+            <li class="margin15" style="display:block">
+              <p class="light"><b>setStyle</b>: Change the style of the layer tiles.</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setStyle("#{{table_name}}{marker-fill:blue}");</pre>
+            </li>
+            <li class="margin15" style="display:block">
+              <p class="light"><b>setInteractivity</b>: Change the columns you want to get data (it needs to reload the tiles).</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setInteractivity("cartodb_id, the_geom, magnitude");</pre>
+            </li>
+            <li class="margin15" style="display:block">
+              <p class="light"><b>setOpacity</b>:  _Not available yet_ -> Waiting for this ticket fixed: https://github.com/mapbox/wax/issues/194</p>
+            </li>
+          </ul>
+
+          <h5 class="margin30" id="custom-infowindow">Custom infowindow</h5>
+          <p class="margin15 light">If you want to use the cartodb custom infowindow, you need to add the script in the html:</p>
+          <pre class="margin10" data-language="javascript">
+&#60;script type="text/javascript" src="dist/cartodb-infowindow.js"&#62;&#60;/script&#62;
+          </pre>
+
+          <p class="light margin15">Create the CartoDB infowindow:</p>
+          <pre data-language="javascript">
+var infowindow = new google.maps.CartoDBInfowindow();
+          </pre>
+
+          <p class="light margin15">And then use as you want:</p>
+          <pre data-language="javascript">
+...
+featureMouseClick: function(latlng, data) {
+  // Set popup content
+  infowindow.setContent(data);
+
+  // Set latlng
+  infowindow.setLatLng(latlng);
+
+  // Show it!
+  infowindow.open(map);
+},
+...
+          </pre>
+
+          <p class="light margin15">You can see an example using it <a href="custominfowindow.html">here</a>.</p>
+        </div>
+      </section>
+  
+      <section class="grey carto shadow margin40">
+        <div class="content less_padding">
+          <div class="left">
+            <h2 class="compact dark">Further info? Take a look a the docs</h2>
+            <p class="light">Visit our support area and get some help from the community.</p>
+          </div>
+          <div class="right">
+            <a class="button blue right margin5" href="http://developers.cartodb.com/documentation/using-cartodb.html">Go to documentation</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="background white border margin40">
+        <section>
+          <div class="content less_padding">
+            <div class="left">
+              <h3 class="lighter margin10">CartoDB is also used by</h3>
+            </div>
+            <div class="right">
+              <ul class="logos">
+                <li><a class="unep-wcmc" target="_blank" href="http://www.unep-wcmc.org/"><img alt="UNEP-WCMC" title="UNEP-WCMC" src="http://developers.cartodb.com/images/logos/unep-wcmc.png" /></a></li>
+                <li><a class="nasa" target="nasa" href="http://www.nasa.gov"><img alt="NASA" title="NASA" src="http://developers.cartodb.com/images/logos/nasa.png" /></a></li>
+                <li><a class="diversity" target="_blank" href="http://www.cbd.int/"><img alt="Convention on Biological Diversity" title="Convention on Biological Diversity" src="http://developers.cartodb.com/images/logos/diversity.png" /></a></li>
+                <li><a class="wsj" target="_blank" href="http://europe.wsj.com/home-page"><img alt="Wall Street Journal" title="Wall Street Journal" src="http://developers.cartodb.com/images/logos/wsj.png" /></a></li>
+                <li><a class="wri" target="_blank" href="http://www.wri.org/"><img alt="WORLD RESOURCES INSTITUTE" title="WORLD RESOURCES INSTITUTE" src="http://developers.cartodb.com/images/logos/wri.png" /></a></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+
+
+      <div class="background white border">
+        <section id="blog">
+          <div class="content no_padding">
+            <ul class="hz">
+              <li>
+                <h3>Common questions</h3>
+              </li>
+              <li>
+                <h3>Do you have any educational plans?</h3>
+                <p class="light margin15">Yes we have. <a href="mailto:wadus@cartodb.com">Contact us</a> for getting more information. We are quite friends of academics so, you will get a lot of benefits.</p>
+              </li>
+              <li>
+                <h3>Need something extra? Let us now.</h3>
+                <p class="light margin15">Need us to help you with your visualization or application? Does your organization have unique requirements that don’t quite fit our plans? <a href="mailto:support@cartodb.com">Contact us</a>.</p>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+
+      <footer>
+        <div class="wrap">
+          <span class="cartodb">CartoDB</span>
+          <p class="lighter small left">CartoDB is a product of <a class="vizzuality" href="http://vizzuality.com">Vizzuality</a>
+          </p>
+          <nav class="right">
+            <a href="http://cartodb.com/tour">Feature tour</a>
+            <a href="http://cartodb.com/tutorial/step/1">Getting started</a>
+            <a class="disabled">Education</a>
+            <a href="http://developers.cartodb.com/">Developers</a>
+            <a href="http://blog.cartodb.com">Blog</a>
+            <a href="http://cartodb.com/pricing">Pricing</a>
+            <a href="mailto:support@cartodb.com">Contact</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  </body>
 </html>

@@ -6,22 +6,24 @@
   <title>Using CartoDB with Google Maps v3</title>
   <link rel="shortcut icon" href="http://cartodb.com/assets/favicon.ico" />
   <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
-  <link rel="stylesheet" href="cartodb.css">
+  <style>body,html {width:100%; height:100%; margin:0; padding:0; overflow:hidden;} #map {height:100%;}</style>
+  <link rel="stylesheet" href="css/cartodb-gmapsv3.css">
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-  <script type="text/javascript" src="wax.g.min-6.0.0-beta6.js"></script>
-  <script type="text/javascript" src="cartodb-infowindow.js"></script>
-  <script type="text/javascript" src="cartodb-gmapsv3.js"></script>
+  <script type="text/javascript" src="js/wax.g.min-6.0.3.js"></script>
+  <!--script type="text/javascript" src="dist/cartodb-infowindow.js"></script-->
+  <script type="text/javascript" src="dist/cartodb-gmapsv3.js"></script>
 
   <script type="text/javascript">
 
   function initialize() {
-    var map = new google.maps.Map(document.getElementById('map_canvas'), {
+    var map = new google.maps.Map(document.getElementById('map'), {
       center: new google.maps.LatLng(20,0),
       zoom: 4,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       mapTypeControl: false
     });
 
+    //var infowindow = new google.maps.CartoDBInfowindow();
     var infowindow = new google.maps.InfoWindow();
 
     var cartodb1_gmapsv3 = new CartoDBLayer({
@@ -29,19 +31,21 @@
       user_name:'examples',
       table_name: 'country_colors',
       query: "SELECT * FROM {{table_name}}",
+      order: "bottom",
       auto_bound: false,
       debug: false
     });
 
 
-    var cartodb2_gmapsv3 = new CartoDBLayer({
+    cartodb2_gmapsv3 = new CartoDBLayer({
       map: map,
       user_name:"examples",
       table_name: 'earthquakes',
       query: "SELECT cartodb_id,the_geom_webmercator,magnitude FROM {{table_name}}",
       tile_style: "#{{table_name}}{marker-fill:#E25B5B}",
-      opacity: 0.8,
+      order: "top",
       interactivity: "cartodb_id, magnitude",
+      opacity: 0.1,
       featureMouseOver: function(data) {
         map.setOptions({draggableCursor: 'pointer'});
       },
@@ -67,12 +71,11 @@
       auto_bound: true,
       debug: false
     });
-
   }
 
   </script>
 </head>
 <body onload="initialize()">
-  <div id="map_canvas"></div>
+  <div id="map"></div>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.40 [May 4, 2012]
+ * @version 0.40 [May 18, 2012]
  * @author: jmedina@vizzuality.com
  * @fileoverview <b>Author:</b> jmedina@vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -9,8 +9,6 @@
  *               maps v3.
  *                 
  */
-
-
 
 // Namespace
 var CartoDB = CartoDB || {};
@@ -24,14 +22,23 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      *    user_name         -     CartoDB user name
      *    table_name        -     CartoDB table name
      *    query             -     If you want to apply any sql sentence to the table...
-     *    opacity           -     If you want to change the opacity of the CartoDB layer
+     *    order             -     If you want to change the position order of the CartoDB layer
      *    tile_style        -     If you want to add other style to the layer
      *    interactivity     -     Get data from the feature clicked ( without any request :) )
      *    featureMouseOver  -     Callback when user hovers a feature (return feature id)
      *    featureMouseClick -     Callback when user clicks a feature (return feature id, latlng and feature data)
      *    debug             -     Get error messages from the library
      *    auto_bound        -     Let cartodb auto-bound-zoom in the map (opcional - default = false)
-     */   
+     */
+
+
+    /*
+      TODO:
+
+        - Add map tyles option
+        - Simple layers have to be wax layers with interaction, because we have to order layers
+        
+    */
 
     function CartoDBLayer(options) {
 
@@ -40,7 +47,6 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       this.options = options;
 
       this.options.query = options.query || "SELECT * FROM {{table_name}}";
-      this.options.opacity = options.opacity || 0.99;
       this.options.auto_bound = options.auto_bound || false;
       this.options.debug = options.debug || false;
 
@@ -96,7 +102,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {Integer} New opacity
      */
     CartoDBLayer.prototype.setOpacity = function(opacity) {
-      this.layer.setOpacity(opacity);
+      /*
+        Waiting fot this ticket:
+          https://github.com/mapbox/wax/issues/194
+      */
     }
 
 
@@ -150,9 +159,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype.setInteraction = function(bool) {
       if (this.interaction) {
         if (bool) {
-          this.interaction.on('on');
+          var self= this;
+          this.interaction.on('on',function(o) {self._bindWaxEvents(self.options.map,o)})
         } else {
-          this.interaction.off('off');
+          this.interaction.off('on');
         }
       }
     }
@@ -162,8 +172,9 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Hide the CartoDB layer
      */
     CartoDBLayer.prototype.hide = function() {
-      this.setOpacity(0);
-      this.setInteraction(false);
+      this.setMap(null)
+      // this.setOpacity(0);
+      // this.setInteraction(false);
     }
 
 
@@ -171,8 +182,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Show the CartoDB layer
      */
     CartoDBLayer.prototype.show = function() {
-      this.setOpacity(this.options.opacity);
-      this.setInteraction(true);
+      // this.setOpacity(this.options.opacity);
+      // this.setInteraction(true);
     }
 
 
@@ -188,8 +199,16 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       // Remove interaction
       this.setInteraction(false);
 
-      // Remove layer
-      this.options.map.removeLayer(this.layer);
+      // // Remove layer
+      var self = this;
+      this.options.map.overlayMapTypes.forEach(
+        function(layer,i) {
+          if (layer == self.layer) {
+            self.options.map.overlayMapTypes.removeAt(i);
+            return;
+          }
+        }
+      );
     }
 
 
@@ -301,6 +320,44 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     }
 
 
+
+    // // Set the map styles of your cartodb table/map
+    // function setCartoDBMapStyle(params) {
+    //   $.ajax({
+    //     url: 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/map_metadata?callback=?',
+    //     dataType: 'jsonp',
+    //     timeout: 2000,
+    //     callbackParameter: 'callback',
+    //     success: function(result) {
+    //       var map_style = $.parseJSON(result.map_metadata);
+
+    //       if (!map_style || map_style.google_maps_base_type=="roadmap") {
+    //         params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
+    //       } else if (map_style.google_maps_base_type=="satellite") {
+    //         params.map.setOptions({mapTypeId: google.maps.MapTypeId.SATELLITE});
+    //       } else if (map_style.google_maps_base_type=="terrain") {
+    //         params.map.setOptions({mapTypeId: google.maps.MapTypeId.TERRAIN});
+    //       } else {
+    //         var mapStyles = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] },{ featureType: "administrative", stylers: [ { saturation: -95 }, { gamma: 2.26 } ] },{ featureType: "water", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", stylers: [ { visibility: "off" } ] },{ featureType: "road", stylers: [ { visibility: "simplified" }, { saturation: -99 }, { gamma: 2.22 } ] },{ featureType: "poi", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "transit", stylers: [ { visibility: "off" } ] },{ featureType: "road", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "poi", stylers: [ { saturation: -55 } ] } ];
+    //         map_style.google_maps_customization_style = mapStyles;
+    //         params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
+    //       }
+
+    //       // Custom tiles
+    //       if (!map_style) {
+    //         map_style = {google_maps_customization_style: []};
+    //       }
+    //       params.map.setOptions({styles: map_style.google_maps_customization_style});
+    //     },
+    //     error: function(e, msg) {
+    //       if (params.debug) throw('Error getting map style: ' + msg);
+    //     }
+    //   });
+    // }
+
+
+
+
     /**
      * Add interaction cartodb tiles to the map
      */
@@ -341,8 +398,11 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
                             if (this.options.debug) throw('featureMouseOver function not defined');
                           }
                           break;
-        case 'mouseup':   var latlng = this.getProjection().fromContainerPixelToLatLng(new google.maps.Point(o.e.clientX,o.e.clientY))
-
+        case 'mouseup':   var offset = this._offset(map.getDiv())
+                            , x = o.e.pageX - offset.left
+                            , y = o.e.pageY - offset.top
+                            , latlng = this.getProjection().fromContainerPixelToLatLng(new google.maps.Point(x,y))
+                          
                           if (this.options.featureMouseClick) {
                             this.options.featureMouseClick(latlng,o.data);
                           } else {
@@ -387,7 +447,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       
       // Build up the tileJSON
       return {
-        blankImage: 'blank_tile.png', 
+        blankImage: '../img/blank_tile.png', 
         tilejson: '1.0.0',
         scheme: 'xyz',
         tiles: [tile_url],
@@ -447,6 +507,17 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype._addUrlData = function (url, data) {
         url += (this._parseUri(url).query) ? '&' : '?';
         return url += data;
+    }
+
+    CartoDBLayer.prototype._offset = function (obj) {
+      var ol = ot = 0;
+      if (obj.offsetParent) {
+        do {
+          ol += obj.offsetLeft;
+          ot += obj.offsetTop;
+        }while (obj = obj.offsetParent);
+      }
+      return {left : ol, top : ot};
     }
   }
 
