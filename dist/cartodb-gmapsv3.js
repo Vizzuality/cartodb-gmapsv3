@@ -40,6 +40,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         - New custom infowindow
         - If you dont select a column in the query but you use it in the interactivity param, it WON'T work
         - Add layer order funcionality
+        - Show and hide better (check previous position)
 
     */
 
