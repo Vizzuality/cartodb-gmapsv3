@@ -37,7 +37,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
         - Add map tyles option
         - Simple layers have to be wax layers with interaction, because we have to order layers
-        
+        - New custom infowindow
+        - If you dont select a column in the query but you use it in the interactivity param, it WON'T work
+        - Add layer order funcionality
+
     */
 
     function CartoDBLayer(options) {
@@ -133,7 +136,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
     /**
      * Change the query when clicks in a feature
-     * @params {Boolean | String} New sql for the request
+     * @params { Boolean || String } New sql for the request
      */
     CartoDBLayer.prototype.setInteractivity = function(value) {
       // Set the new value to the layer options
@@ -145,7 +148,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
     /**
      * Change layer index
-     * @params {Integer} New position for the layer
+     * @params { Integer || String } New position for the layer
      */
     CartoDBLayer.prototype.setLayerOrder = function(position) {
  
@@ -173,8 +176,6 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      */
     CartoDBLayer.prototype.hide = function() {
       this.setMap(null)
-      // this.setOpacity(0);
-      // this.setInteraction(false);
     }
 
 
