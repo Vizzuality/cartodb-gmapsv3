@@ -30,6 +30,7 @@
       map: map,
       user_name:'examples',
       table_name: 'country_colors',
+      map_style: true,
       query: "SELECT * FROM {{table_name}}",
       order: "bottom",
       auto_bound: false,
@@ -41,7 +42,7 @@
       map: map,
       user_name:"examples",
       table_name: 'earthquakes',
-      query: "SELECT cartodb_id,the_geom_webmercator,magnitude FROM {{table_name}}",
+      query: "SELECT * FROM {{table_name}}",
       tile_style: "#{{table_name}}{marker-fill:#E25B5B}",
       order: "top",
       interactivity: "cartodb_id, magnitude",
@@ -68,8 +69,8 @@
         // Show it!
         infowindow.open(map);
       },
-      auto_bound: true,
-      debug: false
+      auto_bound: false,
+      debug: true
     });
   }
 

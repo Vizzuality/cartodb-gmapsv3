@@ -11,3 +11,4 @@ em {font: bold 13px/16px "Segoe UI Bold", "Helvetica Neue", "Helvetica", Arial!i
 h2 {font:bold 34px "Segoe UI Bold", "Helvetica Neue", "Helvetica", Arial!important;}
 h3 {font: bold 23px/24px "Segoe UI Bold", "Helvetica Neue", "Helvetica", Arial!important;}
 h5 {font: bold 19px/15px "Segoe UI Bold", "Helvetica Neue", "Helvetica", Arial!important;}
+div.right {min-height:100px!important;}

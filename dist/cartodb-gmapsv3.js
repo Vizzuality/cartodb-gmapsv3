@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.40 [May 18, 2012]
+ * @version 0.40 [May 19, 2012]
  * @author: jmedina@vizzuality.com
  * @fileoverview <b>Author:</b> jmedina@vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -34,13 +34,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
     /*
       TODO:
-
-        - Add map tyles option
         - Simple layers have to be wax layers with interaction, because we have to order layers
         - New custom infowindow
         - If you dont select a column in the query but you use it in the interactivity param, it WON'T work
         - Add layer order funcionality
         - Show and hide better (check previous position)
+        - Create minified versions
 
     */
 
@@ -73,10 +72,15 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       if (this.options.auto_bound)
         this._setBounds();
 
+      // Map style?
+      if (this.options.map_style)
+        this._setMapStyle();
+
       // Add cartodb logo, yes sir!
       this._addWadus(); 
     }
 
+    // Useless
     CartoDBLayer.prototype.draw = function() {};
 
 
@@ -85,11 +89,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {map}
      */
     CartoDBLayer.prototype.onAdd = function(map) {
-      if (!this.options.interactivity) {
-        this._addSimple();
-      } else {
-        this._addInteraction();
-      }
+      this._addInteraction();
     }
 
 
@@ -152,7 +152,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params { Integer || String } New position for the layer
      */
     CartoDBLayer.prototype.setLayerOrder = function(position) {
- 
+      return "no implemented"
     }
 
 
@@ -176,7 +176,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Hide the CartoDB layer
      */
     CartoDBLayer.prototype.hide = function() {
-      this.setMap(null)
+      // this.setMap(null)
+      return "no implemented"
     }
 
 
@@ -186,6 +187,17 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype.show = function() {
       // this.setOpacity(this.options.opacity);
       // this.setInteraction(true);
+      return "no implemented"
+    }
+
+
+    /**
+     * Return the visibility of the layer
+     */
+    CartoDBLayer.prototype.isVisible = function() {
+      // this.setOpacity(this.options.opacity);
+      // this.setInteraction(true);
+      return "no implemented!"
     }
 
 
@@ -279,85 +291,60 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
 
     /**
-     * Add Cartodb logo
+     * Add Wadus
      */
     CartoDBLayer.prototype._addWadus =  function() {
-
-      if (!document.getElementById('cartodb_logo')) {
-        var self = this        
-          , cartodb_link = document.createElement("a");
-        cartodb_link.setAttribute('id','cartodb_logo');
-        cartodb_link.setAttribute('style',"position:absolute; bottom:3px; left:74px; display:block;");
-        cartodb_link.setAttribute('href','http://www.cartodb.com');
-        cartodb_link.setAttribute('target','_blank');
-        cartodb_link.innerHTML = "<img src='http://cartodb.s3.amazonaws.com/static/new_logo.png' alt='CartoDB' title='CartoDB' />";
-        setTimeout(function(){self.options.map.getDiv().appendChild(cartodb_link)},500);
-      }
+      var self = this;
+      setTimeout(function(){
+        if (!document.getElementById('cartodb_logo')) {
+          var cartodb_link = document.createElement("a");
+          cartodb_link.setAttribute('id','cartodb_logo');
+          cartodb_link.setAttribute('style',"position:absolute; bottom:3px; left:74px; display:block;");
+          cartodb_link.setAttribute('href','http://www.cartodb.com');
+          cartodb_link.setAttribute('target','_blank');
+          cartodb_link.innerHTML = "<img src='http://cartodb.s3.amazonaws.com/static/new_logo.png' alt='CartoDB' title='CartoDB' />";
+          self.options.map.getDiv().appendChild(cartodb_link)
+        }
+      },500);
     }
 
 
     /**
-     * Add simple cartodb tiles to the map
+     * Set the map styles of your CartoDB table/map
      */
-    CartoDBLayer.prototype._addSimple = function () {
+    CartoDBLayer.prototype._setMapStyle = function () {
+      var self = this;
+      reqwest({
+        url: 'http://' + this.options.user_name + '.cartodb.com/tiles/' + this.options.table_name + '/map_metadata?callback=?',
+        type: 'jsonp',
+        jsonpCallback: 'callback',
+        success: function(result) {
+          var map_style = json_parse(result.map_metadata);
 
-      // Then add the cartodb tiles
-      var tile_style = (this.options.tile_style)? encodeURIComponent(this.options.tile_style.replace(/\{\{table_name\}\}/g,this.options.table_name)) : ''
-        , query = encodeURIComponent(this.options.query.replace(/\{\{table_name\}\}/g,this.options.table_name));
+          if (!map_style || map_style.google_maps_base_type=="roadmap") {
+            self.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
+          } else if (map_style.google_maps_base_type=="satellite") {
+            self.map.setOptions({mapTypeId: google.maps.MapTypeId.SATELLITE});
+          } else if (map_style.google_maps_base_type=="terrain") {
+            self.map.setOptions({mapTypeId: google.maps.MapTypeId.TERRAIN});
+          } else {
+            var mapStyles = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] },{ featureType: "administrative", stylers: [ { saturation: -95 }, { gamma: 2.26 } ] },{ featureType: "water", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", stylers: [ { visibility: "off" } ] },{ featureType: "road", stylers: [ { visibility: "simplified" }, { saturation: -99 }, { gamma: 2.22 } ] },{ featureType: "poi", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "transit", stylers: [ { visibility: "off" } ] },{ featureType: "road", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "poi", stylers: [ { saturation: -55 } ] } ];
+            map_style.google_maps_customization_style = mapStyles;
+            self.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
+          }
 
-      // Add the cartodb tiles
-      var cartodb_url = 'http://' + this.options.user_name + '.cartodb.com/tiles/' + this.options.table_name + '/{z}/{x}/{y}.png?sql=' + query +'&style=' + tile_style;
+          // Custom tiles
+          if (!map_style) {
+            map_style = {google_maps_customization_style: []};
+          }
 
-      var layer_options = { 
-        getTileUrl: function(coord, zoom) { 
-          return cartodb_url.replace("{x}", coord.x).replace("{y}", coord.y).replace("{z}", zoom)
-        }, 
-        tileSize: new google.maps.Size(256, 256), 
-        isPng: true,
-        opacity: this.options.opacity
-      };
-
-      this.layer = new google.maps.ImageMapType(layer_options);
-      this.options.map.overlayMapTypes.push(this.layer);
+          self.map.setOptions({styles: map_style.google_maps_customization_style});
+        },
+        error: function(e, msg) {
+          if (params.debug) throw('Error getting map style: ' + msg);
+        }
+      });
     }
-
-
-
-    // // Set the map styles of your cartodb table/map
-    // function setCartoDBMapStyle(params) {
-    //   $.ajax({
-    //     url: 'http://' + params.user_name + '.cartodb.com/tiles/' + params.table_name + '/map_metadata?callback=?',
-    //     dataType: 'jsonp',
-    //     timeout: 2000,
-    //     callbackParameter: 'callback',
-    //     success: function(result) {
-    //       var map_style = $.parseJSON(result.map_metadata);
-
-    //       if (!map_style || map_style.google_maps_base_type=="roadmap") {
-    //         params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
-    //       } else if (map_style.google_maps_base_type=="satellite") {
-    //         params.map.setOptions({mapTypeId: google.maps.MapTypeId.SATELLITE});
-    //       } else if (map_style.google_maps_base_type=="terrain") {
-    //         params.map.setOptions({mapTypeId: google.maps.MapTypeId.TERRAIN});
-    //       } else {
-    //         var mapStyles = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] },{ featureType: "administrative", stylers: [ { saturation: -95 }, { gamma: 2.26 } ] },{ featureType: "water", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "administrative.locality", stylers: [ { visibility: "off" } ] },{ featureType: "road", stylers: [ { visibility: "simplified" }, { saturation: -99 }, { gamma: 2.22 } ] },{ featureType: "poi", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "road.arterial", stylers: [ { visibility: "off" } ] },{ featureType: "road.local", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "transit", stylers: [ { visibility: "off" } ] },{ featureType: "road", elementType: "labels", stylers: [ { visibility: "off" } ] },{ featureType: "poi", stylers: [ { saturation: -55 } ] } ];
-    //         map_style.google_maps_customization_style = mapStyles;
-    //         params.map.setOptions({mapTypeId: google.maps.MapTypeId.ROADMAP});
-    //       }
-
-    //       // Custom tiles
-    //       if (!map_style) {
-    //         map_style = {google_maps_customization_style: []};
-    //       }
-    //       params.map.setOptions({styles: map_style.google_maps_customization_style});
-    //     },
-    //     error: function(e, msg) {
-    //       if (params.debug) throw('Error getting map style: ' + msg);
-    //     }
-    //   });
-    // }
-
-
 
 
     /**
@@ -373,17 +360,21 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
       this.options.map.overlayMapTypes.push(this.layer);
 
+
       this.interaction = wax.g.interaction()
         .map(this.options.map)
         .tilejson(this.tilejson)
-        .on('on',function(o) {self._bindWaxEvents(self.options.map,o)})
-        .on('off', function(o){
-          if (self.options.featureMouseOut) {
-            return self.options.featureMouseOut && self.options.featureMouseOut();
-          } else {
-            if (self.options.debug) throw('featureMouseOut function not defined');
-          }
-        });
+
+      if (this.options.interactivity) 
+        this.interaction
+          .on('on',function(o) {self._bindWaxEvents(self.options.map,o)})
+          .on('off', function(o){
+            if (self.options.featureMouseOut) {
+              return self.options.featureMouseOut && self.options.featureMouseOut();
+            } else {
+              if (self.options.debug) throw('featureMouseOut function not defined');
+            }
+          });
     }
 
 
@@ -511,6 +502,11 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         return url += data;
     }
 
+
+    /**
+     * Calculate the correct offset to get the latlng clicked
+     * @params {obj} Map dom element
+     */
     CartoDBLayer.prototype._offset = function (obj) {
       var ol = ot = 0;
       if (obj.offsetParent) {
@@ -523,6 +519,9 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     }
   }
 
+
+/* json2.js - https://github.com/douglascrockford/JSON-js*/
+var json_parse=(function(){var at,ch,escapee={'"':'"',"\\":"\\","/":"/",b:"\b",f:"\f",n:"\n",r:"\r",t:"\t"},text,error=function(m){throw {name:"SyntaxError",message:m,at:at,text:text}},next=function(c){if(c&&c!==ch){error("Expected '"+c+"' instead of '"+ch+"'")}ch=text.charAt(at);at+=1;return ch},number=function(){var number,string="";if(ch==="-"){string="-";next("-")}while(ch>="0"&&ch<="9"){string+=ch;next()}if(ch==="."){string+=".";while(next()&&ch>="0"&&ch<="9"){string+=ch}}if(ch==="e"||ch==="E"){string+=ch;next();if(ch==="-"||ch==="+"){string+=ch;next()}while(ch>="0"&&ch<="9"){string+=ch;next()}}number=+string;if(!isFinite(number)){error("Bad number")}else{return number}},string=function(){var hex,i,string="",uffff;if(ch==='"'){while(next()){if(ch==='"'){next();return string}else{if(ch==="\\"){next();if(ch==="u"){uffff=0;for(i=0;i<4;i+=1){hex=parseInt(next(),16);if(!isFinite(hex)){break}uffff=uffff*16+hex}string+=String.fromCharCode(uffff)}else{if(typeof escapee[ch]==="string"){string+=escapee[ch]}else{break}}}else{string+=ch}}}}error("Bad string")},white=function(){while(ch&&ch<=" "){next()}},word=function(){switch(ch){case"t":next("t");next("r");next("u");next("e");return true;case"f":next("f");next("a");next("l");next("s");next("e");return false;case"n":next("n");next("u");next("l");next("l");return null}error("Unexpected '"+ch+"'")},value,array=function(){var array=[];if(ch==="["){next("[");white();if(ch==="]"){next("]");return array}while(ch){array.push(value());white();if(ch==="]"){next("]");return array}next(",");white()}}error("Bad array")},object=function(){var key,object={};if(ch==="{"){next("{");white();if(ch==="}"){next("}");return object}while(ch){key=string();white();next(":");if(Object.hasOwnProperty.call(object,key)){error('Duplicate key "'+key+'"')}object[key]=value();white();if(ch==="}"){next("}");return object}next(",");white()}}error("Bad object")};value=function(){white();switch(ch){case"{":return object();case"[":return array();case'"':return string();case"-":return number();default:return ch>="0"&&ch<="9"?number():word()}};return function(source,reviver){var result;text=source;at=0;ch=" ";result=value();white();if(ch){error("Syntax error")}return typeof reviver==="function"?(function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==="object"){for(k in value){if(Object.prototype.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}({"":result},"")):result}}());
 
 /*!
   * Reqwest! A general purpose XHR connection manager
