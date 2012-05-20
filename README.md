@@ -103,6 +103,25 @@ Using the library is really easy. It accepts the following parameters to manage 
 <td>If you want to debug the library, set to true.</td>
 <td>No</td>
 </tr>
+
+<tr>
+<td>tiler_protocol</td>
+<td>Tiler protocol (opcional - default = 'http').</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>tiler_domain</td>
+<td>Tiler domain (opcional - default = 'cartodb.com').</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>tiler_port</td>
+<td>Tiler port as a string (opcional - default = '80').</td>
+<td>No</td>
+</tr>
+
 </table>
 
 # Usage notes
@@ -122,7 +141,7 @@ First of all add the necessary script and css files:
 <link href="css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css">
 <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />          
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-<script type="text/javascript" src="js/wax.g.min-6.0.0-beta6.js"></script>
+<script type="text/javascript" src="js/wax.g.min-6.0.3.js"></script>
 <script type="text/javascript" src="dist/cartodb-gmapsv3.js"></script>
 ```
 When the document is loaded, start creating the map:
@@ -139,7 +158,7 @@ var map = new google.maps.Map(document.getElementById('map'), {
 And then add the CartoDB layer:
 
 ```javascript
-var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
+var cartodb_gmapsv3 = new CartoDBLayer({
   map: map,
   user_name:'example',
   table_name: 'earthquakes',
