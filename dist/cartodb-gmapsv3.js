@@ -29,8 +29,11 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      *    featureMouseClick -     Callback when user clicks a feature (return feature id, latlng and feature data)
      *    debug             -     Get error messages from the library
      *    auto_bound        -     Let cartodb auto-bound-zoom in the map (opcional - default = false)
+     *    tiler_protocol-     Tiler protocol (opcional - default = 'http')
+     *    tiler_domain  -     Tiler domain (opcional - default = 'cartodb.com')
+     *    tiler_port    -     Tiler port as a string (opcional - default = '80')
+     *    debug         -     Do you want to debug the library? Set it to true
      */
-
 
     /*
       TODO:
@@ -43,6 +46,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         - Show and hide better (check previous position)
 
     */
+    // Generate a URL for the tiler
+    function generateUrl( options ){
+        return options.tiler_protocol + '://' + options.user_name + '.' + options.tiler_domain + ':' + options.tiler_port;
+    }
 
     function CartoDBLayer(options) {
 
@@ -53,6 +60,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       this.options.query = options.query || "SELECT * FROM {{table_name}}";
       this.options.auto_bound = options.auto_bound || false;
       this.options.debug = options.debug || false;
+
+      this.options.tiler_protocol = options.tiler_protocol || 'http';
+      this.options.tiler_domain = options.tiler_domain || 'cartodb.com';
+      this.options.tiler_port = options.tiler_port || '80';
 
       this.initialize();
       this.setMap(options.map);
@@ -176,7 +187,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Hide the CartoDB layer
      */
     CartoDBLayer.prototype.hide = function() {
-      this.setMap(null)
+      this.setMap(null);
+      this._remove();
     }
 
 
@@ -184,8 +196,9 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Show the CartoDB layer
      */
     CartoDBLayer.prototype.show = function() {
-      // this.setOpacity(this.options.opacity);
-      // this.setInteraction(true);
+      this.setOpacity(this.options.opacity);
+      this.setInteraction(true);
+      this._update();
     }
 
 
@@ -236,7 +249,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype._setBounds = function() {
       var self = this;
       reqwest({
-        url:'http://'+this.options.user_name+'.cartodb.com/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ this.options.table_name),
+        url: generateUrl(this.options) +'/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ this.options.table_name),
         type: 'jsonp',
         jsonpCallback: 'callback',
         success: function(result) {
@@ -306,7 +319,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         , query = encodeURIComponent(this.options.query.replace(/\{\{table_name\}\}/g,this.options.table_name));
 
       // Add the cartodb tiles
-      var cartodb_url = 'http://' + this.options.user_name + '.cartodb.com/tiles/' + this.options.table_name + '/{z}/{x}/{y}.png?sql=' + query +'&style=' + tile_style;
+      var cartodb_url = generateUrl( this.options ) + '/tiles/' + this.options.table_name + '/{z}/{x}/{y}.png?sql=' + query +'&style=' + tile_style;
 
       var layer_options = { 
         getTileUrl: function(coord, zoom) { 
@@ -421,7 +434,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @return {Object} Options for ImageMapType
      */
     CartoDBLayer.prototype._generateTileJson = function () {
-      var core_url = 'http://' + this.options.user_name + '.cartodb.com';  
+      var core_url = generateUrl( this.options );  
       var base_url = core_url + '/tiles/' + this.options.table_name + '/{z}/{x}/{y}';
       var tile_url = base_url + '.png';
       var grid_url = base_url + '.grid.json';
