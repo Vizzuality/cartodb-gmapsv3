@@ -122,7 +122,7 @@ First of all add the necessary script and css files:
 <link href="css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css">
 <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />          
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-<script type="text/javascript" src="js/wax.g.min-6.0.0-beta6.js"></script>
+<script type="text/javascript" src="js/wax.g.min-6.0.3.js"></script>
 <script type="text/javascript" src="dist/cartodb-gmapsv3.js"></script>
 ```
 When the document is loaded, start creating the map:
@@ -139,7 +139,7 @@ var map = new google.maps.Map(document.getElementById('map'), {
 And then add the CartoDB layer:
 
 ```javascript
-var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
+var cartodb_gmapsv3 = new CartoDBLayer({
   map: map,
   user_name:'example',
   table_name: 'earthquakes',

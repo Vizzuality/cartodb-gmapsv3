@@ -9,7 +9,7 @@
   <style>body,html {width:100%; height:100%; margin:0; padding:0; overflow:hidden;} #map {height:100%;}</style>
   <link rel="stylesheet" href="css/cartodb-gmapsv3.css">
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-  <script type="text/javascript" src="js/wax.g.min-6.0.3.js"></script>
+  <script type="text/javascript" src="js/wax.g-6.0.4.js"></script>
   <!--script type="text/javascript" src="dist/cartodb-infowindow.js"></script-->
   <script type="text/javascript" src="dist/cartodb-gmapsv3.js"></script>
 
@@ -26,13 +26,13 @@
     //var infowindow = new google.maps.CartoDBInfowindow();
     var infowindow = new google.maps.InfoWindow();
 
-    var cartodb1_gmapsv3 = new CartoDBLayer({
+    cartodb1_gmapsv3 = new CartoDBLayer({
       map: map,
       user_name:'examples',
       table_name: 'country_colors',
       map_style: true,
       query: "SELECT * FROM {{table_name}}",
-      order: "bottom",
+      layer_order: "bottom",
       auto_bound: false,
       debug: false
     });
@@ -44,9 +44,9 @@
       table_name: 'earthquakes',
       query: "SELECT * FROM {{table_name}}",
       tile_style: "#{{table_name}}{marker-fill:#E25B5B}",
-      order: "top",
+      layer_order: "top",
       interactivity: "cartodb_id, magnitude",
-      opacity: 0.1,
+      opacity: 1,
       featureMouseOver: function(data) {
         map.setOptions({draggableCursor: 'pointer'});
       },

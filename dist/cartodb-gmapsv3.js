@@ -44,7 +44,6 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     */
 
     function CartoDBLayer(options) {
-
       this.extend(CartoDBLayer, google.maps.OverlayView);
 
       this.options = options;
@@ -52,6 +51,9 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       this.options.query = options.query || "SELECT * FROM {{table_name}}";
       this.options.auto_bound = options.auto_bound || false;
       this.options.debug = options.debug || false;
+      this.options.visible = true;
+      this.options.opacity = this.options.opacity || 1;
+      this.options.layer_order = options.layer_order || "top";
 
       this.initialize();
       this.setMap(options.map);
@@ -106,10 +108,16 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {Integer} New opacity
      */
     CartoDBLayer.prototype.setOpacity = function(opacity) {
-      /*
-        Waiting fot this ticket:
-          https://github.com/mapbox/wax/issues/194
-      */
+      
+      if (isNaN(opacity) || opacity>1 || opacity<0) {
+        if (this.options.debug) {
+          throw(opacity + ' is not a valid value');
+        } else { return }
+      }
+
+      // Set the new value to the layer options
+      this.options.opacity = opacity;
+      this._update();
     }
 
 
@@ -118,6 +126,13 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {str} New sql for the tiles
      */
     CartoDBLayer.prototype.setQuery = function(sql) {
+
+      if (!isNaN(sql)) {
+        if (this.options.debug) {
+         throw(sql + ' is not a valid query');
+        } else { return }
+      }
+
       // Set the new value to the layer options
       this.options.query = sql;
       this._update();
@@ -129,9 +144,16 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {style} New carto for the tiles
      */
     CartoDBLayer.prototype.setStyle = function(style) {
+      if (!isNaN(style)) {
+        if (this.options.debug) {
+          throw(style + ' is not a valid style');
+        } else { return }
+      }
+
       // Set the new value to the layer options
       this.options.tile_style = style;
-      this._update();
+      //this._update();
+      this.interaction.tilejson(this._generateTileJson)
     }
 
 
@@ -140,6 +162,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params { Boolean || String } New sql for the request
      */
     CartoDBLayer.prototype.setInteractivity = function(value) {
+      if (!isNaN(value)) {
+        if (this.options.debug) {
+          throw(value + ' is not a valid setInteractivity value');
+        } else { return }
+      }
+
       // Set the new value to the layer options
       this.options.interactivity = value;
       // Update tiles
@@ -152,7 +180,15 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params { Integer || String } New position for the layer
      */
     CartoDBLayer.prototype.setLayerOrder = function(position) {
-      return "no implemented"
+      
+      if (isNaN(position) && position != "top" && position != "bottom") {
+        if (this.options.debug) {
+          throw(position + ' is not a valid layer position')
+        } else { return }
+      }
+
+      this.options.layer_order = position;
+      this._setLayerOrder()
     }
 
 
@@ -161,6 +197,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {Boolean} Choose if wants interaction or not
      */
     CartoDBLayer.prototype.setInteraction = function(bool) {
+      if (bool !== false && bool !== true) {
+        if (this.options.debug) {
+          throw(bool + ' is not a valid setInteraction value');
+        } else { return }
+      }
+
       if (this.interaction) {
         if (bool) {
           var self= this;
@@ -176,8 +218,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Hide the CartoDB layer
      */
     CartoDBLayer.prototype.hide = function() {
-      // this.setMap(null)
-      return "no implemented"
+      this.options.visible = false;
+      // Save previous opacity
+      this.options.before = this.options.opacity;
+      // Hide it!
+      this.setOpacity(0);
+      this.setInteraction(false);
     }
 
 
@@ -185,9 +231,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Show the CartoDB layer
      */
     CartoDBLayer.prototype.show = function() {
-      // this.setOpacity(this.options.opacity);
-      // this.setInteraction(true);
-      return "no implemented"
+      this.options.visible = true;      
+      this.setOpacity(this.options.before);
+      // Remove before
+      delete this.options.before;
+      console.log(this.options);
+      this.setInteraction(true);
     }
 
 
@@ -195,9 +244,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Return the visibility of the layer
      */
     CartoDBLayer.prototype.isVisible = function() {
-      // this.setOpacity(this.options.opacity);
-      // this.setInteraction(true);
-      return "no implemented!"
+      return this.options.visible
     }
 
 
@@ -234,11 +281,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       this._remove();
 
       // Create the new updated one
-      if (!this.options.interactivity) {
-        this._addSimple();
-      } else {
-        this._addInteraction();
-      }
+      this._addInteraction();
     }
 
 
@@ -356,10 +399,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
       // interaction placeholder
       this.tilejson = this._generateTileJson();
+
+      // Layer created
       this.layer = new wax.g.connector(this.tilejson);
-
-      this.options.map.overlayMapTypes.push(this.layer);
-
+      
+      // Setting its order
+      this._setLayerOrder()
 
       this.interaction = wax.g.interaction()
         .map(this.options.map)
@@ -443,6 +488,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         blankImage: '../img/blank_tile.png', 
         tilejson: '1.0.0',
         scheme: 'xyz',
+        name: this.options.table_name,
         tiles: [tile_url],
         grids: [grid_url],
         tiles_base: tile_url,
@@ -452,6 +498,29 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
           return data
         }
       };
+    }
+
+
+    CartoDBLayer.prototype._setLayerOrder = function(loading) {
+
+      // Remove this layer from the order array if it is present
+      var self = this;
+      this.options.map.overlayMapTypes.forEach(function(l,i){
+        if (l == self.layer) {
+          self.options.map.overlayMapTypes.removeAt(i);
+        }
+      })
+
+      // String positions
+      if (this.options.layer_order == "top")
+        this.options.map.overlayMapTypes.push(this.layer);
+
+      if (this.options.layer_order == "bottom")
+        this.options.map.overlayMapTypes.insertAt(0,this.layer);
+
+
+      // Number positions
+
     }
 
 
