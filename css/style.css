@@ -11,7 +11,7 @@ em {font: bold 13px/16px "Segoe UI Bold", "Helvetica Neue", "Helvetica", Arial!i
 h2 {font:bold 34px "Segoe UI Bold", "Helvetica Neue", "Helvetica", Arial!important;}
 h3 {font: bold 23px/24px "Segoe UI Bold", "Helvetica Neue", "Helvetica", Arial!important;}
 h5 {font: bold 19px/15px "Segoe UI Bold", "Helvetica Neue", "Helvetica", Arial!important;}
-div.right {min-height:100px!important;}
+section.nav div.right {min-height:100px!important;}
 
 /*Reseting infowindow*/
 body.developers.examples section div.content.no_padding.code input, body.developers.examples section div.content.no_padding.code p, body.developers.examples section div.content.no_padding.code div.buttons {width:auto;margin:0;}
