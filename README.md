@@ -2,6 +2,7 @@
 
 This library allows you to use your own CartoDB tables with Google Maps v3.
 
+
 # Using the library
 
 Using the library is really easy. It accepts the following parameters to manage the behavior of your CartoDB layers:
@@ -10,35 +11,53 @@ Using the library is really easy. It accepts the following parameters to manage 
 <tr>
 <td><b>Parameter name</b></td>
 <td><b>Description</b></td>
+<td><b>Type</b></td>
+<td><b>Callback variables</b></td>
 <td><b>Required</b></td>
 </tr>
 
 <tr>
 <td>map</td>
 <td>The Google Map object.</td>
+<td>Object</td>
+<td></td>
 <td>Yes</td>
 </tr>
 
 <tr>
 <td>username</td>
 <td>Your CartoDB user name.</td>
+<td>String</td>
+<td></td>
 <td>Yes</td>
 </tr>
 
 <tr>
 <td>table_name</td>
 <td>Your CartoDB table name.</td>
+<td></td>
+<td></td>
 <td>Yes</td>
 </tr>
 
 <tr>
 <td>query</td>
 <td>A SQL query.</td>
+<td></td>
+<td></td>
 <td>Yes</td>
 </tr>
 
 <tr>
-<td><i>layer_order</i></td>
+<td>opacity</td>
+<td>If you want to change the opacity of the CartoDB layer.</td>
+<td>Number</td>
+<td></td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>layer_order</td>
 <td>If you want to set the order of the CartoDB layer.</td>
 <td>Number or String ("top" or "bottom")</td>
 <td></td>
@@ -46,8 +65,18 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
+<td>tile_style</td>
+<td>If you want to add other style to the layer</td>
+<td>String</td>
+<td></td>
+<td>No</td>
+</tr>
+
+<tr>
 <td>map_style</td>
-<td>Show the same style as you defined in CartoDB.</td>
+<td>Show the same style as you defined in the CartoDB map.</td>
+<td></td>
+<td></td>
 <td>No</td>
 </tr>
 
@@ -63,7 +92,11 @@ Using the library is really easy. It accepts the following parameters to manage 
 <td>featureMouseOver</td>
 <td>A callback when hovers in a feature</td>
 <td>Function</td>
-<td><b>data:</b> The feature data requested in `interactivity`</td>
+<td>
+  <b>event:</b> Mouse event object<br/>
+  <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
+  <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
+</td>
 <td>No (But only will work with `interactivity` specified)</td>
 </tr>
 
@@ -80,7 +113,8 @@ Using the library is really easy. It accepts the following parameters to manage 
 <td>A callback when clicks in a feature</td>
 <td>Function</td>
 <td>
-  <b>latlng:</b> The LatLng leaflet object where was clicked<br/>
+  <b>event:</b> Mouse event object<br/>
+  <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
   <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
 </td>
 <td>No (But only will work with `interactivity` specified)</td>
@@ -89,18 +123,24 @@ Using the library is really easy. It accepts the following parameters to manage 
 <tr>
 <td>tile_style</td>
 <td>If you want to add other style to the layer.</td>
+<td></td>
+<td></td>
 <td>No</td>
 </tr>
 
 <tr>
 <td>auto_bound</td>
 <td>If you want to zoom in the area where the layer is positioned.</td>
+<td></td>
+<td></td>
 <td>No</td>
 </tr>
 
 <tr>
 <td>debug</td>
 <td>If you want to debug the library, set to true.</td>
+<td></td>
+<td></td>
 <td>No</td>
 </tr>
 </table>
@@ -122,9 +162,11 @@ First of all add the necessary script and css files:
 <link href="css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css">
 <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />          
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-<script type="text/javascript" src="js/wax.g.min-6.0.3.js"></script>
-<script type="text/javascript" src="dist/cartodb-gmapsv3.js"></script>
+<script type="text/javascript" src="js/wax.g.min-6.0.4.js"></script>
+<script type="text/javascript" src="dist/cartodb-gmapsv3-min.js"></script>
 ```
+* We strongly recommend to use the library files we have in this repository, they are fully tested.
+
 When the document is loaded, start creating the map:
 
 ```javascript
@@ -156,8 +198,8 @@ var cartodb_gmapsv3 = new CartoDBLayer({
 New funcionalities are coming, in the meantime you can use:
 
 
-- **removeLayer**: Removes the cartodb layer from the map.
-    Example: ```cartodb_gmapsv3.removeLayer();```
+- **setMap**: Attach the layer to the map or remove it.
+    Example: ```cartodb_gmapsv3.setMap(null);```
 - **hide**: Hide the cartodb layer from the map.
     Example: ```cartodb_gmapsv3.hide();```
 - **show**: Show again the cartodb layer in the map.
@@ -174,4 +216,5 @@ New funcionalities are coming, in the meantime you can use:
     Example: ```cartodb_gmapsv3.isVisible();```    
 - **setInteractivity**: Change the columns you want to get data (it needs to reload the tiles)
     Example: ```cartodb_gmapsv3.setInteractivity("cartodb_id, the_geom, magnitude");```
-- **setOpacity**: _Not available yet_ -> Waiting for this ticket fixed: https://github.com/mapbox/wax/issues/194
+- **setOpacity**: Change the opacity of the layer
+    Example: ```cartodb_gmapsv3.setOpacity(0.2);```

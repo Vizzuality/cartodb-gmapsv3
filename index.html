@@ -2,7 +2,6 @@
 <!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
 <!--[if IE 7]> <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
 <!--[if IE 8]> <html class="no-js lt-ie9" lang="en"> <![endif]-->
-<!-- Consider adding a manifest.appcache: h5bp.com/d/Offline -->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
   <head>
     <meta charset="utf-8">
@@ -25,9 +24,8 @@
         </h1>
         <nav class="right">
           <a href="http://cartodb.com/tour">Tour</a>
-          <a href="http://cartodb.com/tutorial/step/1">Getting Started</a>
+          <a href="http://cartodb.com/maps">Maps</a>
           <a class="selected" href="http://developers.cartodb.com">Developers</a>
-          <a href="http://blog.cartodb.com">Blog</a>
           <a href="http://cartodb.com/pricing">Pricing</a>
           <a href="http://cartodb.com/login">Sign in</a>
         </nav>
@@ -44,8 +42,8 @@
           <link href="css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css">
           <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />          
           <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-          <script type="text/javascript" src="js/wax.g.min-6.0.3.js"></script>
-          <script type="text/javascript" src="dist/cartodb-gmapsv3.js"></script>
+          <script type="text/javascript" src="js/wax.g.min-6.0.4.js"></script>
+          <script type="text/javascript" src="dist/cartodb-gmapsv3-min.js"></script>
 
           <script type="text/javascript">
 
@@ -77,13 +75,13 @@
                 tile_style: "#{{table_name}}{marker-fill:#E25B5B}",
                 interactivity: "cartodb_id, magnitude",
                 layer_order: "top",
-                featureMouseOver: function(data) {
+                featureMouseOver: function(ev, latlng, data) {
                   map.setOptions({draggableCursor: 'pointer'});
                 },
                 featureMouseOut: function() {
                   map.setOptions({draggableCursor: 'default'});
                 },
-                featureMouseClick: function(latlng, data) {
+                featureMouseClick: function(ev, latlng, data) {
 
                   // Set popup content
                   var html = '';
@@ -177,7 +175,15 @@
             </tr>
 
             <tr>
-              <td><i>layer_order</i></td>
+              <td>opacity</td>
+              <td>If you want to change the opacity of the CartoDB layer.</td>
+              <td>Number</td>
+              <td></td>
+              <td>No</td>
+            </tr>
+
+            <tr>
+              <td>layer_order</td>
               <td>If you want to set the order of the CartoDB layer.</td>
               <td>Number or String ("top" or "bottom")</td>
               <td></td>
@@ -185,8 +191,16 @@
             </tr>
 
             <tr>
+              <td>tile_style</td>
+              <td>If you want to add other style to the layer</td>
+              <td>String</td>
+              <td></td>
+              <td>No</td>
+            </tr>
+
+            <tr>
               <td>map_style</td>
-              <td>Show the same style as you defined in CartoDB.</td>
+              <td>Show the same style as you defined in the CartoDB map.</td>
               <td>Boolean</td>
               <td></td>
               <td>No</td>
@@ -204,7 +218,11 @@
               <td>featureMouseOver</td>
               <td>A callback when hovers in a feature</td>
               <td>Function</td>
-              <td><b>data:</b> The feature data requested in `interactivity`</td>
+              <td>
+                <b>event:</b> Mouse event object<br/>
+                <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
+                <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
+              </td>
               <td>No (But only will work with `interactivity` specified)</td>
             </tr>
 
@@ -221,7 +239,8 @@
               <td>A callback when clicks in a feature</td>
               <td>Function</td>
               <td>
-                <b>latlng:</b> The LatLng Google Maps object where was clicked<br/>
+                <b>event:</b> Mouse event object<br/>
+                <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
                 <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
               </td>
               <td>No (But only will work with `interactivity` specified)</td>
@@ -264,8 +283,8 @@
 &#60;link href="css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css" /&#62;
 &#60;link  href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" /&#62;
 &#60;script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"&#62;&#60;/script&#62;
-&#60;script type="text/javascript" src="js/wax.g.min-6.0.3.js"&#62;&#60;/script&#62;
-&#60;script type="text/javascript" src="dist/cartodb-gmapsv3.js"&#62;&#60;/script&#62;
+&#60;script type="text/javascript" src="js/wax.g.min-6.0.4.js"&#62;&#60;/script&#62;
+&#60;script type="text/javascript" src="dist/cartodb-gmapsv3-min.js"&#62;&#60;/script&#62;
           </pre>
 
 
@@ -291,7 +310,7 @@ var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
   layer_order: "top",
   tile_style: "#{{table_name}}{marker-fill:red}",
   interactivity: "cartodb_id, magnitude",
-  featureMouseClick: function(feature, latlng, data) {alert(feature)}
+  featureMouseClick: function(ev, latlng, data) {alert(data.cartodb_id)}
   auto_bound: true
 });
           </pre>
@@ -302,8 +321,8 @@ var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
 
           <ul class="margin20">
             <li style="display:block">
-              <p class="light"><b>removeLayer</b>: Removes the cartodb layer from the map.</p>
-              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.removeLayer();</pre>
+              <p class="light"><b>setMap</b>: Attach the layer to the map or remove it.</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setMap(null);</pre>
             </li>
             <li class="margin15" style="display:block">
               <p class="light"><b>hide</b>: Hide the cartodb layer from the map.</p>
@@ -338,13 +357,14 @@ var cartodb_gmapsv3 = new google.maps.CartoDBLayer({
               <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setInteractivity("cartodb_id, the_geom, magnitude");</pre>
             </li>
             <li class="margin15" style="display:block">
-              <p class="light"><b>setOpacity</b>:  _Not available yet_ -> Waiting for this ticket fixed: https://github.com/mapbox/wax/issues/194</p>
+              <p class="light"><b>setOpacity</b>:  Change the opacity of the layer</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setOpacity(0.2);</pre>
             </li>
           </ul>
 
           <h5 class="margin30" id="custom-infowindow">Custom infowindow</h5>
-          <p class="margin15 light">If you want to use the cartodb custom infowindow, you need to add the script in the html:</p>
-          <pre class="margin10" data-language="html">
+          <p class="margin15 light">The custom infowindow will come out soon.</p>
+          <!-- <pre class="margin10" data-language="html">
 &#60;script type="text/javascript" src="dist/cartodb-infowindow.js"&#62;&#60;/script&#62;
           </pre>
 
@@ -369,7 +389,7 @@ featureMouseClick: function(latlng, data) {
 ...
           </pre>
 
-          <p class="light margin15">You can see an example using it <a href="custominfowindow.html">here</a>.</p>
+          <p class="light margin15">You can see an example using it <a href="custominfowindow.html">here</a>.</p> -->
         </div>
       </section>
   
@@ -434,7 +454,7 @@ featureMouseClick: function(latlng, data) {
           <nav class="right">
             <a href="http://cartodb.com/tour">Feature tour</a>
             <a href="http://cartodb.com/tutorial/step/1">Getting started</a>
-            <a class="disabled">Education</a>
+            <a href="http://cartodb.com/maps">Maps</a>
             <a href="http://developers.cartodb.com/">Developers</a>
             <a href="http://blog.cartodb.com">Blog</a>
             <a href="http://cartodb.com/pricing">Pricing</a>

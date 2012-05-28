@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.40 [May 19, 2012]
+ * @version 0.40 [May 29, 2012]
  * @author: jmedina@vizzuality.com
  * @fileoverview <b>Author:</b> jmedina@vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -22,26 +22,18 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      *    user_name         -     CartoDB user name
      *    table_name        -     CartoDB table name
      *    query             -     If you want to apply any sql sentence to the table...
-     *    order             -     If you want to change the position order of the CartoDB layer
+     *    opacity           -     If you want to change the opacity of the CartoDB layer     
+     *    layer_order       -     If you want to change the position order of the CartoDB layer
      *    tile_style        -     If you want to add other style to the layer
+     *    map_style         -     Show the same style as you defined in the CartoDB map
      *    interactivity     -     Get data from the feature clicked ( without any request :) )
-     *    featureMouseOver  -     Callback when user hovers a feature (return feature id)
-     *    featureMouseClick -     Callback when user clicks a feature (return feature id, latlng and feature data)
+     *    featureMouseOver  -     Callback when user hovers a feature (return mouse event, latlng and data)
+     *    featureMouseOut   -     Callback when user hovers out a feature
+     *    featureMouseClick -     Callback when user clicks a feature (return mouse event, latlng and data)
      *    debug             -     Get error messages from the library
      *    auto_bound        -     Let cartodb auto-bound-zoom in the map (opcional - default = false)
      */
 
-
-    /*
-      TODO:
-        - Simple layers have to be wax layers with interaction, because we have to order layers
-        - New custom infowindow
-        - If you dont select a column in the query but you use it in the interactivity param, it WON'T work
-        - Add layer order funcionality
-        - Show and hide better (check previous position)
-        - Create minified versions
-
-    */
 
     function CartoDBLayer(options) {
       this.extend(CartoDBLayer, google.maps.OverlayView);
@@ -152,8 +144,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
       // Set the new value to the layer options
       this.options.tile_style = style;
-      //this._update();
-      this.interaction.tilejson(this._generateTileJson)
+      this._update();
     }
 
 
@@ -187,7 +178,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         } else { return }
       }
 
+      // Remove gmaps position defined
+      if (this.layer.gmaps_index)
+        delete this.layer.gmaps_index;
+      // Set new value
       this.options.layer_order = position;
+      // Layer order time!
       this._setLayerOrder()
     }
 
@@ -235,7 +231,6 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       this.setOpacity(this.options.before);
       // Remove before
       delete this.options.before;
-      console.log(this.options);
       this.setInteraction(true);
     }
 
@@ -257,7 +252,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Remove CartoDB layer
      */
     CartoDBLayer.prototype._remove =  function() {
-      // Remove interaction
+      // Disable and remove interaction
       this.setInteraction(false);
 
       // // Remove layer
@@ -431,7 +426,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype._bindWaxEvents = function(map,o) {
       switch (o.e.type) {
         case 'mousemove': if (this.options.featureMouseOver) {
-                            return this.options.featureMouseOver(o.data);
+                            return this.options.featureMouseOver(o.e,latlng,o.data);
                           } else {
                             if (this.options.debug) throw('featureMouseOver function not defined');
                           }
@@ -442,7 +437,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
                             , latlng = this.getProjection().fromContainerPixelToLatLng(new google.maps.Point(x,y))
                           
                           if (this.options.featureMouseClick) {
-                            this.options.featureMouseClick(latlng,o.data);
+                            this.options.featureMouseClick(o.e,latlng,o.data);
                           } else {
                             if (this.options.debug) throw('featureMouseClick function not defined');
                           }
@@ -501,7 +496,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     }
 
 
-    CartoDBLayer.prototype._setLayerOrder = function(loading) {
+    /**
+     * Set the layer order
+     */
+    CartoDBLayer.prototype._setLayerOrder = function() {
 
       // Remove this layer from the order array if it is present
       var self = this;
@@ -511,16 +509,39 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         }
       })
 
+      // Was it previously attached?
+      if (this.layer.gmaps_index) {
+        this.options.map.overlayMapTypes.insertAt(this.layer.gmaps_index,this.layer)
+        return;
+      }
+
       // String positions
-      if (this.options.layer_order == "top")
+      if (this.options.layer_order == "top") {
         this.options.map.overlayMapTypes.push(this.layer);
-
-      if (this.options.layer_order == "bottom")
+        return;
+      }
+      if (this.options.layer_order == "bottom") {
         this.options.map.overlayMapTypes.insertAt(0,this.layer);
-
-
+        return;
+      }
+        
       // Number positions
+      var actual_length = this.options.map.overlayMapTypes.getLength()
+      if (this.options.layer_order >= actual_length) {
+        // Add it at the end
+        this.options.map.overlayMapTypes.push(this.layer);
+      } else if (this.options.layer_order <= 0) {
+        // 0 dude!
+        this.options.map.overlayMapTypes.insertAt(0,this.layer);
+      } else {
+        // Add in the correct index
+        this.options.map.overlayMapTypes.insertAt(this.options.layer_order,this.layer);
+      }
 
+      // New layer, new indexes, let's check them!
+      this.options.map.overlayMapTypes.forEach(function(l,i){
+        l.gmaps_index = i
+      })
     }
 
 

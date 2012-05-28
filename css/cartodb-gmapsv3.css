@@ -1,3 +1,9 @@
+/*Reseting infowindow*/
+body.developers.examples section div.content.no_padding.code input, body.developers.examples section div.content.no_padding.code p, body.developers.examples section div.content.no_padding.code div.buttons {
+  width:auto;
+  margin:0;
+}
+
 /*Marker infowindow*/
 div.cartodb_infowindow {position:absolute; display:block; width:214px; padding:0; visibility:hidden;}
 div.cartodb_infowindow a.close {position:absolute; right:3px; top:3px; width:22px; height:15px; padding:4px 0 3px 0; text-align:center; font:bold 15px "Helvetica",Arial; color:#666666; text-decoration:none; line-height:15px}
@@ -21,3 +27,4 @@ div.cartodb_infowindow div.bottom a:hover {background:linear-gradient(-90deg, #C
   background:-moz-linear-gradient(-90deg, #CACBCE, #FFFFFF); background: -o-linear-gradient(#CACBCE,#FFFFFF); filter:  progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#CACBCE', endColorstr='#FFFFFF'); cursor:pointer;}
 a.cartodb_logo {position:absolute; bottom:6px; left:75px; display:block; width:71px; height:29px; background:url('http://cartodb.s3.amazonaws.com/embed/new_logo.png') no-repeat 0 0;
         text-indent:-9999px; line-height:0; font-size:0;}
+
