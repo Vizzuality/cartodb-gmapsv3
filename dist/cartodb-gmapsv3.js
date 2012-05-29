@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.41 [May 29, 2012]
+ * @version 0.42 [May 29, 2012]
  * @author: jmedina@vizzuality.com
  * @fileoverview <b>Author:</b> jmedina@vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -32,6 +32,13 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      *    featureMouseClick -     Callback when user clicks a feature (return mouse event, latlng and data)
      *    debug             -     Get error messages from the library
      *    auto_bound        -     Let cartodb auto-bound-zoom in the map (opcional - default = false)
+     *
+     *    tiler_domain      -     Use your own tiler domain
+     *    tiler_port        -     Use your current tiler port
+     *    tiler_protocol    -     http or https?
+     *    sql_domain        -     Use your own sql domain
+     *    sql_port          -     Use your current sql port
+     *    sql_protocol      -     http or https?
      */
 
 
@@ -40,12 +47,22 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
       this.options = options;
 
+      // Domains params
+      this.options.tiler_domain = options.tiler_domain || "cartodb.com";
+      this.options.tiler_port = options.tiler_port || "";
+      this.options.tiler_protocol = options.tiler_protocol || "http";
+      this.options.sql_domain = options.sql_domain || "cartodb.com";
+      this.options.sql_port = options.sql_port || "";
+      this.options.sql_protocol = options.sql_protocol || "http";
+
+      // Custom params
       this.options.query = options.query || "SELECT * FROM {{table_name}}";
       this.options.auto_bound = options.auto_bound || false;
       this.options.debug = options.debug || false;
       this.options.visible = true;
       this.options.opacity = this.options.opacity || 1;
       this.options.layer_order = options.layer_order || "top";
+
 
       this.initialize();
       this.setMap(options.map);
@@ -286,7 +303,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype._setBounds = function() {
       var self = this;
       reqwest({
-        url:'http://'+this.options.user_name+'.cartodb.com/api/v1/sql/?q='+escape('select ST_Extent(the_geom) from '+ this.options.table_name),
+        url: this._generateUrl("sql") + '/api/v2/sql/?q='+escape('select ST_Extent(the_geom) from '+ this.options.table_name),
         type: 'jsonp',
         jsonpCallback: 'callback',
         success: function(result) {
@@ -353,7 +370,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype._setMapStyle = function () {
       var self = this;
       reqwest({
-        url: 'http://' + this.options.user_name + '.cartodb.com/tiles/' + this.options.table_name + '/map_metadata?callback=?',
+        url: this._generateUrl("tiler") + '/tiles/' + this.options.table_name + '/map_metadata?callback=?',
         type: 'jsonp',
         jsonpCallback: 'callback',
         success: function(result) {
@@ -462,10 +479,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @return {Object} Options for ImageMapType
      */
     CartoDBLayer.prototype._generateTileJson = function () {
-      var core_url = 'http://' + this.options.user_name + '.cartodb.com';  
-      var base_url = core_url + '/tiles/' + this.options.table_name + '/{z}/{x}/{y}';
-      var tile_url = base_url + '.png';
-      var grid_url = base_url + '.grid.json';
+      var core_url = this._generateUrl("tiler")
+        , base_url = core_url + '/tiles/' + this.options.table_name + '/{z}/{x}/{y}'
+        , tile_url = base_url + '.png'
+        , grid_url = base_url + '.grid.json'
       
       // SQL?
       if (this.options.query) {
@@ -558,6 +575,18 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     /*
      * HELPER FUNCTIONS
      */
+
+    /**
+     * Generate a URL about sql api or tile api
+     * @params {String} Type of url
+     */  
+    CartoDBLayer.prototype._generateUrl = function(type) {
+      if (type == "sql") {
+        return this.options.sql_protocol + "://" + this.options.user_name + "." + this.options.sql_domain + ((this.options.sql_port != "") ? (":" + this.options.sql_port) : "");
+      } else {
+        return this.options.tiler_protocol + "://" + this.options.user_name + "." + this.options.tiler_domain + ((this.options.tiler_port != "") ? (":" + this.options.tiler_port) : "");
+      }
+    }
 
     /**
      * Parse URI

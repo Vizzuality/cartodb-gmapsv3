@@ -143,6 +143,55 @@ Using the library is really easy. It accepts the following parameters to manage 
 <td></td>
 <td>No</td>
 </tr>
+
+<tr>
+<td>tiler_domain</td>
+<td>Set your Tiler domain.</td>
+<td></td>
+<td></td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>tiler_port</td>
+<td>Set your Tiler port.</td>
+<td>Number</td>
+<td></td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>tiler_protocol</td>
+<td>Set your Tiler protocol</td>
+<td>String (usually "http" or "https")</td>
+<td></td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>sql_domain</td>
+<td>Set your SQL API domain.</td>
+<td></td>
+<td></td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>sql_port</td>
+<td>Set your SQL API port.</td>
+<td>Number</td>
+<td></td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>sql_protocol</td>
+<td>Set your SQL API protocol.</td>
+<td>String (usually "http" or "https")</td>
+<td></td>
+<td>No</td>
+</tr>
+
 </table>
 
 # Usage notes
