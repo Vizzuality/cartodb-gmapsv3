@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.40 [May 29, 2012]
+ * @version 0.41 [May 29, 2012]
  * @author: jmedina@vizzuality.com
  * @fileoverview <b>Author:</b> jmedina@vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -337,13 +337,13 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         if (!document.getElementById('cartodb_logo')) {
           var cartodb_link = document.createElement("a");
           cartodb_link.setAttribute('id','cartodb_logo');
-          cartodb_link.setAttribute('style',"position:absolute; bottom:3px; left:74px; display:block;");
+          cartodb_link.setAttribute('style',"position:absolute; bottom:3px; left:74px; display:block; border:none; z-index:100");
           cartodb_link.setAttribute('href','http://www.cartodb.com');
           cartodb_link.setAttribute('target','_blank');
-          cartodb_link.innerHTML = "<img src='http://cartodb.s3.amazonaws.com/static/new_logo.png' alt='CartoDB' title='CartoDB' />";
+          cartodb_link.innerHTML = "<img src='http://cartodb.s3.amazonaws.com/static/new_logo.png' alt='CartoDB' title='CartoDB' style='border:none;' />";
           self.options.map.getDiv().appendChild(cartodb_link)
         }
-      },500);
+      },2000);
     }
 
 
@@ -431,9 +431,19 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
                             if (this.options.debug) throw('featureMouseOver function not defined');
                           }
                           break;
-        case 'mouseup':   var offset = this._offset(map.getDiv())
-                            , x = o.e.pageX - offset.left
-                            , y = o.e.pageY - offset.top
+        case 'mouseup':   var offset = this._offset(map.getDiv());
+
+                          // Get page y and x (IE?)
+                          if (o.e.pageX || o.e.pageY) {
+                            posx = o.e.pageX;
+                            posy = o.e.pageY;
+                          } else if (o.e.clientX || o.e.clientY) {
+                            posx = o.e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                            posy = o.e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                          }
+
+                          var x = posx - offset.left
+                            , y = posy - offset.top
                             , latlng = this.getProjection().fromContainerPixelToLatLng(new google.maps.Point(x,y))
                           
                           if (this.options.featureMouseClick) {
