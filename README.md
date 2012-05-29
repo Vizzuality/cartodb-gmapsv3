@@ -145,6 +145,10 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+
+<tr>
 <td>tiler_domain</td>
 <td>Set your Tiler domain.</td>
 <td></td>
