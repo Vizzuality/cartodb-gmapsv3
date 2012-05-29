@@ -44,8 +44,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       this.options.auto_bound = options.auto_bound || false;
       this.options.debug = options.debug || false;
       this.options.visible = true;
-      this.options.opacity = this.options.opacity || 1;
-      this.options.layer_order = options.layer_order || "top";
+      this.options.opacity = this.options.opacity || 1;
+      this.options.layer_order = options.layer_order || "top";
 
       this.initialize();
       this.setMap(options.map);
