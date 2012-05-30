@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.42 [May 29, 2012]
+ * @version 0.43 [May 30, 2012]
  * @author: jmedina@vizzuality.com
  * @fileoverview <b>Author:</b> jmedina@vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -57,12 +57,16 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
       // Custom params
       this.options.query = options.query || "SELECT * FROM {{table_name}}";
-      this.options.auto_bound = options.auto_bound || false;
-      this.options.debug = options.debug || false;
       this.options.visible = true;
       this.options.opacity = this.options.opacity || 1;
       this.options.layer_order = options.layer_order || "top";
 
+      // Some checks
+      if (!this.options.table_name || !this.options.map) {
+        if (this.options.debug) {
+          throw('cartodb-gmapsv3 needs at least a CartoDB table name and the gmapsv3 map object :(');
+        } else { return }
+      }
 
       this.initialize();
       this.setMap(options.map);

@@ -17,7 +17,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>map</td>
+<td><i>map</i></td>
 <td>The Google Map object.</td>
 <td>Object</td>
 <td></td>
@@ -25,7 +25,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>username</td>
+<td><i>username</i></td>
 <td>Your CartoDB user name.</td>
 <td>String</td>
 <td></td>
@@ -33,7 +33,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>table_name</td>
+<td><i>table_name</i></td>
 <td>Your CartoDB table name.</td>
 <td></td>
 <td></td>
@@ -41,31 +41,31 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>query</td>
-<td>A SQL query.</td>
+<td><i>query</i></td>
+<td>A SQL query. Default: <b>SELECT * FROM {{table_name}}</b></td>
 <td></td>
 <td></td>
 <td>Yes</td>
 </tr>
 
 <tr>
-<td>opacity</td>
-<td>If you want to change the opacity of the CartoDB layer.</td>
+<td><i>opacity</i></td>
+<td>If you want to change the opacity of the CartoDB layer. Default: <b>1</b></td>
 <td>Number</td>
 <td></td>
 <td>No</td>
 </tr>
 
 <tr>
-<td>layer_order</td>
-<td>If you want to set the order of the CartoDB layer.</td>
+<td><i>layer_order</i></td>
+<td>If you want to set the order of the CartoDB layer. Default: <b>"top"</b></td>
 <td>Number or String ("top" or "bottom")</td>
 <td></td>
 <td>No</td>
 </tr>
 
 <tr>
-<td>tile_style</td>
+<td><i>tile_style</i></td>
 <td>If you want to add other style to the layer</td>
 <td>String</td>
 <td></td>
@@ -73,7 +73,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>map_style</td>
+<td><i>map_style</i></td>
 <td>Show the same style as you defined in the CartoDB map.</td>
 <td></td>
 <td></td>
@@ -81,7 +81,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>interactivity</td>
+<td><i>interactivity</i></td>
 <td>If you want to add interactivity to the layer without making requests.</td>
 <td>String (columns separated by commas)</td>
 <td></td>
@@ -89,7 +89,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>featureMouseOver</td>
+<td><i>featureMouseOver</i></td>
 <td>A callback when hovers in a feature</td>
 <td>Function</td>
 <td>
@@ -101,7 +101,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>featureMouseOut</td>
+<td><i>featureMouseOut</i></td>
 <td>A callback when hovers out a feature</td>
 <td>Function</td>
 <td></td>
@@ -109,7 +109,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>featureMouseClick</td>
+<td><i>featureMouseClick</i></td>
 <td>A callback when clicks in a feature</td>
 <td>Function</td>
 <td>
@@ -121,7 +121,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>tile_style</td>
+<td><i>tile_style</i></td>
 <td>If you want to add other style to the layer.</td>
 <td></td>
 <td></td>
@@ -129,7 +129,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>auto_bound</td>
+<td><i>auto_bound</i></td>
 <td>If you want to zoom in the area where the layer is positioned.</td>
 <td></td>
 <td></td>
@@ -137,61 +137,61 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td>debug</td>
+<td><i>debug</i></td>
 <td>If you want to debug the library, set to true.</td>
 <td></td>
 <td></td>
 <td>No</td>
 </tr>
 
-<tr>
+<tr class="separator">
   <td></td><td></td><td></td><td></td><td></td>
 </tr>
 
 <tr>
-<td>tiler_domain</td>
-<td>Set your Tiler domain.</td>
-<td></td>
+<td><i>tiler_domain</i></td>
+<td>Base domain of the tiler URL. Default: <b>cartodb.com</b></td>
+<td>String</td>
 <td></td>
 <td>No</td>
 </tr>
 
 <tr>
-<td>tiler_port</td>
-<td>Set your Tiler port.</td>
+<td><i>tiler_port</i></td>
+<td>Port of the tiler URL. Default: <b>80</b></td>
 <td>Number</td>
 <td></td>
 <td>No</td>
 </tr>
 
 <tr>
-<td>tiler_protocol</td>
-<td>Set your Tiler protocol</td>
-<td>String (usually "http" or "https")</td>
+<td><i>tiler_protocol</i></td>
+<td>Protocol for the tiler URL. Default: <b>http</b></td>
+<td>String</td>
 <td></td>
 <td>No</td>
 </tr>
 
 <tr>
-<td>sql_domain</td>
-<td>Set your SQL API domain.</td>
-<td></td>
+<td><i>sql_domain</i></td>
+<td>Set your SQL API domain. Default: <b>cartodb.com</b></td>
+<td>String</td>
 <td></td>
 <td>No</td>
 </tr>
 
 <tr>
-<td>sql_port</td>
-<td>Set your SQL API port.</td>
+<td><i>sql_port</i></td>
+<td>Set your SQL API port. Default: <b>8080</b></td>
 <td>Number</td>
 <td></td>
 <td>No</td>
 </tr>
 
 <tr>
-<td>sql_protocol</td>
-<td>Set your SQL API protocol.</td>
-<td>String (usually "http" or "https")</td>
+<td><i>sql_protocol</i></td>
+<td>Set your SQL API protocol. Default: <b>http</b></td>
+<td>String</td>
 <td></td>
 <td>No</td>
 </tr>

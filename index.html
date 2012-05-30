@@ -35,7 +35,7 @@
     <div class="background floating">
       <section class="shadow top">
         <div class="content">
-          <hgroup><h2 class="dark">CartoDB Google Maps v3 library</h2><em class="medium">0.42</em></hgroup>
+          <hgroup><h2 class="dark">CartoDB Google Maps v3 library</h2><em class="medium">0.43</em></hgroup>
         </div>
         <div class="content no_padding border code">
 
@@ -135,190 +135,193 @@
 
           <table class="margin30">
             <tr>
-             <td><b>Parameter name</b></td>
-              <td><b>Description</b></td>
-              <td><b>Type</b></td>
-              <td><b>Callback variables</b></td>
-              <td><b>Required</b></td>
+            <td><b>Parameter name</b></td>
+            <td><b>Description</b></td>
+            <td><b>Type</b></td>
+            <td><b>Callback variables</b></td>
+            <td><b>Required</b></td>
             </tr>
 
             <tr>
-              <td>map</td>
-              <td>The Google Map object.</td>
-              <td>Object</td>
-              <td></td>
-              <td>Yes</td>
+            <td><i>map</i></td>
+            <td>The Google Map object.</td>
+            <td>Object</td>
+            <td></td>
+            <td>Yes</td>
             </tr>
 
             <tr>
-              <td>username</td>
-              <td>Your CartoDB user name.</td>
-              <td>String</td>
-              <td></td>
-              <td>Yes</td>
+            <td><i>username</i></td>
+            <td>Your CartoDB user name.</td>
+            <td>String</td>
+            <td></td>
+            <td>Yes</td>
             </tr>
 
             <tr>
-              <td>table_name</td>
-              <td>Your CartoDB table name.</td>
-              <td>String</td>
-              <td></td>
-              <td>Yes</td>
+            <td><i>table_name</i></td>
+            <td>Your CartoDB table name.</td>
+            <td></td>
+            <td></td>
+            <td>Yes</td>
             </tr>
 
             <tr>
-              <td>query</td>
-              <td>A SQL query.</td>
-              <td>String</td>
-              <td></td>
-              <td>Yes</td>
+            <td><i>query</i></td>
+            <td>A SQL query. Default: <b>SELECT * FROM {{table_name}}</b></td>
+            <td></td>
+            <td></td>
+            <td>Yes</td>
             </tr>
 
             <tr>
-              <td>opacity</td>
-              <td>If you want to change the opacity of the CartoDB layer.</td>
-              <td>Number</td>
-              <td></td>
-              <td>No</td>
+            <td><i>opacity</i></td>
+            <td>If you want to change the opacity of the CartoDB layer. Default: <b>1</b></td>
+            <td>Number</td>
+            <td></td>
+            <td>No</td>
             </tr>
 
             <tr>
-              <td>layer_order</td>
-              <td>If you want to set the order of the CartoDB layer.</td>
-              <td>Number or String ("top" or "bottom")</td>
-              <td></td>
-              <td>No</td>
+            <td><i>layer_order</i></td>
+            <td>If you want to set the order of the CartoDB layer. Default: <b>"top"</b></td>
+            <td>Number or String ("top" or "bottom")</td>
+            <td></td>
+            <td>No</td>
             </tr>
 
             <tr>
-              <td>tile_style</td>
-              <td>If you want to add other style to the layer</td>
-              <td>String</td>
-              <td></td>
-              <td>No</td>
+            <td><i>tile_style</i></td>
+            <td>If you want to add other style to the layer</td>
+            <td>String</td>
+            <td></td>
+            <td>No</td>
             </tr>
 
             <tr>
-              <td>map_style</td>
-              <td>Show the same style as you defined in the CartoDB map.</td>
-              <td>Boolean</td>
-              <td></td>
-              <td>No</td>
+            <td><i>map_style</i></td>
+            <td>Show the same style as you defined in the CartoDB map.</td>
+            <td></td>
+            <td></td>
+            <td>No</td>
             </tr>
 
             <tr>
-              <td>interactivity</td>
-              <td>If you want to add interactivity to the layer without making requests.</td>
-              <td>String (columns separated by commas)</td>
-              <td></td>
-              <td>No</td>
+            <td><i>interactivity</i></td>
+            <td>If you want to add interactivity to the layer without making requests.</td>
+            <td>String (columns separated by commas)</td>
+            <td></td>
+            <td>No</td>
             </tr>
 
             <tr>
-              <td>featureMouseOver</td>
-              <td>A callback when hovers in a feature</td>
-              <td>Function</td>
-              <td>
-                <b>event:</b> Mouse event object<br/>
-                <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
-                <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
-              </td>
-              <td>No (But only will work with `interactivity` specified)</td>
+            <td><i>featureMouseOver</i></td>
+            <td>A callback when hovers in a feature</td>
+            <td>Function</td>
+            <td>
+              <b>event:</b> Mouse event object<br/>
+              <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
+              <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
+            </td>
+            <td>No (But only will work with `interactivity` specified)</td>
             </tr>
 
             <tr>
-              <td>featureMouseOut</td>
-              <td>A callback when hovers out a feature</td>
-              <td>Function</td>
-              <td></td>
-              <td>No (But only will work with `interactivity` specified)</td>
+            <td><i>featureMouseOut</i></td>
+            <td>A callback when hovers out a feature</td>
+            <td>Function</td>
+            <td></td>
+            <td>No (But only will work with `interactivity` specified)</td>
             </tr>
 
             <tr>
-              <td>featureMouseClick</td>
-              <td>A callback when clicks in a feature</td>
-              <td>Function</td>
-              <td>
-                <b>event:</b> Mouse event object<br/>
-                <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
-                <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
-              </td>
-              <td>No (But only will work with `interactivity` specified)</td>
+            <td><i>featureMouseClick</i></td>
+            <td>A callback when clicks in a feature</td>
+            <td>Function</td>
+            <td>
+              <b>event:</b> Mouse event object<br/>
+              <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
+              <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
+            </td>
+            <td>No (But only will work with `interactivity` specified)</td>
             </tr>
 
             <tr>
-              <td>tile_style</td>
-              <td>If you want to add other style to the layer.</td>
-              <td>String</td>
-              <td></td>
-              <td>No</td>
+            <td><i>tile_style</i></td>
+            <td>If you want to add other style to the layer.</td>
+            <td></td>
+            <td></td>
+            <td>No</td>
             </tr>
 
             <tr>
-              <td>auto_bound</td>
-              <td>If you want to zoom in the area where the layer is positioned.</td>
-              <td>Boolean</td>
-              <td></td>
-              <td>No</td>
+            <td><i>auto_bound</i></td>
+            <td>If you want to zoom in the area where the layer is positioned.</td>
+            <td></td>
+            <td></td>
+            <td>No</td>
             </tr>
 
             <tr>
-              <td>debug</td>
-              <td>If you want to debug the library, set to true.</td>
-              <td>Boolean</td>
-              <td></td>
-              <td>No</td>
+            <td><i>debug</i></td>
+            <td>If you want to debug the library, set to true.</td>
+            <td></td>
+            <td></td>
+            <td>No</td>
             </tr>
 
-            <tr class="separator"><td></td><td></td><td></td><td></td><td></td></tr>
-
-            <tr>
-              <td>tiler_domain</td>
-              <td>Set your Tiler domain.</td>
-              <td></td>
-              <td></td>
-              <td>No</td>
+            <tr class="separator">
+              <td></td><td></td><td></td><td></td><td></td>
             </tr>
 
             <tr>
-              <td>tiler_port</td>
-              <td>Set your Tiler port.</td>
-              <td>Number</td>
-              <td></td>
-              <td>No</td>
+            <td><i>tiler_domain</i></td>
+            <td>Base domain of the tiler URL. Default: <b>cartodb.com</b></td>
+            <td>String</td>
+            <td></td>
+            <td>No</td>
             </tr>
 
             <tr>
-              <td>tiler_protocol</td>
-              <td>Set your Tiler protocol</td>
-              <td>String (usually "http" or "https")</td>
-              <td></td>
-              <td>No</td>
+            <td><i>tiler_port</i></td>
+            <td>Port of the tiler URL. Default: <b>80</b></td>
+            <td>Number</td>
+            <td></td>
+            <td>No</td>
             </tr>
 
             <tr>
-              <td>sql_domain</td>
-              <td>Set your SQL API domain.</td>
-              <td></td>
-              <td></td>
-              <td>No</td>
+            <td><i>tiler_protocol</i></td>
+            <td>Protocol for the tiler URL. Default: <b>http</b></td>
+            <td>String</td>
+            <td></td>
+            <td>No</td>
             </tr>
 
             <tr>
-              <td>sql_port</td>
-              <td>Set your SQL API port.</td>
-              <td>Number</td>
-              <td></td>
-              <td>No</td>
+            <td><i>sql_domain</i></td>
+            <td>Set your SQL API domain. Default: <b>cartodb.com</b></td>
+            <td>String</td>
+            <td></td>
+            <td>No</td>
             </tr>
 
             <tr>
-              <td>sql_protocol</td>
-              <td>Set your SQL API protocol.</td>
-              <td>String (usually "http" or "https")</td>
-              <td></td>
-              <td>No</td>
+            <td><i>sql_port</i></td>
+            <td>Set your SQL API port. Default: <b>8080</b></td>
+            <td>Number</td>
+            <td></td>
+            <td>No</td>
             </tr>
+
+            <tr>
+            <td><i>sql_protocol</i></td>
+            <td>Set your SQL API protocol. Default: <b>http</b></td>
+            <td>String</td>
+            <td></td>
+            <td>No</td>
+            </tr>
+
           </table>
 
 
@@ -337,6 +340,7 @@
 &#60;script type="text/javascript" src="dist/cartodb-gmapsv3-min.js"&#62;&#60;/script&#62;
           </pre>
 
+          <p class="light small">* We strongly recommend to use the library files we have in this repository, they are fully tested.</p>
 
           <p class="margin15 light">When the document is loaded, start creating the map:</p>
 
@@ -413,33 +417,34 @@ var cartodb_gmapsv3 = new CartoDBLayer({
           </ul>
 
           <h5 class="margin30" id="custom-infowindow">Custom infowindow</h5>
-          <p class="margin15 light">The custom infowindow will come out soon.</p>
-          <!-- <pre class="margin10" data-language="html">
-&#60;script type="text/javascript" src="dist/cartodb-infowindow.js"&#62;&#60;/script&#62;
+          <p class="margin15 light">If you want to use the cartodb custom infowindow, you need to add the script in the html:</p>
+          <pre class="margin10" data-language="html">
+&#60;script type="text/javascript" src="dist/cartodb-infowindow-min.js"&#62;&#60;/script&#62;
           </pre>
 
-          <p class="light margin15">Create the CartoDB infowindow:</p>
+          <p class="light margin15">Create the CartoDB infowindow passing the map object:</p>
           <pre data-language="javascript">
-var infowindow = new google.maps.CartoDBInfowindow();
+var infowindow = new CartoDBInfowindow(map);
           </pre>
 
           <p class="light margin15">And then use as you want:</p>
           <pre data-language="javascript">
 ...
-featureMouseClick: function(latlng, data) {
-  // Set popup content
+featureMouseClick: function(ev,latlng,data) {
+  // Set infowindow content
+  // You can pass an Object, an Array or a String
   infowindow.setContent(data);
 
   // Set latlng
   infowindow.setLatLng(latlng);
 
   // Show it!
-  infowindow.open(map);
+  infowindow.open();
 },
 ...
           </pre>
 
-          <p class="light margin15">You can see an example using it <a href="custominfowindow.html">here</a>.</p> -->
+          <p class="light margin15">You can see an example using it <a href="custominfowindow.html">here</a>.</p>
         </div>
       </section>
   

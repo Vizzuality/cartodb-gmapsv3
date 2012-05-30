@@ -10,8 +10,8 @@
   <link rel="stylesheet" href="css/cartodb-gmapsv3.css">
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
   <script type="text/javascript" src="js/wax.g.min-6.0.4.js"></script>
-  <!--script type="text/javascript" src="dist/cartodb-infowindow.js"></script-->
-  <script type="text/javascript" src="dist/cartodb-gmapsv3.js"></script>
+  <script type="text/javascript" src="dist/cartodb-infowindow-min.js"></script>
+  <script type="text/javascript" src="dist/cartodb-gmapsv3-min.js"></script>
 
   <script type="text/javascript">
 
@@ -23,8 +23,7 @@
       mapTypeControl: false
     });
 
-    //var infowindow = new google.maps.CartoDBInfowindow();
-    var infowindow = new google.maps.InfoWindow();
+    var infowindow = new CartoDBInfowindow(map);
 
     var cartodb1_gmapsv3 = new CartoDBLayer({
       map: map,
@@ -60,13 +59,13 @@
           html += '<label>' + column + '</label>';
           html += '<p>' + data[column] + '</p>';
         }
-        infowindow.setContent(html);
+        infowindow.setContent(data);
 
         // Set latlng
         infowindow.setPosition(latlng);
 
         // Show it!
-        infowindow.open(map);
+        infowindow.open();
       },
       auto_bound: false,
       debug: true
