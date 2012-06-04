@@ -35,7 +35,7 @@
     <div class="background floating">
       <section class="shadow top">
         <div class="content">
-          <hgroup><h2 class="dark">CartoDB Google Maps v3 library</h2><em class="medium">0.43</em></hgroup>
+          <hgroup><h2 class="dark">CartoDB Google Maps v3 library</h2><em class="medium">0.44</em></hgroup>
         </div>
         <div class="content no_padding border code">
 
@@ -161,7 +161,7 @@
             <tr>
             <td><i>table_name</i></td>
             <td>Your CartoDB table name.</td>
-            <td></td>
+            <td>String</td>
             <td></td>
             <td>Yes</td>
             </tr>
@@ -169,7 +169,7 @@
             <tr>
             <td><i>query</i></td>
             <td>A SQL query. Default: <b>SELECT * FROM {{table_name}}</b></td>
-            <td></td>
+            <td>String</td>
             <td></td>
             <td>Yes</td>
             </tr>
@@ -249,15 +249,15 @@
             <tr>
             <td><i>tile_style</i></td>
             <td>If you want to add other style to the layer.</td>
-            <td></td>
+            <td>String</td>
             <td></td>
             <td>No</td>
             </tr>
 
             <tr>
             <td><i>auto_bound</i></td>
-            <td>If you want to zoom in the area where the layer is positioned.</td>
-            <td></td>
+            <td>Bounds in the area with your query results.</td>
+            <td>Boolean</td>
             <td></td>
             <td>No</td>
             </tr>
@@ -265,7 +265,7 @@
             <tr>
             <td><i>debug</i></td>
             <td>If you want to debug the library, set to true.</td>
-            <td></td>
+            <td>Boolean</td>
             <td></td>
             <td>No</td>
             </tr>

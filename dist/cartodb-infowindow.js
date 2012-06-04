@@ -1,6 +1,6 @@
 /*
  * CartoDBInfowindow
- * v0.1
+ * v0.2
  */
 
   function CartoDBInfowindow(map) {
@@ -37,9 +37,6 @@
         me._hide();
       });
 
-      google.maps.event.addDomListener(div, 'click', function (ev) {
-        ev.preventDefault ? ev.preventDefault() : ev.returnValue = false;
-      });
       google.maps.event.addDomListener(div, 'dblclick', function (ev) {
         ev.preventDefault ? ev.preventDefault() : ev.returnValue = false;
       });

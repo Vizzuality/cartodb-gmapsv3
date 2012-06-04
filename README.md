@@ -123,15 +123,15 @@ Using the library is really easy. It accepts the following parameters to manage 
 <tr>
 <td><i>tile_style</i></td>
 <td>If you want to add other style to the layer.</td>
-<td></td>
+<td>String</td>
 <td></td>
 <td>No</td>
 </tr>
 
 <tr>
 <td><i>auto_bound</i></td>
-<td>If you want to zoom in the area where the layer is positioned.</td>
-<td></td>
+<td>Bounds in the area with your query results.</td>
+<td>Booelan</td>
 <td></td>
 <td>No</td>
 </tr>
@@ -139,7 +139,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 <tr>
 <td><i>debug</i></td>
 <td>If you want to debug the library, set to true.</td>
-<td></td>
+<td>Boolean</td>
 <td></td>
 <td>No</td>
 </tr>

@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.43 [May 30, 2012]
+ * @version 0.44 [June 4, 2012]
  * @author: jmedina@vizzuality.com
  * @fileoverview <b>Author:</b> jmedina@vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -307,19 +307,18 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype._setBounds = function() {
       var self = this;
       reqwest({
-        url: this._generateUrl("sql") + '/api/v2/sql/?q='+escape('select ST_Extent(the_geom) from '+ this.options.table_name),
+        url: this._generateUrl("sql") + '/api/v2/sql/?q='+escape('SELECT ST_XMin(ST_Extent(the_geom)) as minx,ST_YMin(ST_Extent(the_geom)) as miny,'+
+          'ST_XMax(ST_Extent(the_geom)) as maxx,ST_YMax(ST_Extent(the_geom)) as maxy from ('+ this.options.query.replace(/\{\{table_name\}\}/g,this.options.table_name) + ') as subq'),
         type: 'jsonp',
         jsonpCallback: 'callback',
         success: function(result) {
-          if (result.rows[0].st_extent!=null) {
-            var coordinates = result.rows[0].st_extent.replace('BOX(','').replace(')','').split(',');
-            var coor1 = coordinates[0].split(' ');
-            var coor2 = coordinates[1].split(' ');
+          if (result.rows[0].maxx!=null) {
+            var coordinates = result.rows[0];
 
-            var lon0 = coor1[0];
-            var lat0 = coor1[1];
-            var lon1 = coor2[0];
-            var lat1 = coor2[1];
+            var lon0 = coordinates.maxx;
+            var lat0 = coordinates.maxy;
+            var lon1 = coordinates.minx;
+            var lat1 = coordinates.miny;
 
             var minlat = -85.0511;
             var maxlat =  85.0511;
