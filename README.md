@@ -35,7 +35,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 <tr>
 <td><i>table_name</i></td>
 <td>Your CartoDB table name.</td>
-<td></td>
+<td>String</td>
 <td></td>
 <td>Yes</td>
 </tr>
@@ -43,7 +43,7 @@ Using the library is really easy. It accepts the following parameters to manage 
 <tr>
 <td><i>query</i></td>
 <td>A SQL query. Default: <b>SELECT * FROM {{table_name}}</b></td>
-<td></td>
+<td>String</td>
 <td></td>
 <td>Yes</td>
 </tr>
