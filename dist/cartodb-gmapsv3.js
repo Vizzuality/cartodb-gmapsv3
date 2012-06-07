@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.44 [June 4, 2012]
+ * @version 0.45 [June 7, 2012]
  * @author: jmedina@vizzuality.com
  * @fileoverview <b>Author:</b> jmedina@vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -44,7 +44,6 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
     function CartoDBLayer(options) {
       this.extend(CartoDBLayer, google.maps.OverlayView);
-
       this.options = options;
 
       // Domains params
@@ -58,7 +57,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       // Custom params
       this.options.query = options.query || "SELECT * FROM {{table_name}}";
       this.options.visible = true;
-      this.options.opacity = this.options.opacity || 1;
+      this.options.opacity = (!isNaN(options.opacity)) ? options.opacity : 1; // Hack to save 0 (false) from check of Javascript :S
       this.options.layer_order = options.layer_order || "top";
 
       // Some checks
