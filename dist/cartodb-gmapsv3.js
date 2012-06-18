@@ -686,6 +686,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     /**
      * Calculate the correct offset to get the latlng clicked or touched
      * @params {obj} Map dom element
+     * @params {obj} Wax event object
      */
     CartoDBLayer.prototype._findPos = function (map,o) {
       var curleft = curtop = 0;
