@@ -89,19 +89,20 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td><i>featureMouseOver</i></td>
+<td><i>featureOver</i></td>
 <td>A callback when hovers in a feature</td>
 <td>Function</td>
 <td>
   <b>event:</b> Mouse event object<br/>
   <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
+  <b>pos:</b> Object with x and y position in the DOM map element<br/>
   <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
 </td>
 <td>No (But only will work with `interactivity` specified)</td>
 </tr>
 
 <tr>
-<td><i>featureMouseOut</i></td>
+<td><i>featureOut</i></td>
 <td>A callback when hovers out a feature</td>
 <td>Function</td>
 <td></td>
@@ -109,12 +110,13 @@ Using the library is really easy. It accepts the following parameters to manage 
 </tr>
 
 <tr>
-<td><i>featureMouseClick</i></td>
+<td><i>featureClick</i></td>
 <td>A callback when clicks in a feature</td>
 <td>Function</td>
 <td>
   <b>event:</b> Mouse event object<br/>
-  <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
+  <b>latlng:</b> The LatLng gmapsv3 object where was clicked or touched<br/>
+  <b>pos:</b> Object with x and y position in the DOM map element<br/>
   <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
 </td>
 <td>No (But only will work with `interactivity` specified)</td>
@@ -215,7 +217,7 @@ First of all add the necessary script and css files:
 <link href="css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css">
 <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />          
 <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-<script type="text/javascript" src="js/wax.g.min-6.0.4.js"></script>
+<script type="text/javascript" src="js/wax.g.min-6.2.0-touched.js"></script>
 <script type="text/javascript" src="dist/cartodb-gmapsv3-min.js"></script>
 ```
 * We strongly recommend to use the library files we have in this repository, they are fully tested.
@@ -242,7 +244,9 @@ var cartodb_gmapsv3 = new CartoDBLayer({
   layer_order: "top",
   tile_style: "#{{table_name}}{marker-fill:red}",
   interactivity: "cartodb_id, magnitude",
-  featureMouseClick: function(feature, latlng, data) {alert(feature)}
+  featureClick: function(feature, latlng, pos, data) {alert(feature)},
+  featureOut: function() {},
+  featureOver: function(feature, latlng, pos, data) {},
   auto_bound: true
 });
 ```
@@ -269,5 +273,9 @@ New funcionalities are coming, in the meantime you can use:
     Example: ```cartodb_gmapsv3.isVisible();```    
 - **setInteractivity**: Change the columns you want to get data (it needs to reload the tiles)
     Example: ```cartodb_gmapsv3.setInteractivity("cartodb_id, the_geom, magnitude");```
+- **setOptions**: Change any parameter at the same time refreshing the tiles once
+    Example: ```cartodb_gmapsv3.setOptions({query: "SELECT * FROM {{table_name}} WHERE cartodb_id<100", interactivity: "cartodb_id,the_geom,magnitude"});```
 - **setOpacity**: Change the opacity of the layer
     Example: ```cartodb_gmapsv3.setOpacity(0.2);```
+- **setBounds**: Set bounds in the map using a new query or the default one
+    Example: ```cartodb_gmapsv3.setBounds("SELECT * FROM {{table_name}} WHERE cartodb_id < 100");```

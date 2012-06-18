@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.45 [June 7, 2012]
+ * @version 0.46 [June 18, 2012]
  * @author: jmedina@vizzuality.com
  * @fileoverview <b>Author:</b> jmedina@vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -27,9 +27,9 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      *    tile_style        -     If you want to add other style to the layer
      *    map_style         -     Show the same style as you defined in the CartoDB map
      *    interactivity     -     Get data from the feature clicked ( without any request :) )
-     *    featureMouseOver  -     Callback when user hovers a feature (return mouse event, latlng and data)
-     *    featureMouseOut   -     Callback when user hovers out a feature
-     *    featureMouseClick -     Callback when user clicks a feature (return mouse event, latlng and data)
+     *    featurever        -     Callback when user hovers a feature (return mouse event, latlng and data)
+     *    featureOut        -     Callback when user hovers out a feature
+     *    featureClick      -     Callback when user clicks a feature (return mouse event, latlng and data)
      *    debug             -     Get error messages from the library
      *    auto_bound        -     Let cartodb auto-bound-zoom in the map (opcional - default = false)
      *
@@ -43,22 +43,25 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
 
     function CartoDBLayer(options) {
+      // Extend from OverlayView
       this.extend(CartoDBLayer, google.maps.OverlayView);
-      this.options = options;
 
-      // Domains params
-      this.options.tiler_domain = options.tiler_domain || "cartodb.com";
-      this.options.tiler_port = options.tiler_port || "";
-      this.options.tiler_protocol = options.tiler_protocol || "http";
-      this.options.sql_domain = options.sql_domain || "cartodb.com";
-      this.options.sql_port = options.sql_port || "";
-      this.options.sql_protocol = options.sql_protocol || "http";
-
-      // Custom params
-      this.options.query = options.query || "SELECT * FROM {{table_name}}";
-      this.options.visible = true;
-      this.options.opacity = (!isNaN(options.opacity)) ? options.opacity : 1; // Hack to save 0 (false) from check of Javascript :S
-      this.options.layer_order = options.layer_order || "top";
+      // Extend options
+      this.options = {
+        query:          "SELECT * FROM {{table_name}}",
+        opacity:        1,
+        auto_bound:     false,
+        debug:          false,
+        visible:        true,
+        layer_order:    "top", 
+        tiler_domain:   "cartodb.com",
+        tiler_port:     "80",
+        tiler_protocol: "http",
+        sql_domain:     "cartodb.com",
+        sql_port:       "80",
+        sql_protocol:   "http"
+      }
+      this.options = this._extend({}, this.options, options);
 
       // Some checks
       if (!this.options.table_name || !this.options.map) {
@@ -84,7 +87,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype.initialize = function () {
       // Bounds? CartoDB does it
       if (this.options.auto_bound)
-        this._setBounds();
+        this.setBounds();
 
       // Map style?
       if (this.options.map_style)
@@ -231,6 +234,24 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
 
     /**
+     * Change multiple options at the same time
+     * @params {Object} New options object
+     */
+    CartoDBLayer.prototype.setOptions = function(options) {
+      if (typeof options!= "object" || options.length) {
+        if (this.options.debug) {
+          throw(options + ' options has to be an object');
+        } else { return }
+      }
+
+      // Set options
+      this.options = this._extend({}, this.options, options);
+
+      this._update();
+    }
+
+
+    /**
      * Hide the CartoDB layer
      */
     CartoDBLayer.prototype.hide = function() {
@@ -302,12 +323,18 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
     /**
      * Zoom to cartodb geometries
+     * @param {String} If it specifies a sql, it bounds over it, if not, using the default one
      */
-    CartoDBLayer.prototype._setBounds = function() {
+    CartoDBLayer.prototype.setBounds = function(sql) {
       var self = this;
+
+      if (!sql) {
+        var sql = this.options.query;
+      }
+      
       reqwest({
         url: this._generateUrl("sql") + '/api/v2/sql/?q='+escape('SELECT ST_XMin(ST_Extent(the_geom)) as minx,ST_YMin(ST_Extent(the_geom)) as miny,'+
-          'ST_XMax(ST_Extent(the_geom)) as maxx,ST_YMax(ST_Extent(the_geom)) as maxy from ('+ this.options.query.replace(/\{\{table_name\}\}/g,this.options.table_name) + ') as subq'),
+          'ST_XMax(ST_Extent(the_geom)) as maxx,ST_YMax(ST_Extent(the_geom)) as maxy from ('+ sql.replace(/\{\{table_name\}\}/g,this.options.table_name) + ') as subq'),
         type: 'jsonp',
         jsonpCallback: 'callback',
         success: function(result) {
@@ -420,20 +447,20 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       // Setting its order
       this._setLayerOrder()
 
-      this.interaction = wax.g.interaction()
-        .map(this.options.map)
-        .tilejson(this.tilejson)
-
-      if (this.options.interactivity) 
-        this.interaction
+      // Adding interaction if it is necessary
+      if (this.options.interactivity) {
+        this.interaction = wax.g.interaction()
+          .map(this.options.map)
+          .tilejson(this.tilejson)
           .on('on',function(o) {self._bindWaxEvents(self.options.map,o)})
           .on('off', function(o){
-            if (self.options.featureMouseOut) {
-              return self.options.featureMouseOut && self.options.featureMouseOut();
+            if (self.options.featureOut) {
+              return self.options.featureOut && self.options.featureOut();
             } else {
-              if (self.options.debug) throw('featureMouseOut function not defined');
+              if (self.options.debug) throw('featureOut function not defined');
             }
           });
+      }
     }
 
 
@@ -444,31 +471,28 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      */
     CartoDBLayer.prototype._bindWaxEvents = function(map,o) {
       switch (o.e.type) {
-        case 'mousemove': if (this.options.featureMouseOver) {
-                            return this.options.featureMouseOver(o.e,latlng,o.data);
+        case 'mousemove': if (this.options.featureOver) {
+                            return this.options.featureOver(o.e,latlng,o.pos,o.data);
                           } else {
-                            if (this.options.debug) throw('featureMouseOver function not defined');
+                            if (this.options.debug) throw('featureOver function not defined');
                           }
                           break;
-        case 'mouseup':   var offset = this._offset(map.getDiv());
-
-                          // Get page y and x (IE?)
-                          if (o.e.pageX || o.e.pageY) {
-                            posx = o.e.pageX;
-                            posy = o.e.pageY;
-                          } else if (o.e.clientX || o.e.clientY) {
-                            posx = o.e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-                            posy = o.e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-                          }
-
-                          var x = posx - offset.left
-                            , y = posy - offset.top
-                            , latlng = this.getProjection().fromContainerPixelToLatLng(new google.maps.Point(x,y))
+        case 'click':     var point = this._findPos(map,o)
+                            , latlng = this.getProjection().fromContainerPixelToLatLng(point);
                           
-                          if (this.options.featureMouseClick) {
-                            this.options.featureMouseClick(o.e,latlng,o.data);
+                          if (this.options.featureClick) {
+                            this.options.featureClick(o.e,latlng,o.pos,o.data);
                           } else {
-                            if (this.options.debug) throw('featureMouseClick function not defined');
+                            if (this.options.debug) throw('featureClick function not defined');
+                          }
+                          break;
+        case 'touchend':  var point = this._findPos(map,o)
+                            , latlng = this.getProjection().fromContainerPixelToLatLng(point);
+                          
+                          if (this.options.featureClick) {
+                            this.options.featureClick(o.e,latlng,o.pos,o.data);
+                          } else {
+                            if (this.options.debug) throw('featureClick function not defined');
                           }
                           break;
         default:          break;
@@ -596,6 +620,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
        }
      }
 
+
     /**
      * Parse URI
      * @params {String} Tile url
@@ -641,18 +666,41 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
 
     /**
-     * Calculate the correct offset to get the latlng clicked
+     * Merge src properties into dest
+     * @params {obj} Dest
+     */
+    CartoDBLayer.prototype._extend = function (/*Object*/ dest) /*-> Object*/ {
+      var sources = Array.prototype.slice.call(arguments, 1);
+      for (var j = 0, len = sources.length, src; j < len; j++) {
+        src = sources[j] || {};
+        for (var i in src) {
+          if (src.hasOwnProperty(i)) {
+            dest[i] = src[i];
+          }
+        }
+      }
+      return dest;
+    }
+
+
+    /**
+     * Calculate the correct offset to get the latlng clicked or touched
      * @params {obj} Map dom element
      */
-    CartoDBLayer.prototype._offset = function (obj) {
-      var ol = ot = 0;
+    CartoDBLayer.prototype._findPos = function (map,o) {
+      var curleft = curtop = 0;
+      var obj = map.getDiv();
       if (obj.offsetParent) {
+        // Modern browsers
         do {
-          ol += obj.offsetLeft;
-          ot += obj.offsetTop;
-        }while (obj = obj.offsetParent);
+          curleft += obj.offsetLeft;
+          curtop += obj.offsetTop;
+        } while (obj = obj.offsetParent);
+        return new google.maps.Point(o.pos.x - curleft,o.pos.y - curtop)
+      } else {
+        // IE
+        return new google.maps.Point(o.e)
       }
-      return {left : ol, top : ot};
     }
   }
 

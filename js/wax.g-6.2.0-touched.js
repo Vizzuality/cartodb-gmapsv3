@@ -1,4 +1,4 @@
-/* wax - 6.0.4 - 1.0.4-572-g5e88957 */
+/* wax - 6.2.0 - 1.0.4-587-g1182501 */
 
 
 !function (name, context, definition) {
@@ -1469,8 +1469,19 @@ if (typeof window !== 'undefined') {
 // Loosen restrictions of Caja's
 // html-sanitizer to allow for styling
 html4.ATTRIBS['*::style'] = 0;
-html4.ATTRIBS['a::target'] = 0;
 html4.ELEMENTS['style'] = 0;
+
+html4.ATTRIBS['a::target'] = 0;
+
+html4.ELEMENTS['video'] = 0;
+html4.ATTRIBS['video::src'] = 0;
+html4.ATTRIBS['video::poster'] = 0;
+html4.ATTRIBS['video::controls'] = 0;
+
+html4.ELEMENTS['audio'] = 0;
+html4.ATTRIBS['audio::src'] = 0;
+html4.ATTRIBS['video::autoplay'] = 0;
+html4.ATTRIBS['video::controls'] = 0;
 /*
   mustache.js — Logic-less templates in JavaScript
 
@@ -2280,13 +2291,11 @@ wax.interaction = function() {
     // grid[ [x, y, tile] ] structure.
     function getTile(e) {
         var g = grid();
-        if (e) {
-          for (var i = 0; i < g.length; i++) {
+        for (var i = 0; i < g.length; i++) {
             if ((g[i][0] < e.y) &&
                ((g[i][0] + 256) > e.y) &&
                 (g[i][1] < e.x) &&
                ((g[i][1] + 256) > e.x)) return g[i][2];
-          }
         }
         return false;
     }
@@ -2338,7 +2347,7 @@ wax.interaction = function() {
         _downLock = true;
         _d = wax.u.eventoffset(e);
         if (e.type === 'mousedown') {
-            bean.add(document.body, 'mouseup', onUp);
+            bean.add(document.body, 'click', onUp);
 
         // Only track single-touches. Double-touches will not affect this
         // control
@@ -2391,6 +2400,7 @@ wax.interaction = function() {
             if (feature) bean.fire(interaction, 'on', {
                 parent: parent(),
                 data: feature,
+                pos: pos,
                 formatter: gm.formatter().format,
                 e: e
             });
@@ -2540,6 +2550,33 @@ wax.legend = function() {
     };
 
     return legend.add();
+};
+var wax = wax || {};
+
+wax.location = function() {
+
+    var t = {};
+
+    function on(o) {
+        console.log(o);
+        if ((o.e.type === 'mousemove' || !o.e.type)) {
+            return;
+        } else {
+            var loc = o.formatter({ format: 'location' }, o.data);
+            if (loc) {
+                window.location.href = loc;
+            }
+        }
+    }
+
+    t.events = function() {
+        return {
+            on: on
+        };
+    };
+
+    return t;
+
 };
 var wax = wax || {};
 wax.movetip = {};
@@ -2829,6 +2866,10 @@ wax.tooltip = function() {
             popped = true;
 
             tooltips.push(tt);
+
+            bean.add(close, 'touchstart mousedown', function(e) {
+                e.stop();
+            });
 
             bean.add(close, 'click touchend', function closeClick(e) {
                 e.stop();
@@ -3244,7 +3285,7 @@ wax.g.connector.prototype.getTile = function(coord, zoom, ownerDocument) {
         var img = this.cache[key] = new Image(256, 256);
         this.cache[key].src = this.getTileUrl(coord, zoom);
         this.cache[key].setAttribute('gTileKey', key);
-        this.cache[key].setAttribute('style', "opacity:" + this.options.opacity + "; filter: alpha(opacity=" + (this.options.opacity*100) + ")");
+        this.cache[key].setAttribute("style","opacity:"+this.options.opacity+"; filter: alpha(opacity="+(this.options.opacity*100)+")");
         this.cache[key].onerror = function() { img.style.display = 'none'; };
     }
     return this.cache[key];

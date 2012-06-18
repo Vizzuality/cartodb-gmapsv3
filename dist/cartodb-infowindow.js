@@ -1,6 +1,6 @@
 /*
  * CartoDBInfowindow
- * v0.2
+ * v0.21
  */
 
   function CartoDBInfowindow(map) {
@@ -35,6 +35,19 @@
       google.maps.event.addDomListener(a, 'click', function (ev) {
         ev.preventDefault ? ev.preventDefault() : ev.returnValue = false;
         me._hide();
+      });
+
+      google.maps.event.addDomListener(a, 'touchend', function (ev) {
+        ev.preventDefault ? ev.preventDefault() : ev.returnValue = false;
+        me._hide();
+      });
+
+      google.maps.event.addDomListener(div, 'touchstart', function (ev) {
+        ev.preventDefault ? ev.preventDefault() : ev.returnValue = false;
+      });
+
+      google.maps.event.addDomListener(div, 'touchend', function (ev) {
+        ev.preventDefault ? ev.preventDefault() : ev.returnValue = false;
       });
 
       google.maps.event.addDomListener(div, 'dblclick', function (ev) {

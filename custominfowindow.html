@@ -9,59 +9,55 @@
   <style>body,html {width:100%; height:100%; margin:0; padding:0; overflow:hidden;} #map {height:100%;}</style>
   <link rel="stylesheet" href="css/cartodb-gmapsv3.css">
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-  <script type="text/javascript" src="js/wax.g.min-6.0.4.js"></script>
-  <script type="text/javascript" src="dist/cartodb-infowindow-min.js"></script>
-  <script type="text/javascript" src="dist/cartodb-gmapsv3-min.js"></script>
+  <script type="text/javascript" src="js/wax.g-6.2.0-touched.js"></script>
+  <script type="text/javascript" src="dist/cartodb-infowindow.js"></script>
+  <script type="text/javascript" src="dist/cartodb-gmapsv3.js"></script>
 
   <script type="text/javascript">
 
   function initialize() {
-    var map = new google.maps.Map(document.getElementById('map'), {
-      center: new google.maps.LatLng(20,0),
-      zoom: 4,
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: new google.maps.LatLng(7.369722, 12.354722),
+            disableDefaultUI: false,
+            zoom: 5,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       mapTypeControl: false
     });
 
     var infowindow = new CartoDBInfowindow(map);
 
-    var cartodb1_gmapsv3 = new CartoDBLayer({
+    // First cartodb layer, countries
+    var cartodb_gmaps1 = new CartoDBLayer({
       map: map,
       user_name:'examples',
       table_name: 'country_colors',
-      map_style: true,
       query: "SELECT * FROM {{table_name}}",
-      layer_order: "bottom",
       auto_bound: false,
-      debug: false
+      debug: true
     });
 
 
-    var cartodb2_gmapsv3 = new CartoDBLayer({
+    // Second cartodb layer, earthquakes
+    cartodb_gmaps2 = new CartoDBLayer({
       map: map,
       user_name:"examples",
       table_name: 'earthquakes',
-      query: "SELECT * FROM {{table_name}}",
+      query: "SELECT cartodb_id,the_geom_webmercator,the_geom,magnitude FROM {{table_name}}",
       tile_style: "#{{table_name}}{marker-fill:#E25B5B}",
-      layer_order: "top",
       interactivity: "cartodb_id, magnitude",
-      opacity: 1,
-      featureMouseOver: function(ev, latlng, data) {
+      featureOver: function(ev, latlng, pos, data) {
         map.setOptions({draggableCursor: 'pointer'});
       },
-      featureMouseOut: function() {
+      featureOut: function() {
         map.setOptions({draggableCursor: 'default'});
       },
-      featureMouseClick: function(ev, latlng, data) {
-        // Set popup content
-        var html = '';
-        for(var column in data) {
-          html += '<label>' + column + '</label>';
-          html += '<p>' + data[column] + '</p>';
-        }
-        infowindow.setContent(html);
+      featureClick: function(ev, latlng, pos, data) {
+        ev.stopPropagation ? ev.stopPropagation() : window.event.cancelBubble = true;
 
-        // Set latlng
+        // Set infowindow content
+        infowindow.setContent(data);
+
+        // Set infowindow latlng
         infowindow.setPosition(latlng);
 
         // Show it!
@@ -70,6 +66,7 @@
       auto_bound: true,
       debug: true
     });
+
   }
 
   </script>

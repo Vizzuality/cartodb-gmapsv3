@@ -35,14 +35,14 @@
     <div class="background floating">
       <section class="shadow top">
         <div class="content">
-          <hgroup><h2 class="dark">CartoDB Google Maps v3 library</h2><em class="medium">0.45</em></hgroup>
+          <hgroup><h2 class="dark">CartoDB Google Maps v3 library</h2><em class="medium">0.46</em></hgroup>
         </div>
         <div class="content no_padding border code">
 
           <link href="css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css">
           <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />          
           <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-          <script type="text/javascript" src="js/wax.g.min-6.0.4.js"></script>
+          <script type="text/javascript" src="js/wax.g.min-6.2.0-touched.js"></script>
           <script type="text/javascript" src="dist/cartodb-gmapsv3-min.js"></script>
 
           <script type="text/javascript">
@@ -75,13 +75,13 @@
                 tile_style: "#{{table_name}}{marker-fill:#E25B5B}",
                 interactivity: "cartodb_id, magnitude",
                 layer_order: "top",
-                featureMouseOver: function(ev, latlng, data) {
+                featureOver: function(ev, latlng, pos, data) {
                   map.setOptions({draggableCursor: 'pointer'});
                 },
-                featureMouseOut: function() {
+                featureOut: function() {
                   map.setOptions({draggableCursor: 'default'});
                 },
-                featureMouseClick: function(ev, latlng, data) {
+                featureClick: function(ev, latlng, pos, data) {
 
                   // Set popup content
                   var html = '';
@@ -215,19 +215,20 @@
             </tr>
 
             <tr>
-            <td><i>featureMouseOver</i></td>
+            <td><i>featureOver</i></td>
             <td>A callback when hovers in a feature</td>
             <td>Function</td>
             <td>
               <b>event:</b> Mouse event object<br/>
-              <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
+              <b>latlng:</b> The LatLng gmapsv3 object where was hovered<br/>
+              <b>pos:</b> Object with x and y position in the DOM map element<br/>
               <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
             </td>
             <td>No (But only will work with `interactivity` specified)</td>
             </tr>
 
             <tr>
-            <td><i>featureMouseOut</i></td>
+            <td><i>featureOut</i></td>
             <td>A callback when hovers out a feature</td>
             <td>Function</td>
             <td></td>
@@ -235,12 +236,13 @@
             </tr>
 
             <tr>
-            <td><i>featureMouseClick</i></td>
+            <td><i>featureClick</i></td>
             <td>A callback when clicks in a feature</td>
             <td>Function</td>
             <td>
               <b>event:</b> Mouse event object<br/>
-              <b>latlng:</b> The LatLng gmapsv3 object where was clicked<br/>
+              <b>latlng:</b> The LatLng gmapsv3 object where was clicked or touched<br/>
+              <b>pos:</b> Object with x and y position in the DOM map element<br/>
               <b>data:</b> The CartoDB data of the clicked feature with the `interactivity` param.
             </td>
             <td>No (But only will work with `interactivity` specified)</td>
@@ -336,7 +338,7 @@
 &#60;link href="css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css" /&#62;
 &#60;link  href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" /&#62;
 &#60;script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"&#62;&#60;/script&#62;
-&#60;script type="text/javascript" src="js/wax.g.min-6.0.4.js"&#62;&#60;/script&#62;
+&#60;script type="text/javascript" src="js/wax.g.min-6.2.0-touched.js"&#62;&#60;/script&#62;
 &#60;script type="text/javascript" src="dist/cartodb-gmapsv3-min.js"&#62;&#60;/script&#62;
           </pre>
 
@@ -364,7 +366,9 @@ var cartodb_gmapsv3 = new CartoDBLayer({
   layer_order: "top",
   tile_style: "#{{table_name}}{marker-fill:red}",
   interactivity: "cartodb_id, magnitude",
-  featureMouseClick: function(ev, latlng, data) {alert(data.cartodb_id)}
+  featureClick: function(ev, latlng, pos, data) {alert(data.cartodb_id)},
+  featureOver: function(ev, latlng, pos, data) {},
+  featureOut: function() {},
   auto_bound: true
 });
           </pre>
@@ -411,8 +415,16 @@ var cartodb_gmapsv3 = new CartoDBLayer({
               <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setInteractivity("cartodb_id, the_geom, magnitude");</pre>
             </li>
             <li class="margin15" style="display:block">
-              <p class="light"><b>setOpacity</b>:  Change the opacity of the layer</p>
+              <p class="light"><b>setOpacity</b>: Change the opacity of the layer</p>
               <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setOpacity(0.2);</pre>
+            </li>
+            <li class="margin15" style="display:block">
+              <p class="light"><b>setOptions</b>: Change any parameter at the same time refreshing the tiles once</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setOptions({query: "SELECT * FROM {{table_name}} WHERE cartodb_id<100", interactivity: "cartodb_id,the_geom,magnitude"});</pre>
+            </li>
+            <li class="margin15" style="display:block">
+              <p class="light"><b>setBounds</b>: Set bounds in the map using a new query or the default one</p>
+              <pre style="margin:5px 0 0!important" data-language="javascript">   cartodb_gmapsv3.setBounds(); cartodb_gmapsv3.setBounds("SELECT * FROM {{table_name}} WHERE cartodb_id < 100");</pre>
             </li>
           </ul>
 
@@ -430,13 +442,13 @@ var infowindow = new CartoDBInfowindow(map);
           <p class="light margin15">And then use as you want:</p>
           <pre data-language="javascript">
 ...
-featureMouseClick: function(ev,latlng,data) {
+featureClick: function(ev,latlng,pos,data) {
   // Set infowindow content
   // You can pass an Object, an Array or a String
   infowindow.setContent(data);
 
-  // Set latlng
-  infowindow.setLatLng(latlng);
+  // Set position
+  infowindow.setPosition(latlng);
 
   // Show it!
   infowindow.open();
