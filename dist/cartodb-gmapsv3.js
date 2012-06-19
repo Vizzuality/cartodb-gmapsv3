@@ -697,7 +697,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
           curleft += obj.offsetLeft;
           curtop += obj.offsetTop;
         } while (obj = obj.offsetParent);
-        return new google.maps.Point(o.pos.x - curleft,o.pos.y - curtop)
+        return new google.maps.Point(o.e.pos.x - curleft,o.e.pos.y - curtop)
       } else {
         // IE
         return new google.maps.Point(o.e)
