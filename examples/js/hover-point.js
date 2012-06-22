@@ -15,6 +15,52 @@ tableName   = 'points_na',
 markerStyle = "#{{table_name}}{marker-fill:#F55; marker-line-color:#F55;}",
 mapStyle    = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] }, { featureType: "administrative", stylers: [ { saturation: -95 },{ gamma: 2.26 } ] }, { featureType: "water", elementType: "labels", stylers: [ { visibility: "off" } ] }, { featureType: "administrative.locality", stylers: [ { visibility: 'off' } ] }, { featureType: "road", stylers: [ { visibility: "simplified" }, { saturation: -99 }, { gamma: 2.22 } ] }, { featureType: "poi", elementType: "labels", stylers: [ { visibility: "off" } ] }, { featureType: "road.arterial", stylers: [ { visibility: 'off' } ] }, { featureType: "road.local", elementType: "labels", stylers: [ { visibility: 'off' } ] }, { featureType: "transit", stylers: [ { visibility: 'off' } ] }, { featureType: "road", elementType: "labels", stylers: [ { visibility: 'off' } ] },{ featureType: "poi", stylers: [ { saturation: -55 } ] } ];
 
+var circle;
+radDeg      = 0;
+
+// Calculates the radius of the circle
+var getRadius = function() {
+
+  bounds = map.getBounds();
+
+center = bounds.getCenter();
+ne = bounds.getNorthEast();
+
+// r = radius of the earth in statute miles
+var r = 100000;
+
+// Convert lat or lng from decimal degrees into radians (divide by 57.2958)
+var lat1 = center.lat() / 57.2958;
+var lon1 = center.lng() / 57.2958;
+var lat2 = ne.lat() / 57.2958;
+var lon2 = ne.lng() / 57.2958;
+
+// distance = circle radius from center to Northeast corner of bounds
+return r * Math.acos(Math.sin(lat1) * Math.sin(lat2) +
+  Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1));
+};
+
+function removeCircle() {
+  if (circle) { // Remove circle
+    circle.setMap(null);
+    circle = null;
+  }
+}
+
+
+function drawCircle(center) {
+  if (circle) return;
+
+  circle = new google.maps.Circle({
+    map: map,
+    center: center,
+    radius: getRadius(),
+    strokeWeight: 0,
+    fillColor: "#E95050",
+    fillOpacity: 1
+  });
+}
+
 var updateLayer = function(){
 
   // Our main query
@@ -33,7 +79,19 @@ var updateLayer = function(){
     query: query,
     layer_order: "top",
     tile_style: markerStyle,
-    interactivity: "cartodb_id"
+    interactivity: "cartodb_id, latitude, longitude",
+    featureClick: function(ev, latlng, pos, data) {
+      map.setOptions({ draggableCursor: 'pointer' });
+    },
+    featureOver: function(ev, latlng, pos, data) {
+      var center = new google.maps.LatLng(data.latitude, data.longitude);
+      map.setOptions({ draggableCursor: 'pointer' });
+      drawCircle(center);
+    },
+    featureOut: function() {
+      map.setOptions({ draggableCursor: 'default' });
+      removeCircle();
+    }
   });
 };
 
