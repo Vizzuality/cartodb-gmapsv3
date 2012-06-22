@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Hover point</title>
+    <title>Show hide</title>
 
     <link href="css/style.css" media="screen, projection" rel="stylesheet" type="text/css" />
     <link href="css/print.css" media="print" rel="stylesheet" type="text/css" />
@@ -15,17 +15,34 @@
 
     <!-- Maps: CartoDB + Google Maps v3 -->
     <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-    <script src="../js/wax.g-6.2.0-touched.js" type="text/javascript" charset="utf-8"></script>
-    <script src="../dist/cartodb-gmapsv3.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../js/wax.g.min-6.2.0-touched.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../dist/cartodb-gmapsv3-min.js" type="text/javascript" charset="utf-8"></script>
 
     <link  href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
     <link  href="../css/cartodb-gmapsv3.css" rel="stylesheet" type="text/css">
 
-    <script src="js/hover-point.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/show-hide.js" type="text/javascript" charset="utf-8"></script>
+
+    <style type="text/css">
+      .controls {
+        position:absolute;
+        top: 10px;
+        right: 10px;
+        width: 90px;
+        padding: 20px;
+
+        text-align:center;
+        background:#fff;
+
+        z-index: 1000;
+      }
+    </style>
 
   </head>
   <body onload="init();">
+    <div class="controls">
+      <a href="#" data-action="toggle">Hide layer</a>
+    </div>
     <div id="map"></div>
   </body>
 </html>
-

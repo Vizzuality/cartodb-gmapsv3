@@ -9,13 +9,15 @@ initialZoom = 5,
 
 // CartoDB setup
 userName    = "examples",
-tableName   = 'points_na',
+tableName   = 'earthquakes',
+
+infowindow  = null,
 
 // Styling
 markerStyle = "#{{table_name}}{marker-fill:#F55; marker-line-color:#F55;}",
-mapStyle    = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] }, { featureType: "administrative", stylers: [ { saturation: -95 },{ gamma: 2.26 } ] }, { featureType: "water", elementType: "labels", stylers: [ { visibility: "off" } ] }, { featureType: "administrative.locality", stylers: [ { visibility: 'off' } ] }, { featureType: "road", stylers: [ { visibility: "simplified" }, { saturation: -99 }, { gamma: 2.22 } ] }, { featureType: "poi", elementType: "labels", stylers: [ { visibility: "off" } ] }, { featureType: "road.arterial", stylers: [ { visibility: 'off' } ] }, { featureType: "road.local", elementType: "labels", stylers: [ { visibility: 'off' } ] }, { featureType: "transit", stylers: [ { visibility: 'off' } ] }, { featureType: "road", elementType: "labels", stylers: [ { visibility: 'off' } ] },{ featureType: "poi", stylers: [ { saturation: -55 } ] } ];
+mapStyle    = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] }, { featureType: "administrative", stylers: [ { saturation: -95 },{ gamma: 2.26 } ] }, { featureType: "water", elementType: "labels", stylers: [ { visibility: "off" } ] }, { featureType: "administrative.locality", stylers: [ { visibility: 'off' } ] }, { featureType: "road", stylers: [ { visibility: "simplified" }, { saturation: -99 }, { gamma: 2.22 } ] }, { featureType: "poi", elementType: "labels", stylers: [ { visibility: "off" } ] }, { featureType: "road.arterial", stylers: [ { visibility: 'off' } ] }, { featureType: "road.local", elementType: "labels", stylers: [ { visibility: 'off' } ] }, { featureType: "transit", stylers: [ { visibility: 'off' } ] }, { featureType: "road", elementType: "labels", stylers: [ { visibility: 'off' } ] },{ featureType: "poi", stylers: [ { saturation: -55 } ] } ],
 
-var circle;
+circle,
 radDeg      = 0;
 
 var getRadius = function() {
@@ -43,7 +45,6 @@ function removeCircle() {
     circle = null;
   }
 }
-
 
 function drawCircle(center) {
   if (circle) return;
@@ -76,16 +77,42 @@ var updateLayer = function(){
     query: query,
     layer_order: "top",
     tile_style: markerStyle,
-    interactivity: "cartodb_id, latitude, longitude",
+    interactivity: "cartodb_id, magnitude, latitude, longitude",
+    featureClick: function(ev, latlng, pos, data) {
+
+      // The popup content goes here
+      var html = '';
+
+      // Remove unwanted properties
+      delete data.latitude;
+      delete data.longitude;
+      delete data.cartodb_id;
+
+      for(var column in data) {
+        html += '<label>' + column + '</label>';
+        html += '<p>' + data[column] + '</p>';
+      }
+
+      infowindow.setContent(html);
+
+      // Set latlng
+      infowindow.setPosition(latlng);
+
+      // Show it!
+      infowindow.open(map);
+    },
+
     featureOver: function(ev, latlng, pos, data) {
       var center = new google.maps.LatLng(data.latitude, data.longitude);
       map.setOptions({ draggableCursor: 'pointer' });
       drawCircle(center);
     },
+
     featureOut: function() {
       map.setOptions({ draggableCursor: 'default' });
       removeCircle();
     }
+
   });
 };
 
@@ -98,6 +125,8 @@ function init() {
     mapTypeId: google.maps.MapTypeId.ROADMAP,
     mapTypeControl: false
   });
+
+  infowindow = new CartoDBInfowindow(map),
 
   map.setOptions({ styles: mapStyle });
 
