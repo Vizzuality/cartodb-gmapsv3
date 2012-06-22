@@ -18,26 +18,23 @@ mapStyle    = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] }, { feature
 var circle;
 radDeg      = 0;
 
-// Calculates the radius of the circle
 var getRadius = function() {
 
-  bounds = map.getBounds();
+  var
+  r      = 100000, // radius of the circle
+  bounds = map.getBounds(),
+  center = bounds.getCenter(),
+  ne     = bounds.getNorthEast();
 
-center = bounds.getCenter();
-ne = bounds.getNorthEast();
+  // Convert lat or lng from decimal degrees into radians (divide by 57.2958)
+  var lat1 = center.lat() / 57.2958;
+  var lon1 = center.lng() / 57.2958;
+  var lat2 = ne.lat() / 57.2958;
+  var lon2 = ne.lng() / 57.2958;
 
-// r = radius of the earth in statute miles
-var r = 100000;
-
-// Convert lat or lng from decimal degrees into radians (divide by 57.2958)
-var lat1 = center.lat() / 57.2958;
-var lon1 = center.lng() / 57.2958;
-var lat2 = ne.lat() / 57.2958;
-var lon2 = ne.lng() / 57.2958;
-
-// distance = circle radius from center to Northeast corner of bounds
-return r * Math.acos(Math.sin(lat1) * Math.sin(lat2) +
-  Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1));
+  // distance = circle radius from center to Northeast corner of bounds
+  return r * Math.acos(Math.sin(lat1) * Math.sin(lat2) +
+                       Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon2 - lon1));
 };
 
 function removeCircle() {

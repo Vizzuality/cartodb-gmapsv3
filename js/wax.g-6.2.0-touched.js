@@ -955,7 +955,7 @@ var html = (function (html4) {
     quot : '"',
     apos : '\''
   };
-  
+
   // Schemes on which to defer to uripolicy. Urls with other schemes are denied
   var WHITELISTED_SCHEMES = /^(?:https?|mailto|data)$/i;
 
@@ -2324,6 +2324,7 @@ wax.interaction = function() {
                 bean.fire(interaction, 'on', {
                     parent: parent(),
                     data: feature,
+                    pos: pos,
                     formatter: gm.formatter().format,
                     e: e
                 });
@@ -2813,7 +2814,7 @@ wax.tooltip = function() {
         return tooltip;
     }
 
-    
+
     function remove() {
         if (this.parentNode) this.parentNode.removeChild(this);
     }

@@ -7,7 +7,7 @@
  *               href="http://opensource.org/licenses/mit-license.php">MIT</a>
  *               license.<br/> This library lets you use CartoDB with google
  *               maps v3.
- *                 
+ *
  */
 
 // Namespace
@@ -22,7 +22,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      *    user_name         -     CartoDB user name
      *    table_name        -     CartoDB table name
      *    query             -     If you want to apply any sql sentence to the table...
-     *    opacity           -     If you want to change the opacity of the CartoDB layer     
+     *    opacity           -     If you want to change the opacity of the CartoDB layer
      *    layer_order       -     If you want to change the position order of the CartoDB layer
      *    tile_style        -     If you want to add other style to the layer
      *    map_style         -     Show the same style as you defined in the CartoDB map
@@ -53,7 +53,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         auto_bound:     false,
         debug:          false,
         visible:        true,
-        layer_order:    "top", 
+        layer_order:    "top",
         tiler_domain:   "cartodb.com",
         tiler_port:     "80",
         tiler_protocol: "http",
@@ -94,7 +94,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         this._setMapStyle();
 
       // Add cartodb logo, yes sir!
-      this._addWadus(); 
+      this._addWadus();
     }
 
     // Useless
@@ -123,7 +123,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {Integer} New opacity
      */
     CartoDBLayer.prototype.setOpacity = function(opacity) {
-      
+
       if (isNaN(opacity) || opacity>1 || opacity<0) {
         if (this.options.debug) {
           throw(opacity + ' is not a valid value');
@@ -194,7 +194,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params { Integer || String } New position for the layer
      */
     CartoDBLayer.prototype.setLayerOrder = function(position) {
-      
+
       if (isNaN(position) && position != "top" && position != "bottom") {
         if (this.options.debug) {
           throw(position + ' is not a valid layer position')
@@ -268,7 +268,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Show the CartoDB layer
      */
     CartoDBLayer.prototype.show = function() {
-      this.options.visible = true;      
+      this.options.visible = true;
       this.setOpacity(this.options.before);
       // Remove before
       delete this.options.before;
@@ -331,7 +331,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       if (!sql) {
         var sql = this.options.query;
       }
-      
+
       reqwest({
         url: this._generateUrl("sql") + '/api/v2/sql/?q='+escape('SELECT ST_XMin(ST_Extent(the_geom)) as minx,ST_YMin(ST_Extent(the_geom)) as miny,'+
           'ST_XMax(ST_Extent(the_geom)) as maxx,ST_YMax(ST_Extent(the_geom)) as maxy from ('+ sql.replace(/\{\{table_name\}\}/g,this.options.table_name) + ') as subq'),
@@ -435,7 +435,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Add interaction cartodb tiles to the map
      */
     CartoDBLayer.prototype._addInteraction = function () {
-      
+
       var self = this;
 
       // interaction placeholder
@@ -443,7 +443,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
       // Layer created
       this.layer = new wax.g.connector(this.tilejson);
-      
+
       // Setting its order
       this._setLayerOrder()
 
@@ -470,6 +470,9 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @param {Event} Wax event
      */
     CartoDBLayer.prototype._bindWaxEvents = function(map,o) {
+      var point = this._findPos(map,o)
+      , latlng = this.getProjection().fromContainerPixelToLatLng(point);
+
       switch (o.e.type) {
         case 'mousemove': if (this.options.featureOver) {
                             return this.options.featureOver(o.e,latlng,o.pos,o.data);
@@ -477,19 +480,13 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
                             if (this.options.debug) throw('featureOver function not defined');
                           }
                           break;
-        case 'click':     var point = this._findPos(map,o)
-                            , latlng = this.getProjection().fromContainerPixelToLatLng(point);
-                          
-                          if (this.options.featureClick) {
+        case 'click':     if (this.options.featureClick) {
                             this.options.featureClick(o.e,latlng,o.pos,o.data);
                           } else {
                             if (this.options.debug) throw('featureClick function not defined');
                           }
                           break;
-        case 'touchend':  var point = this._findPos(map,o)
-                            , latlng = this.getProjection().fromContainerPixelToLatLng(point);
-                          
-                          if (this.options.featureClick) {
+        case 'touchend':  if (this.options.featureClick) {
                             this.options.featureClick(o.e,latlng,o.pos,o.data);
                           } else {
                             if (this.options.debug) throw('featureClick function not defined');
@@ -509,7 +506,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         , base_url = core_url + '/tiles/' + this.options.table_name + '/{z}/{x}/{y}'
         , tile_url = base_url + '.png'
         , grid_url = base_url + '.grid.json'
-      
+
       // SQL?
       if (this.options.query) {
         var query = 'sql=' + encodeURIComponent(this.options.query.replace(/\{\{table_name\}\}/g,this.options.table_name));
@@ -530,10 +527,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         tile_url = this._addUrlData(tile_url, interactivity);
         grid_url = this._addUrlData(grid_url, interactivity);
       }
-      
+
       // Build up the tileJSON
       return {
-        blankImage: '../img/blank_tile.png', 
+        blankImage: '../img/blank_tile.png',
         tilejson: '1.0.0',
         scheme: 'xyz',
         name: this.options.table_name,
@@ -577,7 +574,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         this.options.map.overlayMapTypes.insertAt(0,this.layer);
         return;
       }
-        
+
       // Number positions
       var actual_length = this.options.map.overlayMapTypes.getLength()
       if (this.options.layer_order >= actual_length) {
@@ -605,17 +602,17 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     /**
      * Generate a URL about sql api or tile api
      * @params {String} Type of url
-     */  
+     */
      CartoDBLayer.prototype._generateUrl = function(type) {
        if (type == "sql") {
-         return this.options.sql_protocol + 
-             "://" + ((this.options.user_name)?this.options.user_name+".":"")  + 
-             this.options.sql_domain + 
+         return this.options.sql_protocol +
+             "://" + ((this.options.user_name)?this.options.user_name+".":"")  +
+             this.options.sql_domain +
              ((this.options.sql_port != "") ? (":" + this.options.sql_port) : "");
        } else {
-         return this.options.tiler_protocol + 
-             "://" + ((this.options.user_name)?this.options.user_name+".":"")  + 
-             this.options.tiler_domain + 
+         return this.options.tiler_protocol +
+             "://" + ((this.options.user_name)?this.options.user_name+".":"")  +
+             this.options.tiler_domain +
              ((this.options.tiler_port != "") ? (":" + this.options.tiler_port) : "");
        }
      }
@@ -625,7 +622,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Parse URI
      * @params {String} Tile url
      * @return {String} URI parsed
-     */    
+     */
     CartoDBLayer.prototype._parseUri = function (str) {
       var o = {
         strictMode: false,
