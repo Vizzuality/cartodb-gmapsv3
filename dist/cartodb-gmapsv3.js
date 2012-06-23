@@ -361,8 +361,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
             lat0 = clampNum(lat0, minlat, maxlat);
             lat1 = clampNum(lat1, minlat, maxlat);
 
-            var sw = new google.maps.LatLng(lat0, lon0);
-            var ne = new google.maps.LatLng(lat1, lon1);
+            var ne = new google.maps.LatLng(lat0, lon0);
+            var sw = new google.maps.LatLng(lat1, lon1);
             var bounds = new google.maps.LatLngBounds(sw,ne);
             self.options.map.fitBounds(bounds);
           }
