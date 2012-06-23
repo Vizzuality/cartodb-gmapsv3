@@ -5,24 +5,38 @@ layer        = null,
 layerVisible = true,
 // Initial coordinates
 lat          = 40.7248057566452,
-lng          = -73.9967118782795,
-initialZoom  = 5,
+lng          = -50.9967118782795,
+initialZoom  = 2,
 
 // CartoDB setup
-userName     = "examples",
-tableName    = 'points_na',
+userName     = "javierarce",
+tableName    = 'country_boundaries',
 
 // Styling
-markerStyle  = "#{{table_name}}{marker-fill:#F55; marker-line-color:#F55;}",
+markerStyle  = null;
+
+//"#{{table_name}}  { line-color:#FFFFFF; line-width:1; line-opacity:1; polygon-opacity:1; } \
+//#{{table_name}} [operating<=104] { polygon-fill:#980043 } \
+//#{{table_name}} [operating<=19]  { polygon-fill:#DD1C77 } \
+//#{{table_name}} [operating<=10]  { polygon-fill:#DF65B0 } \
+//#{{table_name}} [operating<=2]   { polygon-fill:#D4B9DA } \
+//#{{table_name}} [operating<=0]   { polygon-fill:#F1EEF6 }";
+
 mapStyle     = [ { stylers: [ { saturation: -65 }, { gamma: 1.52 } ] }, { featureType: "administrative", stylers: [ { saturation: -95 },{ gamma: 2.26 } ] }, { featureType: "water", elementType: "labels", stylers: [ { visibility: "off" } ] }, { featureType: "administrative.locality", stylers: [ { visibility: 'off' } ] }, { featureType: "road", stylers: [ { visibility: "simplified" }, { saturation: -99 }, { gamma: 2.22 } ] }, { featureType: "poi", elementType: "labels", stylers: [ { visibility: "off" } ] }, { featureType: "road.arterial", stylers: [ { visibility: 'off' } ] }, { featureType: "road.local", elementType: "labels", stylers: [ { visibility: 'off' } ] }, { featureType: "transit", stylers: [ { visibility: 'off' } ] }, { featureType: "road", elementType: "labels", stylers: [ { visibility: 'off' } ] },{ featureType: "poi", stylers: [ { saturation: -55 } ] } ];
 
-var updateLayer = function(){
+var updateLayer = function(country) {
 
-  // Our main query
-  var query = "SELECT * FROM {{table_name}}";
+  var query = null;
+
+  if ( country != null ) { // Our main query
+    query = "SELECT * FROM {{table_name}} WHERE admin = '" + country + "'";
+  } else {
+    query = "SELECT * FROM {{table_name}}";
+  }
 
   if (layer) {
     layer.setOptions({ query: query });
+    layer.setBounds();
     return;
   }
 
@@ -34,7 +48,7 @@ var updateLayer = function(){
     query: query,
     layer_order: "top",
     tile_style: markerStyle,
-    interactivity: "cartodb_id",
+    interactivity: "cartodb_id"
   });
 };
 
@@ -52,15 +66,12 @@ function init() {
 
   updateLayer();
 
-  $('a[data-action="toggle"]').on("click", function() {
-    if (layerVisible) {
-      layer.hide();
-      $(this).text("Show layer");
-    } else {
-      layer.show();
-      $(this).text("Hide layer");
-    }
-    layerVisible = !layerVisible;
+  $('.controls .countries').on("change", function(e) {
+    e.preventDefault();
+
+    var country = $(".controls").find('.countries option:selected').val();
+
+    updateLayer(country);
   });
 
 }

@@ -52,7 +52,9 @@ function init() {
 
   updateLayer();
 
-  $('a[data-action="toggle"]').on("click", function() {
+  $('a[data-action="toggle"]').on("click", function(e) {
+    e.preventDefault();
+
     if (layerVisible) {
       layer.hide();
       $(this).text("Show layer");
