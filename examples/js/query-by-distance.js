@@ -73,7 +73,9 @@ function drawCircle() {
     strokeOpacity: 0.20,
     strokeWeight: 2,
     fillColor: "#0000ff",
-    fillOpacity: 0.050
+    fillOpacity: 0.050,
+    zIndex:0,
+    clickable:false
   });
 }
 
