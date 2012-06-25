@@ -58,7 +58,7 @@ function drawCircle(center) {
   });
 }
 
-var updateLayer = function(){
+var renderLayer = function(){
 
   // Our main query
   var query = "SELECT * FROM {{table_name}}";
@@ -101,5 +101,5 @@ function init() {
 
   map.setOptions({ styles: mapStyle });
 
-  updateLayer();
+  renderLayer();
 }
