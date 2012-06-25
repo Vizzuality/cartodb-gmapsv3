@@ -9,8 +9,8 @@ lng          = -50.9967118782795,
 initialZoom  = 3,
 
 // CartoDB setup
-userName     = "javierarce",
-tableName    = "country_boundaries",
+userName     = "examples",
+tableName    = "country_bounds",
 
 // Styling
 markerStyle  = null;
