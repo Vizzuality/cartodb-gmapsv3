@@ -63,7 +63,7 @@ function drawCircle() {
   if (circle) { // Remove circle
     circle.setMap(null);
   }
- /
+
   // Circle setup
   circle = new google.maps.Circle({
     map: map,
