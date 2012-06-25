@@ -46,15 +46,14 @@ var renderLayer = function(){
 var getRagDeg = function(dist) {
   var deg = 180;
   var brng = deg * Math.PI / 180;
+
   dist = dist/6371000;
+
   var lat1 = lat * Math.PI / 180;
   var lon1 = lng * Math.PI / 180;
-  var lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist) +
-                       Math.cos(lat1) * Math.sin(dist) * Math.cos(brng));
-  var lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(dist) *
-                               Math.cos(lat1),
-  Math.cos(dist) - Math.sin(lat1) *
-    Math.sin(lat2));
+  var lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist) + Math.cos(lat1) * Math.sin(dist) * Math.cos(brng));
+  var lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(dist) * Math.cos(lat1), Math.cos(dist) - Math.sin(lat1) * Math.sin(lat2));
+
   if (isNaN(lat2) || isNaN(lon2)) return null;
   return lat - (lat2 * 180 / Math.PI) ;
 };
@@ -64,7 +63,8 @@ function drawCircle() {
   if (circle) { // Remove circle
     circle.setMap(null);
   }
-
+ /
+  // Circle setup
   circle = new google.maps.Circle({
     map: map,
     center: new google.maps.LatLng(lat, lng),

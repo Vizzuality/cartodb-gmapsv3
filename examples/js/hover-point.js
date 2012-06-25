@@ -77,15 +77,18 @@ var renderLayer = function(){
     layer_order: "top",
     tile_style: markerStyle,
     interactivity: "cartodb_id, latitude, longitude",
+
     featureOver: function(ev, latlng, pos, data) {
       var center = new google.maps.LatLng(data.latitude, data.longitude);
       map.setOptions({ draggableCursor: 'pointer' });
       drawCircle(center);
     },
+
     featureOut: function() {
       map.setOptions({ draggableCursor: 'default' });
       removeCircle();
     }
+
   });
 };
 
@@ -99,6 +102,7 @@ function init() {
     mapTypeControl: false
   });
 
+  // Set map style
   map.setOptions({ styles: mapStyle });
 
   renderLayer();

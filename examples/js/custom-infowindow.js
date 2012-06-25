@@ -95,16 +95,17 @@ var renderLayer = function(){
 
       infowindow.setContent(html);
 
-      // Set latlng
+      // Set infowindow center
       infowindow.setPosition(latlng);
 
-      // Show it!
+      // Show the infowindow
       infowindow.open(map);
     },
 
     featureOver: function(ev, latlng, pos, data) {
-      var center = new google.maps.LatLng(data.latitude, data.longitude);
       map.setOptions({ draggableCursor: 'pointer' });
+
+      var center = new google.maps.LatLng(data.latitude, data.longitude);
       drawCircle(center);
     },
 
@@ -126,7 +127,8 @@ function init() {
     mapTypeControl: false
   });
 
-  infowindow = new CartoDBInfowindow(map),
+  // Create infowindow
+  infowindow = new CartoDBInfowindow(map);
 
   map.setOptions({ styles: mapStyle });
 
