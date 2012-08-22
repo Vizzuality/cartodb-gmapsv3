@@ -299,7 +299,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       this.setInteraction(false);
 
       // Remove interaction
-      this.interaction.remove();
+      //this.interaction.remove();
 
       // Remove layer
       var self = this;

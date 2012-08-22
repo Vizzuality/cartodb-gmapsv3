@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+  <title>Using CartoDB with Google Maps v3</title>
+  <link rel="shortcut icon" href="http://cartodb.com/assets/favicon.ico" />
+  <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
+  <style>body,html {width:100%; height:100%; margin:0; padding:0; overflow:hidden;} #map {height:100%;}</style>
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+  <script type="text/javascript" src="js/wax.g.min.js"></script>
+
+  <script type="text/javascript">
+
+  var interaction;
+
+  function initialize() {
+
+    var url = 'http://api.tiles.mapbox.com/v3/mapbox.geography-class.jsonp';
+
+    wax.tilejson(url, function(tilejson) {
+      var m = new google.maps.Map(
+        document.getElementById('map'), {
+          center: new google.maps.LatLng(0, 0),
+          disableDefaultUI: true,
+          zoom: 1,
+          mapTypeId: google.maps.MapTypeId.ROADMAP });
+      
+      m.mapTypes.set('mb', new wax.g.connector(tilejson));
+      m.setMapTypeId('mb');
+
+      interaction = wax.g.interaction();
+
+      interaction.map(m);
+      interaction.tilejson(tilejson);
+      interaction.on(wax.tooltip().parent(m.getDiv()).events());
+    });
+  }
+
+  </script>
+</head>
+<body onload="initialize()">
+  <div id="map"></div>
+</body>
+</html>
