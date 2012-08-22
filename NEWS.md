@@ -1,3 +1,7 @@
+[v 0.47]
+- Fixed a bug when removes wax interaction.
+- Updated to new wax library.
+- New way to manage x,y events position.
 [v 0.46]
 - Touch events supported
 - Feature event functions renamed (featureClick,featureOut,featureOver)

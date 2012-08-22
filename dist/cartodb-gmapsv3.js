@@ -1,8 +1,8 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.46 [June 18, 2012]
- * @author: jmedina@vizzuality.com
- * @fileoverview <b>Author:</b> jmedina@vizzuality.com<br/> <b>Licence:</b>
+ * @version 0.47 [August 22, 2012]
+ * @author: Vizzuality.com
+ * @fileoverview <b>Author:</b> Vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
  *               href="http://opensource.org/licenses/mit-license.php">MIT</a>
  *               license.<br/> This library lets you use CartoDB with google
@@ -207,7 +207,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       // Set new value
       this.options.layer_order = position;
       // Layer order time!
-      this._setLayerOrder()
+      this._setLayerOrder();
     }
 
 
@@ -225,9 +225,11 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       if (this.interaction) {
         if (bool) {
           var self= this;
-          this.interaction.on('on',function(o) {self._bindWaxEvents(self.options.map,o)})
+          this.interaction.on('on',function(o) {self._bindWaxOnEvents(self.options.map,o)})
+          this.interaction.on('on',function(o) {self._bindWaxOffEvents()})
         } else {
           this.interaction.off('on');
+          this.interaction.off('off');
         }
       }
     }
@@ -293,10 +295,13 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Remove CartoDB layer
      */
     CartoDBLayer.prototype._remove =  function() {
-      // Disable and remove interaction
+      // Disable interaction
       this.setInteraction(false);
 
-      // // Remove layer
+      // Remove interaction
+      this.interaction.remove();
+
+      // Remove layer
       var self = this;
       this.options.map.overlayMapTypes.forEach(
         function(layer,i) {
@@ -306,6 +311,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
           }
         }
       );
+
     }
 
 
@@ -452,24 +458,18 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         this.interaction = wax.g.interaction()
           .map(this.options.map)
           .tilejson(this.tilejson)
-          .on('on',function(o) {self._bindWaxEvents(self.options.map,o)})
-          .on('off', function(o){
-            if (self.options.featureOut) {
-              return self.options.featureOut && self.options.featureOut();
-            } else {
-              if (self.options.debug) throw('featureOut function not defined');
-            }
-          });
+          .on('on',function(o) { self._bindWaxOnEvents(self.options.map,o) })
+          .on('off', function(o) { self._bindWaxOffEvents() });
       }
     }
 
 
     /**
-     * Bind events for wax interaction
+     * Bind on events for wax interaction
      * @param {Object} Layer map object
      * @param {Event} Wax event
      */
-    CartoDBLayer.prototype._bindWaxEvents = function(map,o) {
+    CartoDBLayer.prototype._bindWaxOnEvents = function(map,o) {
       var point = this._findPos(map,o)
       , latlng = this.getProjection().fromContainerPixelToLatLng(point);
 
@@ -493,6 +493,18 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
                           }
                           break;
         default:          break;
+      }
+    }
+
+
+    /**
+     * Bind off event for wax interaction
+     */
+    CartoDBLayer.prototype._bindWaxOffEvents = function(){
+      if (this.options.featureOut) {
+        return this.options.featureOut && this.options.featureOut();
+      } else {
+        if (this.options.debug) throw('featureOut function not defined');
       }
     }
 
@@ -694,7 +706,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
           curleft += obj.offsetLeft;
           curtop += obj.offsetTop;
         } while (obj = obj.offsetParent);
-        return new google.maps.Point(o.pos.x - curleft,o.pos.y - curtop)
+        return new google.maps.Point((o.e.clientX || o.e.changedTouches[0].clientX) - curleft,(o.e.clientY || o.e.changedTouches[0].clientY) - curtop)
       } else {
         // IE
         return new google.maps.Point(o.e)
