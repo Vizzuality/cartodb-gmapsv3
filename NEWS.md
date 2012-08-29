@@ -1,5 +1,8 @@
-[v 0.47]
+[v 0.47-b]
+- Opacity bug fixed.
 - Fixed a bug when removes wax interaction.
+- Updated to new wax library.
+[v 0.47-a]
 - Updated to new wax library.
 - New way to manage x,y events position.
 [v 0.46]

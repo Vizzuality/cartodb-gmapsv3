@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.47 [August 22, 2012]
+ * @version 0.48 [August 29, 2012]
  * @author: Vizzuality.com
  * @fileoverview <b>Author:</b> Vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -299,7 +299,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       this.setInteraction(false);
 
       // Remove interaction
-      //this.interaction.remove();
+      this.interaction.remove();
 
       // Remove layer
       var self = this;

@@ -5,6 +5,8 @@ table tr.separator td {background:#e8e8e8;}
 table tr td {border: 1px solid #CCC; text-align: left; margin: 0; padding: 6px 13px;}
 table td b {color:#333333;}
 span.string p {display:inline-block; width:auto!important; font-size:13px;}
+div.right .blue.button.download {position:relative; display:inline; top:auto; right:auto; float:none; padding-right:18px!important;}
+
 
 /* Fonts for Firefox */
 header nav a {font:bold 12px "Segoe UI Bold", "Helvetica Neue", "Helvetica", Arial;}
