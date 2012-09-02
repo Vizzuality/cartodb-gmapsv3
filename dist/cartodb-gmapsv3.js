@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.50 [September 2, 2012]
+ * @version 0.51 [September 2, 2012]
  * @author: Vizzuality.com
  * @fileoverview <b>Author:</b> Vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -53,6 +53,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         auto_bound:     false,
         debug:          false,
         visible:        true,
+        added:          false,
         layer_order:    "top",
         tiler_domain:   "cartodb.com",
         tiler_port:     "80",
@@ -108,6 +109,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype.onAdd = function(map) {
       this._addInteraction();
 
+      this.options.added = true;
+
       google.maps.event.trigger(this, 'added');
     }
 
@@ -118,6 +121,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype.onRemove = function(map) {
       this._remove();
 
+      this.options.added = false;
+
       google.maps.event.trigger(this, 'removed');
     }
 
@@ -127,6 +132,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {Integer} New opacity
      */
     CartoDBLayer.prototype.setOpacity = function(opacity) {
+
+      if (!this.options.added) {
+        if (this.options.debug) {
+          throw('the layer is not still added to the map');
+        } else { return }
+      }
 
       if (isNaN(opacity) || opacity>1 || opacity<0) {
         if (this.options.debug) {
@@ -146,6 +157,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      */
     CartoDBLayer.prototype.setQuery = function(sql) {
 
+      if (!this.options.added) {
+        if (this.options.debug) {
+          throw('the layer is not still added to the map');
+        } else { return }
+      }
+
       if (!isNaN(sql)) {
         if (this.options.debug) {
          throw(sql + ' is not a valid query');
@@ -163,6 +180,13 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {style} New carto for the tiles
      */
     CartoDBLayer.prototype.setStyle = function(style) {
+
+      if (!this.options.added) {
+        if (this.options.debug) {
+          throw('the layer is not still added to the map');
+        } else { return }
+      }
+
       if (!isNaN(style)) {
         if (this.options.debug) {
           throw(style + ' is not a valid style');
@@ -180,6 +204,13 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params { Boolean || String } New sql for the request
      */
     CartoDBLayer.prototype.setInteractivity = function(value) {
+
+      if (!this.options.added) {
+        if (this.options.debug) {
+          throw('the layer is not still added to the map');
+        } else { return }
+      }
+
       if (!isNaN(value)) {
         if (this.options.debug) {
           throw(value + ' is not a valid setInteractivity value');
@@ -198,6 +229,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params { Integer || String } New position for the layer
      */
     CartoDBLayer.prototype.setLayerOrder = function(position) {
+
+      if (!this.options.added) {
+        if (this.options.debug) {
+          throw('the layer is not still added to the map');
+        } else { return }
+      }
 
       if (isNaN(position) && position != "top" && position != "bottom") {
         if (this.options.debug) {
@@ -220,6 +257,13 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {Boolean} Choose if wants interaction or not
      */
     CartoDBLayer.prototype.setInteraction = function(bool) {
+
+      if (!this.options.added) {
+        if (this.options.debug) {
+          throw('the layer is not still added to the map');
+        } else { return }
+      }
+
       if (bool !== false && bool !== true) {
         if (this.options.debug) {
           throw(bool + ' is not a valid setInteraction value');
@@ -244,6 +288,13 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {Object} New options object
      */
     CartoDBLayer.prototype.setOptions = function(options) {
+
+      if (!this.options.added) {
+        if (this.options.debug) {
+          throw('the layer is not still added to the map');
+        } else { return }
+      }
+
       if (typeof options!= "object" || options.length) {
         if (this.options.debug) {
           throw(options + ' options has to be an object');
@@ -261,6 +312,19 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Hide the CartoDB layer
      */
     CartoDBLayer.prototype.hide = function() {
+
+      if (!this.options.added) {
+        if (this.options.debug) {
+          throw('the layer is not still added to the map');
+        } else { return }
+      }
+
+      if (!this.options.visible) {
+        if (this.options.debug) {
+          throw('the layer is already hidden');
+        } else { return }
+      }
+
       this.options.visible = false;
       // Save previous opacity
       this.options.before = this.options.opacity;
@@ -276,13 +340,26 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Show the CartoDB layer
      */
     CartoDBLayer.prototype.show = function() {
+
+      if (!this.options.added) {
+        if (this.options.debug) {
+          throw('the layer is not still added to the map');
+        } else { return }
+      }
+
+      if (this.options.visible) {
+        if (this.options.debug) {
+          throw('the layer is already shown');
+        } else { return }
+      }
+
       this.options.visible = true;
       this.setOpacity(this.options.before);
       // Remove before
       delete this.options.before;
       this.setInteraction(true);
 
-      google.maps.event.trigger(this, 'showed');
+      google.maps.event.trigger(this, 'shown');
     }
 
 
@@ -291,6 +368,14 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      */
     CartoDBLayer.prototype.isVisible = function() {
       return this.options.visible
+    }
+
+
+    /**
+     * Returns if the layer belongs to the map or not
+     */
+    CartoDBLayer.prototype.isAdded = function() {
+      return this.options.added
     }
 
 

@@ -1,3 +1,8 @@
+[v 0.51]
+- All functins check first if the layer belongs to the map first.
+- New function isAdded returns if the layer belongs to the map.
+- Hide and show check if the layer is already shown or hidden.
+
 [v 0.50]
 - Typo binding interaction (on/off).
 - Triggers added when actions are performed.

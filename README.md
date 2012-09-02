@@ -270,7 +270,9 @@ New funcionalities are coming, in the meantime you can use:
 - **setStyle**: Change the style of the layer tiles
     Example: ```cartodb_gmapsv3.setStyle("#{{table_name}}{marker-fill:blue}");```
 - **isVisible**: Get the visibility of the layer.
-    Example: ```cartodb_gmapsv3.isVisible();```    
+    Example: ```cartodb_gmapsv3.isVisible();```
+- **isAdded**: Returns if the layer belongs to the maps or not.
+    Example: ```cartodb_gmapsv3.isAdded();```    
 - **setInteractivity**: Change the columns you want to get data (it needs to reload the tiles)
     Example: ```cartodb_gmapsv3.setInteractivity("cartodb_id, the_geom, magnitude");```
 - **setOptions**: Change any parameter at the same time refreshing the tiles once
