@@ -5,12 +5,12 @@
 [v 0.49]
 - Fixed error trying to remove interaction in all layers.
 
-[v 0.47-b]
+[v 0.48]
 - Opacity bug fixed.
 - Fixed a bug when removes wax interaction.
 - Updated to new wax library.
 
-[v 0.47-a]
+[v 0.47]
 - Updated to new wax library.
 - New way to manage x,y events position.
 
