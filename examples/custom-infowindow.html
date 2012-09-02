@@ -11,12 +11,14 @@
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
   <script type="text/javascript" src="../js/wax.g.min.js"></script>
   <script type="text/javascript" src="../dist/cartodb-infowindow.js"></script>
-  <script type="text/javascript" src="../dist/cartodb-gmapsv3-min.js"></script>
+  <script type="text/javascript" src="../dist/cartodb-gmapsv3.js"></script>
 
   <script type="text/javascript">
 
+  var map, infowindow, cartodb_gmaps1, cartodb_gmaps2;
+
   function initialize() {
-    var map = new google.maps.Map(document.getElementById('map'), {
+    map = new google.maps.Map(document.getElementById('map'), {
       center: new google.maps.LatLng(7.369722, 12.354722),
             disableDefaultUI: false,
             zoom: 3,
@@ -24,10 +26,10 @@
       mapTypeControl: false
     });
 
-    var infowindow = new CartoDBInfowindow(map);
+    infowindow = new CartoDBInfowindow(map);
 
     // First cartodb layer, countries
-    var cartodb_gmaps1 = new CartoDBLayer({
+    cartodb_gmaps1 = new CartoDBLayer({
       map: map,
       user_name:'examples',
       table_name: 'country_colors',
@@ -67,6 +69,27 @@
       },
       auto_bound: false,
       debug: true
+    });
+
+
+    google.maps.event.addListener(cartodb_gmaps2,"removed",function(){
+      if ('console' in self && 'log' in console) console.log("removed")
+    });
+
+    google.maps.event.addListener(cartodb_gmaps2,"added",function(){
+      if ('console' in self && 'log' in console) console.log("added")
+    });
+
+    google.maps.event.addListener(cartodb_gmaps2,"updated",function(){
+      if ('console' in self && 'log' in console) console.log("updated")
+    });
+
+    google.maps.event.addListener(cartodb_gmaps2,"showed",function(){
+      if ('console' in self && 'log' in console) console.log("showed")
+    });
+
+    google.maps.event.addListener(cartodb_gmaps2,"hidden",function(){
+      if ('console' in self && 'log' in console) console.log("hidden")
     });
 
   }

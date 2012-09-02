@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.49 [August 31, 2012]
+ * @version 0.50 [September 2, 2012]
  * @author: Vizzuality.com
  * @fileoverview <b>Author:</b> Vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -107,6 +107,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      */
     CartoDBLayer.prototype.onAdd = function(map) {
       this._addInteraction();
+
+      google.maps.event.trigger(this, 'added');
     }
 
 
@@ -115,6 +117,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      */
     CartoDBLayer.prototype.onRemove = function(map) {
       this._remove();
+
+      google.maps.event.trigger(this, 'removed');
     }
 
 
@@ -226,7 +230,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         if (bool) {
           var self= this;
           this.interaction.on('on',function(o) {self._bindWaxOnEvents(self.options.map,o)})
-          this.interaction.on('on',function(o) {self._bindWaxOffEvents()})
+          this.interaction.on('off',function(o) {self._bindWaxOffEvents()})
         } else {
           this.interaction.off('on');
           this.interaction.off('off');
@@ -263,6 +267,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       // Hide it!
       this.setOpacity(0);
       this.setInteraction(false);
+
+      google.maps.event.trigger(this, 'hidden');
     }
 
 
@@ -275,6 +281,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       // Remove before
       delete this.options.before;
       this.setInteraction(true);
+
+      google.maps.event.trigger(this, 'showed');
     }
 
 
@@ -325,6 +333,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
       // Create the new updated one
       this._addInteraction();
+
+      google.maps.event.trigger(this, 'updated');
     }
 
 
