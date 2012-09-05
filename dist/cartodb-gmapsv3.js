@@ -294,7 +294,6 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @params {Object} New options object
      */
     CartoDBLayer.prototype._setOptions = function(options) {
-      debugger;
       if (!this.options.added) {
         if (this.options.debug) {
           throw('the layer is not still added to the map');

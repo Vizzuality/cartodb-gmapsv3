@@ -2,24 +2,29 @@ describe('Interaction funcionality', function() {
   var div, map, cdb_layer;
 
   beforeEach(function() {
+
     div = document.createElement('div');
+    div.setAttribute("id","map");
     div.style.height = "100px";
     div.style.width = "100px";
 
-    map = L.map( div, {center: [51.505, -0.09],zoom: 13} );
+    map = new google.maps.Map(div, {
+      center: new google.maps.LatLng(51.505, -0.09),
+      disableDefaultUI: false,
+      zoom: 13,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      mapTypeControl: false
+    });
 
-    cdb_layer = new L.CartoDBLayer({
+    cdb_layer = new CartoDBLayer({
       map: map,
       user_name:"examples",
       table_name: 'country_colors',
-      attribution: "Vizzuality",
-      interactivity: "cartodb_id",
       opacity:0.8,
+      interactivity: "cartodb_id",
       auto_bound: false,
       debug: true
     });
-
-    map.addLayer(cdb_layer);
   });
 
 
@@ -31,36 +36,42 @@ describe('Interaction funcionality', function() {
     // Fake a mouseout
     $(div).trigger('mouseout');
     expect(cdb_layer._bindWaxOffEvents).toThrow();
+
+    // Fake a click
+    $(div).trigger('click');
+    expect(cdb_layer._bindWaxOffEvents).toThrow();   
   });
 
 
-  // it('If there is interaction defined, click should work', function() {
+  it('If there is interaction defined, click should work', function() {
 
-  //   runs(function () {
-  //     cdb_layer.setOptions({
-  //       featureOver:  function(ev,latlng,pos,data) {},
-  //       featureOut:   function() {},
-  //       featureClick: function(ev,latlng,pos,data) {}
-  //     });      
+    waits(500);
 
-  //     spyOn(cdb_layer, '_bindWaxOnEvents');
+    runs(function () {
+      cdb_layer.setOptions({
+        featureOver:  function(ev,latlng,pos,data) {},
+        featureOut:   function() {},
+        featureClick: function(ev,latlng,pos,data) {}
+      });
 
-  //     var e = new jQuery.Event("click");
-  //     e.pageX = 10;
-  //     e.pageY = 10;
-  //     e.clientX = 10;
-  //     e.clientY = 10;
-  //     $(div).trigger(e);
+      spyOn(cdb_layer, '_bindWaxOnEvents');
 
-  //     cdb_layer.interaction.click(e,{x:100,y:100});
-  //   });
+      var e = new jQuery.Event("click");
+      e.pageX = 10;
+      e.pageY = 10;
+      e.clientX = 10;
+      e.clientY = 10;
+      $(div).trigger(e);
 
-  //   waits(500);
+      cdb_layer.interaction.click(e,{x:100,y:100});
+    });
 
-  //   runs(function () {
-  //     expect(cdb_layer._bindWaxOnEvents).toHaveBeenCalled();
-  //   });
-  // });
+    waits(500);
+
+    runs(function () {
+      expect(cdb_layer._bindWaxOnEvents).toHaveBeenCalled();
+    });
+  });
 
 
   // it('If there is interaction defined, mouseover should work', function() {
