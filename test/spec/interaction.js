@@ -34,219 +34,219 @@ describe('Interaction funcionality', function() {
   });
 
 
-  it('If there is interaction defined, click should work', function() {
+  // it('If there is interaction defined, click should work', function() {
 
-    runs(function () {
-      cdb_layer.setOptions({
-        featureOver:  function(ev,latlng,pos,data) {},
-        featureOut:   function() {},
-        featureClick: function(ev,latlng,pos,data) {}
-      });      
+  //   runs(function () {
+  //     cdb_layer.setOptions({
+  //       featureOver:  function(ev,latlng,pos,data) {},
+  //       featureOut:   function() {},
+  //       featureClick: function(ev,latlng,pos,data) {}
+  //     });      
 
-      spyOn(cdb_layer, '_bindWaxOnEvents');
+  //     spyOn(cdb_layer, '_bindWaxOnEvents');
 
-      var e = new jQuery.Event("click");
-      e.pageX = 10;
-      e.pageY = 10;
-      e.clientX = 10;
-      e.clientY = 10;
-      $(div).trigger(e);
+  //     var e = new jQuery.Event("click");
+  //     e.pageX = 10;
+  //     e.pageY = 10;
+  //     e.clientX = 10;
+  //     e.clientY = 10;
+  //     $(div).trigger(e);
 
-      cdb_layer.interaction.click(e,{x:100,y:100});
-    });
+  //     cdb_layer.interaction.click(e,{x:100,y:100});
+  //   });
 
-    waits(500);
+  //   waits(500);
 
-    runs(function () {
-      expect(cdb_layer._bindWaxOnEvents).toHaveBeenCalled();
-    });
-  });
-
-
-  it('If there is interaction defined, mouseover should work', function() {
-    runs(function () {
-      cdb_layer.setOptions({
-        featureOver:  function(ev,latlng,pos,data) {},
-        featureOut:   function() {},
-        featureClick: function(ev,latlng,pos,data) {}
-      });      
-
-      spyOn(cdb_layer, '_bindWaxOnEvents');
-
-      var e = new $.Event("mousemove");
-      e.pageX = 10;
-      e.pageY = 10;
-      e.clientX = 10;
-      e.clientY = 10;
-      $(div).trigger(e);
-
-      var pos = wax.u.eventoffset(e);
-      cdb_layer.interaction.screen_feature(pos, function(feature) {
-        if (feature) {
-          bean.fire(cdb_layer.interaction, 'on', {
-            parent: map,
-            data: feature,
-            formatter: null,
-            e: e
-          });
-        } else {
-          bean.fire(cdb_layer.interaction, 'off');
-        }
-      });
-    });
-
-    waits(500);
-
-    runs(function () {
-      expect(cdb_layer._bindWaxOnEvents).toHaveBeenCalled();
-    });
-  });
+  //   runs(function () {
+  //     expect(cdb_layer._bindWaxOnEvents).toHaveBeenCalled();
+  //   });
+  // });
 
 
-  it('If there is interaction defined, mouseout should work', function() {
-    runs(function () {
-      cdb_layer.setOptions({
-        featureOver:  function(ev,latlng,pos,data) {},
-        featureOut:   function() {},
-        featureClick: function(ev,latlng,pos,data) {}
-      });
+  // it('If there is interaction defined, mouseover should work', function() {
+  //   runs(function () {
+  //     cdb_layer.setOptions({
+  //       featureOver:  function(ev,latlng,pos,data) {},
+  //       featureOut:   function() {},
+  //       featureClick: function(ev,latlng,pos,data) {}
+  //     });      
 
-      // Move map to a place without a feature
-      map.setView([51.17934297928927, -28.828125], 6)
+  //     spyOn(cdb_layer, '_bindWaxOnEvents');
 
-      spyOn(cdb_layer, '_bindWaxOffEvents');
+  //     var e = new $.Event("mousemove");
+  //     e.pageX = 10;
+  //     e.pageY = 10;
+  //     e.clientX = 10;
+  //     e.clientY = 10;
+  //     $(div).trigger(e);
 
-      var e = new $.Event("mousemove");
-      e.pageX = 10;
-      e.pageY = 10;
-      e.clientX = 10;
-      e.clientY = 10;
-      $(div).trigger(e);
+  //     var pos = wax.u.eventoffset(e);
+  //     cdb_layer.interaction.screen_feature(pos, function(feature) {
+  //       if (feature) {
+  //         bean.fire(cdb_layer.interaction, 'on', {
+  //           parent: map,
+  //           data: feature,
+  //           formatter: null,
+  //           e: e
+  //         });
+  //       } else {
+  //         bean.fire(cdb_layer.interaction, 'off');
+  //       }
+  //     });
+  //   });
 
-      var pos = wax.u.eventoffset(e);
-      cdb_layer.interaction.screen_feature(pos, function(feature) {
-        if (feature) {
-          bean.fire(cdb_layer.interaction, 'on', {
-            parent: map,
-            data: feature,
-            formatter: null,
-            e: e
-          });
-        } else {
-          bean.fire(cdb_layer.interaction, 'off');
-        }
-      });
-    });
+  //   waits(500);
 
-    waits(500);
-
-    runs(function () {
-      expect(cdb_layer._bindWaxOffEvents).toHaveBeenCalled();
-    });
-  });
+  //   runs(function () {
+  //     expect(cdb_layer._bindWaxOnEvents).toHaveBeenCalled();
+  //   });
+  // });
 
 
-  it('A click action should return data', function() {
+  // it('If there is interaction defined, mouseout should work', function() {
+  //   runs(function () {
+  //     cdb_layer.setOptions({
+  //       featureOver:  function(ev,latlng,pos,data) {},
+  //       featureOut:   function() {},
+  //       featureClick: function(ev,latlng,pos,data) {}
+  //     });
 
-    cdb_layer.setOptions({
-      featureOver:  function(ev,latlng,pos,data) {},
-      featureOut:   function() {},
-      featureClick: function(ev,latlng,pos,data) {
-        expect(latlng).not.toBeNull()
-        expect(latlng.lat).toBeDefined();
-        expect(latlng.lng).toBeDefined();
-        expect(ev).not.toBeNull();
-        expect(pos).not.toBeNull();
-        expect(data).not.toBeNull();
-        expect(data.cartodb_id).toBeDefined();
-      }
-    });      
+  //     // Move map to a place without a feature
+  //     map.setView([51.17934297928927, -28.828125], 6)
 
-    var e = new jQuery.Event("click");
-    e.pageX = 10;
-    e.pageY = 10;
-    e.clientX = 10;
-    e.clientY = 10;
-    $(div).trigger(e);
+  //     spyOn(cdb_layer, '_bindWaxOffEvents');
 
-    cdb_layer.interaction.click(e,{x:100,y:100});
-  });
+  //     var e = new $.Event("mousemove");
+  //     e.pageX = 10;
+  //     e.pageY = 10;
+  //     e.clientX = 10;
+  //     e.clientY = 10;
+  //     $(div).trigger(e);
 
+  //     var pos = wax.u.eventoffset(e);
+  //     cdb_layer.interaction.screen_feature(pos, function(feature) {
+  //       if (feature) {
+  //         bean.fire(cdb_layer.interaction, 'on', {
+  //           parent: map,
+  //           data: feature,
+  //           formatter: null,
+  //           e: e
+  //         });
+  //       } else {
+  //         bean.fire(cdb_layer.interaction, 'off');
+  //       }
+  //     });
+  //   });
 
-  it('A museover action should return data', function() {
-    cdb_layer.setOptions({
-      featureOver:  function(ev,latlng,pos,data) {
-        expect(latlng).not.toBeNull()
-        expect(latlng.lat).toBeDefined();
-        expect(latlng.lng).toBeDefined();
-        expect(ev).not.toBeNull();
-        expect(pos).not.toBeNull();
-        expect(data).not.toBeNull();
-        expect(data.cartodb_id).toBeDefined();
-      },
-      featureOut:   function() {},
-      featureClick: function(ev,latlng,pos,data) {}
-    });      
+  //   waits(500);
 
-    var e = new $.Event("mousemove");
-    e.pageX = 10;
-    e.pageY = 10;
-    $(div).trigger(e);
-
-    var pos = wax.u.eventoffset(e);
-    cdb_layer.interaction.screen_feature(pos, function(feature) {
-      if (feature) {
-        bean.fire(cdb_layer.interaction, 'on', {
-          parent: map,
-          data: feature,
-          formatter: null,
-          e: e
-        });
-      } else {
-        bean.fire(cdb_layer.interaction, 'off');
-      }
-    });
-  });
+  //   runs(function () {
+  //     expect(cdb_layer._bindWaxOffEvents).toHaveBeenCalled();
+  //   });
+  // });
 
 
-  it('A mouseout action should arrive', function() {
-    runs(function () {
-      cdb_layer.setOptions({
-        featureOver:  function(ev,latlng,pos,data) {},
-        featureOut:   function() {},
-        featureClick: function(ev,latlng,pos,data) {}
-      });
+  // it('A click action should return data', function() {
 
-      // Move map to a place without a feature
-      map.setView([51.17934297928927, -28.828125], 6)
+  //   cdb_layer.setOptions({
+  //     featureOver:  function(ev,latlng,pos,data) {},
+  //     featureOut:   function() {},
+  //     featureClick: function(ev,latlng,pos,data) {
+  //       expect(latlng).not.toBeNull()
+  //       expect(latlng.lat).toBeDefined();
+  //       expect(latlng.lng).toBeDefined();
+  //       expect(ev).not.toBeNull();
+  //       expect(pos).not.toBeNull();
+  //       expect(data).not.toBeNull();
+  //       expect(data.cartodb_id).toBeDefined();
+  //     }
+  //   });      
 
-      spyOn(cdb_layer.options, 'featureOut');
+  //   var e = new jQuery.Event("click");
+  //   e.pageX = 10;
+  //   e.pageY = 10;
+  //   e.clientX = 10;
+  //   e.clientY = 10;
+  //   $(div).trigger(e);
 
-      var e = new $.Event("mousemove");
-      e.pageX = 10;
-      e.pageY = 10;
-      $(div).trigger(e);
+  //   cdb_layer.interaction.click(e,{x:100,y:100});
+  // });
 
-      var pos = wax.u.eventoffset(e);
-      cdb_layer.interaction.screen_feature(pos, function(feature) {
-        if (feature) {
-          bean.fire(cdb_layer.interaction, 'on', {
-            parent: map,
-            data: feature,
-            formatter: null,
-            e: e
-          });
-        } else {
-          bean.fire(cdb_layer.interaction, 'off');
-        }
-      });
-    });
 
-    waits(500);
+  // it('A museover action should return data', function() {
+  //   cdb_layer.setOptions({
+  //     featureOver:  function(ev,latlng,pos,data) {
+  //       expect(latlng).not.toBeNull()
+  //       expect(latlng.lat).toBeDefined();
+  //       expect(latlng.lng).toBeDefined();
+  //       expect(ev).not.toBeNull();
+  //       expect(pos).not.toBeNull();
+  //       expect(data).not.toBeNull();
+  //       expect(data.cartodb_id).toBeDefined();
+  //     },
+  //     featureOut:   function() {},
+  //     featureClick: function(ev,latlng,pos,data) {}
+  //   });      
 
-    runs(function () {
-      expect(cdb_layer.options.featureOut).toHaveBeenCalled();
-    });
-  });
+  //   var e = new $.Event("mousemove");
+  //   e.pageX = 10;
+  //   e.pageY = 10;
+  //   $(div).trigger(e);
+
+  //   var pos = wax.u.eventoffset(e);
+  //   cdb_layer.interaction.screen_feature(pos, function(feature) {
+  //     if (feature) {
+  //       bean.fire(cdb_layer.interaction, 'on', {
+  //         parent: map,
+  //         data: feature,
+  //         formatter: null,
+  //         e: e
+  //       });
+  //     } else {
+  //       bean.fire(cdb_layer.interaction, 'off');
+  //     }
+  //   });
+  // });
+
+
+  // it('A mouseout action should arrive', function() {
+  //   runs(function () {
+  //     cdb_layer.setOptions({
+  //       featureOver:  function(ev,latlng,pos,data) {},
+  //       featureOut:   function() {},
+  //       featureClick: function(ev,latlng,pos,data) {}
+  //     });
+
+  //     // Move map to a place without a feature
+  //     map.setView([51.17934297928927, -28.828125], 6)
+
+  //     spyOn(cdb_layer.options, 'featureOut');
+
+  //     var e = new $.Event("mousemove");
+  //     e.pageX = 10;
+  //     e.pageY = 10;
+  //     $(div).trigger(e);
+
+  //     var pos = wax.u.eventoffset(e);
+  //     cdb_layer.interaction.screen_feature(pos, function(feature) {
+  //       if (feature) {
+  //         bean.fire(cdb_layer.interaction, 'on', {
+  //           parent: map,
+  //           data: feature,
+  //           formatter: null,
+  //           e: e
+  //         });
+  //       } else {
+  //         bean.fire(cdb_layer.interaction, 'off');
+  //       }
+  //     });
+  //   });
+
+  //   waits(500);
+
+  //   runs(function () {
+  //     expect(cdb_layer.options.featureOut).toHaveBeenCalled();
+  //   });
+  // });
 
 });

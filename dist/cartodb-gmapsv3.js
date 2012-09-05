@@ -64,6 +64,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       }
       this.options = this._extend({}, this.options, options);
 
+      // Hack to prevent setOptions OverlayView default function
+      this.setOptions = function(options) {
+        google.maps.OverlayView.prototype.setOptions.call(this, {});
+        this._setOptions(options);
+      }
+
       // Some checks
       if (!this.options.table_name || !this.options.map) {
         if (this.options.debug) {
@@ -287,8 +293,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Change multiple options at the same time
      * @params {Object} New options object
      */
-    CartoDBLayer.prototype.setOptions = function(options) {
-
+    CartoDBLayer.prototype._setOptions = function(options) {
+      debugger;
       if (!this.options.added) {
         if (this.options.debug) {
           throw('the layer is not still added to the map');

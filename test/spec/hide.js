@@ -35,24 +35,32 @@ describe('Hide funcionality', function() {
 
   it('if hides layers should work', function() {
 
+    waits(500);
+
     runs(function () {
       cdb_layer.hide();
     });
 
-    waits(2000);
+    waits(500);
 
-    runs(function () {
+    runs(function() {
       var $tile = $(div).find("img[gtilekey]").first()
-        , opacity = cdb_layer.options.opacity;
+        , opacity = cdb_layer.options.opacity
+        , before_opacity = cdb_layer.options.before;
 
       expect(cdb_layer.options.visible).toBeFalsy();
       expect($tile.css("opacity")).toEqual('0');
-      expect(opacity).not.toEqual(0);
-    });
+      expect(opacity).toEqual(0);
+      expect(before_opacity).not.toEqual(0);
+    })
   });
 
-  // it('If sets opacity to 0, layer should be visible', function() {
-  //   cdb_layer.setOpacity(0);
-  //   expect(cdb_layer.options.visible).toBeTruthy();
-  // });
+  it('If sets opacity to 0, layer should be visible', function() {
+    waits(500);
+
+    runs(function () {
+      cdb_layer.setOpacity(0);
+      expect(cdb_layer.options.visible).toBeTruthy();
+    });
+  });
 });
