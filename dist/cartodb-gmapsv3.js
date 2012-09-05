@@ -826,17 +826,12 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype._findPos = function (map,o) {
       var curleft = curtop = 0;
       var obj = map.getDiv();
-      if (obj.offsetParent) {
-        // Modern browsers
-        do {
-          curleft += obj.offsetLeft;
-          curtop += obj.offsetTop;
-        } while (obj = obj.offsetParent);
-        return new google.maps.Point((o.e.clientX || o.e.changedTouches[0].clientX) - curleft,(o.e.clientY || o.e.changedTouches[0].clientY) - curtop)
-      } else {
-        // IE
-        return new google.maps.Point(o.e)
-      }
+
+      do {
+        curleft += obj.offsetLeft;
+        curtop += obj.offsetTop;
+      } while (obj = obj.offsetParent);
+      return new google.maps.Point((o.e.clientX || o.e.changedTouches[0].clientX) - curleft,(o.e.clientY || o.e.changedTouches[0].clientY) - curtop)
     }
 
 
