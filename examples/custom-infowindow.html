@@ -20,8 +20,8 @@
   function initialize() {
     map = new google.maps.Map(document.getElementById('map'), {
       center: new google.maps.LatLng(7.369722, 12.354722),
-            disableDefaultUI: false,
-            zoom: 3,
+      disableDefaultUI: false,
+      zoom: 3,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       mapTypeControl: false
     });
@@ -34,8 +34,7 @@
       user_name:'examples',
       table_name: 'country_colors',
       query: "SELECT * FROM {{table_name}}",
-      tile_style: "#{{table_name}}{polygon-fill:#FF6600; line-color:grey; polygon-opacity:0.1; line-width:0; line-opacity:0;}",
-      opacity: 0.4,
+      opacity: 0.2,
       auto_bound: false,
       debug: true
     });
@@ -91,6 +90,10 @@
 
     google.maps.event.addListener(cartodb_gmaps2,"hidden",function(){
       if ('console' in self && 'log' in console) console.log("hidden")
+    });
+
+    google.maps.event.addListener(cartodb_gmaps2,"tileerror",function(){
+      if ('console' in self && 'log' in console) console.log("tile - error")
     });
 
   }

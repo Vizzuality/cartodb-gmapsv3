@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.51 [September 2, 2012]
+ * @version 0.52 [September 5, 2012]
  * @author: Vizzuality.com
  * @fileoverview <b>Author:</b> Vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -435,7 +435,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       }
 
       reqwest({
-        url: this._generateUrl("sql") + '/api/v2/sql/?q='+escape('SELECT ST_XMin(ST_Extent(the_geom)) as minx,ST_YMin(ST_Extent(the_geom)) as miny,'+
+        url: this._generateCoreUrl("sql") + '/api/v2/sql/?q='+escape('SELECT ST_XMin(ST_Extent(the_geom)) as minx,ST_YMin(ST_Extent(the_geom)) as miny,'+
           'ST_XMax(ST_Extent(the_geom)) as maxx,ST_YMax(ST_Extent(the_geom)) as maxy from ('+ sql.replace(/\{\{table_name\}\}/g,this.options.table_name) + ') as subq'),
         type: 'jsonp',
         jsonpCallback: 'callback',
@@ -501,7 +501,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype._setMapStyle = function () {
       var self = this;
       reqwest({
-        url: this._generateUrl("tiler") + '/tiles/' + this.options.table_name + '/map_metadata?callback=?',
+        url: this._generateCoreUrl("tiler") + '/tiles/' + this.options.table_name + '/map_metadata?callback=?',
         type: 'jsonp',
         jsonpCallback: 'callback',
         success: function(result) {
@@ -547,7 +547,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       this.layer = new wax.g.connector(this.tilejson);
 
       // Setting its order
-      this._setLayerOrder()
+      this._setLayerOrder();
+
+      // Check the tiles
+      this._checkTiles();
 
       // Adding interaction if it is necessary
       if (this.options.interactivity) {
@@ -609,32 +612,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Generate tilejson for wax
      * @return {Object} Options for ImageMapType
      */
-    CartoDBLayer.prototype._generateTileJson = function () {
-      var core_url = this._generateUrl("tiler")
-        , base_url = core_url + '/tiles/' + this.options.table_name + '/{z}/{x}/{y}'
-        , tile_url = base_url + '.png'
-        , grid_url = base_url + '.grid.json'
-
-      // SQL?
-      if (this.options.query) {
-        var query = 'sql=' + encodeURIComponent(this.options.query.replace(/\{\{table_name\}\}/g,this.options.table_name));
-        tile_url = this._addUrlData(tile_url, query);
-        grid_url = this._addUrlData(grid_url, query);
-      }
-
-      // STYLE?
-      if (this.options.tile_style) {
-        var style = 'style=' + encodeURIComponent(this.options.tile_style.replace(/\{\{table_name\}\}/g,this.options.table_name));
-        tile_url = this._addUrlData(tile_url, style);
-        grid_url = this._addUrlData(grid_url, style);
-      }
-
-      // INTERACTIVITY?
-      if (this.options.interactivity) {
-        var interactivity = 'interactivity=' + encodeURIComponent(this.options.interactivity.replace(/ /g,''));
-        tile_url = this._addUrlData(tile_url, interactivity);
-        grid_url = this._addUrlData(grid_url, interactivity);
-      }
+    CartoDBLayer.prototype._generateTileJson = function() {
+      var urls = this._generateTileUrls();
 
       // Build up the tileJSON
       return {
@@ -642,10 +621,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         tilejson: '1.0.0',
         scheme: 'xyz',
         name: this.options.table_name,
-        tiles: [tile_url],
-        grids: [grid_url],
-        tiles_base: tile_url,
-        grids_base: grid_url,
+        tiles: [urls.tile_url],
+        grids: [urls.grid_url],
+        tiles_base: urls.tile_url,
+        grids_base: urls.grid_url,
         opacity: this.options.opacity,
         formatter: function(options, data) {
           return data
@@ -711,7 +690,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * Generate a URL about sql api or tile api
      * @params {String} Type of url
      */
-     CartoDBLayer.prototype._generateUrl = function(type) {
+     CartoDBLayer.prototype._generateCoreUrl = function(type) {
        if (type == "sql") {
          return this.options.sql_protocol +
              "://" + ((this.options.user_name)?this.options.user_name+".":"")  +
@@ -724,6 +703,52 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
              ((this.options.tiler_port != "") ? (":" + this.options.tiler_port) : "");
        }
      }
+
+    /**
+     * Generate the final tile and grid URLs for the tiler
+     */
+    CartoDBLayer.prototype._generateTileUrls = function() {
+      var core_url = this._generateCoreUrl("tiler")
+        , base_url = core_url + '/tiles/' + this.options.table_name + '/{z}/{x}/{y}'
+        , tile_url = base_url + '.png'
+        , grid_url = base_url + '.grid.json';
+
+      // SQL?
+      if (this.options.query) {
+        var q = encodeURIComponent(this.options.query.replace(/\{\{table_name\}\}/g,this.options.table_name));
+        q = q.replace(/%7Bx%7D/g,"{x}").replace(/%7By%7D/g,"{y}").replace(/%7Bz%7D/g,"{z}");
+        var query = 'sql=' +  q
+        tile_url = this._addUrlData(tile_url, query);
+        grid_url = this._addUrlData(grid_url, query);
+      }
+
+      // EXTRA PARAMS?
+      for (_param in this.options.extra_params) {
+        tile_url = this._addUrlData(tile_url, _param+"="+this.options.extra_params[_param]);
+        grid_url = this._addUrlData(grid_url, _param+"="+this.options.extra_params[_param]);
+      }
+
+      // STYLE?
+      if (this.options.tile_style) {
+        var style = 'style=' + encodeURIComponent(this.options.tile_style.replace(/\{\{table_name\}\}/g,this.options.table_name));
+        tile_url = this._addUrlData(tile_url, style);
+        grid_url = this._addUrlData(grid_url, style);
+      }
+
+      // INTERACTIVITY?
+      if (this.options.interactivity) {
+        var interactivity = 'interactivity=' + encodeURIComponent(this.options.interactivity.replace(/ /g,''));
+        tile_url = this._addUrlData(tile_url, interactivity);
+        grid_url = this._addUrlData(grid_url, interactivity);
+      }
+
+      return {
+        core_url: core_url,
+        base_url: base_url,
+        tile_url: tile_url,
+        grid_url: grid_url
+      }
+    },
 
 
     /**
@@ -765,8 +790,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      * @return {String} Tile url parsed
      */
     CartoDBLayer.prototype._addUrlData = function (url, data) {
-        url += (this._parseUri(url).query) ? '&' : '?';
-        return url += data;
+      url += (this._parseUri(url).query) ? '&' : '?';
+      return url += data;
     }
 
 
@@ -808,6 +833,56 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         return new google.maps.Point(o.e)
       }
     }
+
+
+    /**
+     * Check if the tile is ok or fails
+     */
+    CartoDBLayer.prototype._checkTiles = function() {
+      var xyz = {z: 4, x: 6, y: 6}
+        , self = this
+        , img = new Image()
+        , urls = this._generateTileUrls()
+
+      // Choose a x-y-z for the check tile - grid
+      urls.tile_url = urls.tile_url.replace(/\{z\}/g,xyz.z).replace(/\{x\}/g,xyz.x).replace(/\{y\}/g,xyz.y);
+      urls.grid_url = urls.grid_url.replace(/\{z\}/g,xyz.z).replace(/\{x\}/g,xyz.x).replace(/\{y\}/g,xyz.y);
+
+
+      reqwest({
+        method: "get",
+        url: urls.grid_url,
+        type: 'jsonp',
+        jsonpCallback: 'callback',
+        jsonpCallbackName: 'grid',
+        success: function() {
+          clearTimeout(timeout)
+        },
+        error: function(error,msg) {
+          if (self.interaction)
+            self.interaction.remove();
+
+          if (self.options.debug) 
+            throw('There is an error in your query or your interaction parameter');
+
+          google.maps.event.trigger(this, 'layererror', msg);
+        }
+      });
+
+      // Hacky for reqwest, due to timeout doesn't work very well
+      var timeout = setTimeout(function(){
+        clearTimeout(timeout);
+
+        if (self.interaction)
+          self.interaction.remove();
+
+        if (self.options.debug)
+          throw('There is an error in your query or your interaction parameter');
+
+        google.maps.event.trigger(this, 'layererror', "There is a problem in your SQL or interaction parameter");
+      },2000);
+    }
+
   }
 
 
