@@ -11,7 +11,7 @@
   <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
   <script type="text/javascript" src="../js/wax.g.js"></script>
   <script type="text/javascript" src="../dist/cartodb-infowindow.js"></script>
-  <script type="text/javascript" src="../dist/cartodb-gmapsv3-min.js"></script>
+  <script type="text/javascript" src="../dist/cartodb-gmapsv3.js"></script>
 
   <script type="text/javascript">
 
@@ -94,6 +94,14 @@
 
     google.maps.event.addListener(cartodb_gmaps2,"tileerror",function(){
       if ('console' in self && 'log' in console) console.log("tile - error")
+    });
+
+    google.maps.event.addListener(cartodb_gmaps2,"loading",function(){
+      if ('console' in self && 'log' in console) console.log("loading")
+    });
+
+    google.maps.event.addListener(cartodb_gmaps2,"loaded",function(){
+      if ('console' in self && 'log' in console) console.log("loaded")
     });
 
   }

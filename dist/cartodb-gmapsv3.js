@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.52 [September 5, 2012]
+ * @version 0.53 [September 6, 2012]
  * @author: Vizzuality.com
  * @fileoverview <b>Author:</b> Vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -54,6 +54,8 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         debug:          false,
         visible:        true,
         added:          false,
+        loaded:         null,
+        loading:        null, 
         layer_order:    "top",
         tiler_domain:   "cartodb.com",
         tiler_port:     "80",
@@ -127,6 +129,10 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     CartoDBLayer.prototype.onRemove = function(map) {
       this._remove();
 
+      // Remove tilesloaded listener
+      if (this.loaded)
+        google.maps.event.removeListener(this.loaded);
+
       this.options.added = false;
 
       google.maps.event.trigger(this, 'removed');
@@ -160,8 +166,9 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
     /**
      * Change query of the tiles
      * @params {str} New sql for the tiles
+     * @params {Boolean}  Choose if the map fits to the sql results bounds (thanks to @fgblanch)
      */
-    CartoDBLayer.prototype.setQuery = function(sql) {
+    CartoDBLayer.prototype.setQuery = function(sql, fitToBounds) {
 
       if (!this.options.added) {
         if (this.options.debug) {
@@ -175,24 +182,14 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
         } else { return }
       }
 
+      if (fitToBounds)
+        this.setBounds(sql)
+
       // Set the new value to the layer options
       this.options.query = sql;
       this._update();
     }
 
-   /**
-     * Overload of setQuery with the option of fit the query results to bounds 
-     * @params {str}      New sql for the tiles
-     * @params {Boolean}  Choose if the map fits to the sql results bounds
-     */
-    CartoDBLayer.prototype.setQuery = function(sql, fitToBounds) {
-
-      this.setQuery(sql);
-
-      if(fitToBounds){
-        this.setBounds(sql);
-      }
-    }
 
     /**
      * Change style of the tiles
@@ -563,6 +560,11 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
       // Layer created
       this.layer = new wax.g.connector(this.tilejson);
+      
+      // Loading event
+      this.loaded = google.maps.event.addListener(this.options.map, "tilesloaded", function(ev){
+        google.maps.event.trigger(self, 'loaded');
+      });
 
       // Setting its order
       this._setLayerOrder();
