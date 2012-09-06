@@ -180,6 +180,19 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
       this._update();
     }
 
+   /**
+     * Overload of setQuery with the option of fit the query results to bounds 
+     * @params {str}      New sql for the tiles
+     * @params {Boolean}  Choose if the map fits to the sql results bounds
+     */
+    CartoDBLayer.prototype.setQuery = function(sql, fitToBounds) {
+
+      this.setQuery(sql);
+
+      if(fitToBounds){
+        this.setBounds(sql);
+      }
+    }
 
     /**
      * Change style of the tiles
