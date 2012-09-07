@@ -594,19 +594,19 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
 
       switch (o.e.type) {
         case 'mousemove': if (this.options.featureOver) {
-                            return this.options.featureOver(o.e,latlng,o.pos,o.data);
+                            return this.options.featureOver(o.e,latlng,point,o.data);
                           } else {
                             if (this.options.debug) throw('featureOver function not defined');
                           }
                           break;
         case 'click':     if (this.options.featureClick) {
-                            this.options.featureClick(o.e,latlng,o.pos,o.data);
+                            this.options.featureClick(o.e,latlng,point,o.data);
                           } else {
                             if (this.options.debug) throw('featureClick function not defined');
                           }
                           break;
         case 'touchend':  if (this.options.featureClick) {
-                            this.options.featureClick(o.e,latlng,o.pos,o.data);
+                            this.options.featureClick(o.e,latlng,point,o.data);
                           } else {
                             if (this.options.debug) throw('featureClick function not defined');
                           }
