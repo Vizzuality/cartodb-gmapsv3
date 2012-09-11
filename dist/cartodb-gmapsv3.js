@@ -1,6 +1,6 @@
 /**
  * @name cartodb-gmapsv3 for Google Maps V3 API
- * @version 0.53 [September 6, 2012]
+ * @version 0.54 [September 11, 2012]
  * @author: Vizzuality.com
  * @fileoverview <b>Author:</b> Vizzuality.com<br/> <b>Licence:</b>
  *               Licensed under <a
@@ -27,7 +27,7 @@ if (typeof(google.maps.CartoDBLayer) === "undefined") {
      *    tile_style        -     If you want to add other style to the layer
      *    map_style         -     Show the same style as you defined in the CartoDB map
      *    interactivity     -     Get data from the feature clicked ( without any request :) )
-     *    featurever        -     Callback when user hovers a feature (return mouse event, latlng and data)
+     *    featureOver       -     Callback when user hovers a feature (return mouse event, latlng and data)
      *    featureOut        -     Callback when user hovers out a feature
      *    featureClick      -     Callback when user clicks a feature (return mouse event, latlng and data)
      *    debug             -     Get error messages from the library

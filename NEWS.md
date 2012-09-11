@@ -1,3 +1,13 @@
+[v 0.54]
+- Fix a bug with position event from wax thanks to @sidkshatriya.
+
+[v 0.53]
+- Added a new param for setQuery that allows bounds over this query thanks to @fgblanch.
+
+[v 0.52]
+- Added some jasmine tests.
+- Check if the SQL or interaction if not corretly applied.
+
 [v 0.51]
 - All functins check first if the layer belongs to the map first.
 - New function isAdded returns if the layer belongs to the map.
