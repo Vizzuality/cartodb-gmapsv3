@@ -28,6 +28,18 @@
 
     infowindow = new CartoDBInfowindow(map);
 
+    wax_layer = wax.tilejson('http://api.tiles.mapbox.com/v3/mapbox.geography-class.jsonp', function(tilejson) {
+      
+      map.mapTypes.set('mb', new wax.g.connector(tilejson));
+      map.setMapTypeId('mb');
+
+      wax.g.interaction()
+        .map(map)
+        .tilejson(tilejson)
+        .on(wax.tooltip().parent(map.getDiv()).events());
+    });
+
+
     // First cartodb layer, countries
     cartodb_gmaps1 = new CartoDBLayer({
       map: map,
@@ -70,6 +82,9 @@
       auto_bound: false,
       debug: true
     });
+
+
+
 
 
     google.maps.event.addListener(cartodb_gmaps2,"removed",function(){
