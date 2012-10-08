@@ -238,7 +238,7 @@ And then add the CartoDB layer:
 ```javascript
 var cartodb_gmapsv3 = new CartoDBLayer({
   map: map,
-  user_name:'example',
+  user_name:'examples',
   table_name: 'earthquakes',
   query: "SELECT * FROM {{table_name}}",
   layer_order: "top",
