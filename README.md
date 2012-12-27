@@ -213,7 +213,7 @@ We strongly recommend the use of the files available in this repository. These a
 
 # Example
 
-Here's a [live example](http://vizzuality.github.com/cartodb-gmapsv3/custom-infowindow.html)!
+There are several usages of this library in [examples](https://github.com/Vizzuality/cartodb-gmapsv3/tree/master/examples) folder.
 
 First of all add the necessary script and css files:
 
